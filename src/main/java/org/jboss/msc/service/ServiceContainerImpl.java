@@ -132,6 +132,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
         @Override
         public void run() {
+            DebugUtils.debug("MSC shutdown thread started");
             final ServiceContainer container = containerRef.get();
             if (container == null) return;
             container.shutdown();
@@ -140,6 +141,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             } catch (InterruptedException ie) {
                 // ignored
             }
+            DebugUtils.debug("MSC shutdown thread finished");
         }
     }
 
@@ -409,26 +411,30 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
     }
 
-    void incrementUnstableServices() {
+    void incrementUnstableServices(final ServiceControllerImpl controller) {
         synchronized (lock) {
+            org.jboss.msc.service.DebugUtils.debug("CONTAINER.incrementUnstableServices(" + controller + ") " + (unstableServices + 1));
             unstableServices++;
         }
     }
 
     void addProblem(ServiceController<?> controller) {
         synchronized (lock) {
+            org.jboss.msc.service.DebugUtils.debug("CONTAINER.addProblem(" + controller + "");
             problems.add(controller);
         }
     }
 
     void addFailed(ServiceController<?> controller) {
         synchronized (lock) {
+            org.jboss.msc.service.DebugUtils.debug("CONTAINER.addFailed(" + controller + "");
             failed.add(controller);
         }
     }
 
-    void decrementUnstableServices() {
+    void decrementUnstableServices(final ServiceControllerImpl controller) {
         synchronized (lock) {
+            org.jboss.msc.service.DebugUtils.debug("CONTAINER.decrementUnstableServices(" + controller + ") " + (unstableServices - 1));
             if (--unstableServices == 0) {
                 lock.notifyAll();
             }
@@ -531,6 +537,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             if (down) return;
             down = true;
             shutdownInitiated = System.nanoTime();
+            DebugUtils.debug(new Exception(), "ServiceContainerImpl.shutdown()");
         }
         // unregistering shutdown hook
         if (shutdownThread != null) {
@@ -551,6 +558,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         final ContainerShutdownListener shutdownListener = new ContainerShutdownListener(new Runnable() {
             public void run() {
                 executor.shutdown();
+                DebugUtils.debug("ServiceContainerImpl.shutdown() FINISHED");
             }
         });
         ServiceControllerImpl<?> controller;
@@ -650,12 +658,15 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
                     registration = existing;
                 }
             }
+            debug(getName() + "$" + this.getClass().getName() + " WRITE LOCK ATTEMPT " + registration);
             synchronized (registration) {
                 registration.acquireWrite();
+                debug(getName() + "$" + this.getClass().getName() + " WRITE LOCK ACQUIRED " + registration);
                 try {
                     success = registration.addPendingInstallation();
                 } finally {
                     registration.releaseWrite();
+                    debug(getName() + "$" + this.getClass().getName() + " WRITE LOCK RELEASED " + registration);
                 }
             }
         } while (!success);
@@ -749,11 +760,18 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             instance.commitInstallation(serviceBuilder.getInitialMode());
             ok = true;
             return instance;
+        } catch (RuntimeException t) {
+            DebugUtils.debug(t, "Exception caught during service installation");
+            throw t;
         } finally {
             if (! ok) {
                 instance.rollbackInstallation();
             }
         }
+    }
+
+    private void debug(final String msg) {
+        DebugUtils.debug("(" + getName() + ") " + msg);
     }
 
     /**
@@ -771,8 +789,16 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         final Deque<ServiceControllerImpl> visitStack = new ArrayDeque<>();
         visitStack.push(instance);
         for (ServiceRegistrationImpl registration : instance.getRegistrations()) {
+            debug(getName() + "$" + this.getClass().getName() + " READ LOCK ATTEMPT " + registration);
             synchronized (registration) {
-                detectCircularity(registration.getDependents(), instance, visited, visitStack);
+                registration.acquireRead();
+                debug(getName() + "$" + this.getClass().getName() + " READ LOCK ACQUIRED " + registration);
+                try {
+                    detectCircularity(registration.getDependents(), instance, visited, visitStack);
+                } finally {
+                    registration.releaseRead();
+                    debug(getName() + "$" + this.getClass().getName() + " READ LOCK RELEASED " + registration);
+                }
             }
         }
     }
@@ -797,8 +823,16 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
                 }
                 for (ServiceRegistrationImpl registration : controller.getRegistrations()) {
                     if (registration.getDependencyController() == null) continue; // concurrent removal
+                    debug(getName() + "$" + this.getClass().getName() + " READ LOCK ATTEMPT " + registration);
                     synchronized (registration) {
-                        detectCircularity(registration.getDependents(), instance, visited, visitStack);
+                        registration.acquireRead();
+                        debug(getName() + "$" + this.getClass().getName() + " READ LOCK ACQUIRED " + registration);
+                        try {
+                            detectCircularity(registration.getDependents(), instance, visited, visitStack);
+                        } finally {
+                            registration.releaseRead();
+                            debug(getName() + "$" + this.getClass().getName() + " READ LOCK RELEASED " + registration);
+                        }
                     }
                 }
                 visitStack.poll();
