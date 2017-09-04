@@ -217,6 +217,22 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         int depCount = requires.size();
         stoppingDependencies = parent == null ? depCount : depCount + 1;
         children = new IdentityHashSet<>();
+        final StringBuilder sb = new StringBuilder();
+        sb.append(".<constructor> ");
+        if (provides.size() > 0) {
+            sb.append("provides == { ");
+            for (ServiceRegistrationImpl alias : provides.keySet()) sb.append(alias.getName() + " ");
+            sb.append(" }");
+        }
+        if (parent != null) {
+            sb.append(" parent == " + parent);
+        }
+        if (depCount > 0) {
+            sb.append(" dependencies == { ");
+            for (Dependency dependency : requires) sb.append(dependency + " ");
+            sb.append(" }");
+        }
+        debug(sb.toString());
     }
 
     private static Set<ServiceName> unmodifiableSetOf(final Set<? extends Dependency> set) {
@@ -235,6 +251,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      * installation is {@link #commitInstallation(org.jboss.msc.service.ServiceController.Mode) committed}.
      */
     void startInstallation() {
+        debug("startInstallation() START");
         ServiceRegistrationImpl registration;
         WritableValueImpl injector;
         Lockable lock;
@@ -242,8 +259,10 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             registration = provided.getKey();
             injector = provided.getValue();
             lock = registration.getLock();
+            debug(registration.getName() + "WRITE LOCK ATTEMPT " + registration);
             synchronized (lock) {
                 lock.acquireWrite();
+                debug(registration.getName() + "WRITE LOCK ACQUIRED " + registration);
                 try {
                     registration.set(this, injector);
                     if (injector != null) {
@@ -251,9 +270,11 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     }
                 } finally {
                     lock.releaseWrite();
+                    debug(registration.getName() + "WRITE LOCK RELEASED " + registration);
                 }
             }
         }
+        debug("startInstallation() END");
     }
 
     /**
@@ -263,19 +284,24 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      * installation is {@link #commitInstallation(org.jboss.msc.service.ServiceController.Mode) committed}.
      */
     void startConfiguration() {
+        debug("startConfiguration() START");
         Lockable lock;
         for (Dependency dependency : requires) {
+            debug(dependency.getName() + " DEPENDENCY WRITE LOCK ATTEMPT " + dependency);
             lock = dependency.getLock();
             synchronized (lock) {
                 lock.acquireWrite();
+                debug(dependency.getName() + " DEPENDENCY WRITE LOCK ACQUIRED " + dependency);
                 try {
                     dependency.addDependent(this);
                 } finally {
                     lock.releaseWrite();
+                    debug(dependency.getName() + " DEPENDENCY WRITE LOCK RELEASED " + dependency);
                 }
             }
         }
         if (parent != null) parent.addChild(this);
+        debug("startConfiguration() END");
     }
 
     /**
@@ -284,6 +310,11 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      * @param initialMode the initial service mode
      */
     void commitInstallation(Mode initialMode) {
+        debug("commitInstallation(" + initialMode + ") START");
+        Substate state = this.state;
+        if (state != Substate.NEW) {
+            debug(new Exception("commitInstallation(" + initialMode + ") ASSERTION FAILURE"));
+        }
         assert (state == Substate.NEW);
         assert initialMode != null;
         assert !holdsLock(this);
@@ -300,12 +331,14 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             updateStabilityState(leavingRestState);
         }
         doExecute(tasks);
+        debug("commitInstallation(" + initialMode + ") END");
     }
 
     /**
      * Roll back the service install.
      */
     void rollbackInstallation() {
+        debug("rollbackInstallation() START");
         final Runnable removeTask;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
@@ -316,6 +349,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             updateStabilityState(leavingRestState);
         }
         removeTask.run();
+        debug("rollbackInstallation() END");
     }
 
     /**
@@ -373,16 +407,16 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         final boolean enteringStableRestState = state.isRestState() && asyncTasks == 0;
         if (leavingStableRestState) {
             if (!enteringStableRestState) {
-                container.incrementUnstableServices();
+                container.incrementUnstableServices(this);
                 for (StabilityMonitor monitor : monitors) {
-                    monitor.incrementUnstableServices();
+                    monitor.incrementUnstableServices(this);
                 }
             }
         } else {
             if (enteringStableRestState) {
-                container.decrementUnstableServices();
+                container.decrementUnstableServices(this);
                 for (StabilityMonitor monitor : monitors) {
-                    monitor.decrementUnstableServices();
+                    monitor.decrementUnstableServices(this);
                 }
                 if (state == Substate.REMOVED) {
                     for (StabilityMonitor monitor : monitors) {
@@ -391,6 +425,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     if (shutdownListener != null) {
                         shutdownListener.controllerDied();
                         shutdownListener = null;
+                        debug("shutdownListener.controllerDied()");
                     }
                 }
             }
@@ -516,7 +551,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
         // clean up tasks execution flags
         execFlags = 0;
-
         Transition transition;
         do {
             // first of all, check if dependencies & parent should be un/demanded
@@ -558,6 +592,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 }
             }
             transition = getTransition();
+            debug(" transition() transition == " + transition);
             if (transition == null) {
                 return tasks;
             }
@@ -691,6 +726,14 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         return tasks;
     }
 
+    private void debug(final String msg) {
+        DebugUtils.debug("(" + getName() + ") " + msg);
+    }
+
+    private void debug(final Throwable e) {
+        DebugUtils.debug(e, "(" + getName() + ") EXCEPTION CAUGHT");
+    }
+
     private void getListenerTasks(final LifecycleEvent event, final List<Runnable> tasks) {
         for (LifecycleListener listener : lifecycleListeners) {
             tasks.add(new LifecycleListenerTask(listener, event));
@@ -705,6 +748,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             try {
                 executor.execute(task);
             } catch (RejectedExecutionException e) {
+                DebugUtils.debug(e, "SC.shutdown() == " + container.isShutdown());
                 task.run();
             }
         }
@@ -743,6 +787,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     private void internalSetMode(final Mode newMode) {
         assert holdsLock(this);
+        debug("internalSetMode(" + newMode + ") START");
         final ServiceController.Mode oldMode = mode;
         if (oldMode == Mode.REMOVE) {
             if (state.compareTo(Substate.REMOVING) >= 0) {
@@ -750,12 +795,14 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             }
         }
         mode = newMode;
+        debug("internalSetMode(" + newMode + ") END");
     }
 
     @Override
     public void dependencyAvailable() {
         final List<Runnable> tasks;
         synchronized (this) {
+            debug("dependencyAvailable() START");
             final boolean leavingRestState = isStableRestState();
             assert unavailableDependencies > 0;
             --unavailableDependencies;
@@ -764,6 +811,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
+            debug("dependencyAvailable() END tasks == " + tasks.size());
         }
         doExecute(tasks);
     }
@@ -772,6 +820,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     public void dependencyUnavailable() {
         final List<Runnable> tasks;
         synchronized (this) {
+            debug("dependencyUnavailable() START");
             final boolean leavingRestState = isStableRestState();
             ++unavailableDependencies;
             if (ignoreNotification() || unavailableDependencies != 1) return;
@@ -779,6 +828,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
+            debug("dependencyUnavailable() END tasks == " + tasks.size());
         }
         doExecute(tasks);
     }
@@ -792,7 +842,9 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     public void dependencyUp() {
         final List<Runnable> tasks;
         synchronized (this) {
+            debug("dependencyUp() START");
             final boolean leavingRestState = isStableRestState();
+            debug("dependencyUp() MIDDLE stoppingDependencies == " + (stoppingDependencies-1));
             assert stoppingDependencies > 0;
             --stoppingDependencies;
             if (ignoreNotification() || stoppingDependencies != 0) return;
@@ -800,6 +852,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
+            debug("dependencyUp() END tasks == " + tasks.size());
         }
         doExecute(tasks);
     }
@@ -808,13 +861,16 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     public void dependencyDown() {
         final List<Runnable> tasks;
         synchronized (this) {
+            debug("dependencyDown() START");
             final boolean leavingRestState = isStableRestState();
+            debug("dependencyDown() MIDDLE stoppingDependencies == " + (stoppingDependencies+1));
             ++stoppingDependencies;
             if (ignoreNotification() || stoppingDependencies != 1) return;
             // we raised it to 1
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
+            debug("dependencyDown() END tasks == " + tasks.size());
         }
         doExecute(tasks);
     }
@@ -823,13 +879,16 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     public void dependencyFailed() {
         final List<Runnable> tasks;
         synchronized (this) {
+            debug("dependencyFailed() START");
             final boolean leavingRestState = isStableRestState();
+            debug("dependencyFailed() MIDDLE failCount == " + (failCount+1));
             ++failCount;
             if (ignoreNotification() || failCount != 1) return;
             // we raised it to 1
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
+            debug("dependencyFailed() END tasks == " + tasks.size());
         }
         doExecute(tasks);
     }
@@ -838,7 +897,9 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     public void dependencySucceeded() {
         final List<Runnable> tasks;
         synchronized (this) {
+            debug("dependencySucceeded() START");
             final boolean leavingRestState = isStableRestState();
+            debug("dependencySucceeded() MIDDLE failCount == " + (failCount-1));
             assert failCount > 0;
             --failCount;
             if (ignoreNotification() || failCount != 0) return;
@@ -846,6 +907,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
+            debug("dependencySucceeded() END tasks == " + tasks.size());
         }
         doExecute(tasks);
     }
@@ -857,7 +919,9 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     void dependentsStarted(final int count) {
         assert !holdsLock(this);
         synchronized (this) {
+            debug("dependentsStarted(" + count + ") START");
             runningDependents += count;
+            debug("dependentsStarted(" + count + ") END");
         }
     }
 
@@ -865,7 +929,9 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         assert !holdsLock(this);
         final List<Runnable> tasks;
         synchronized (this) {
+            debug("dependentStopped() START");
             final boolean leavingRestState = isStableRestState();
+            debug("dependentStopped() MIDDLE runningDependents == " + (runningDependents-1));
             assert runningDependents > 0;
             --runningDependents;
             if (ignoreNotification() || runningDependents != 0) return;
@@ -873,15 +939,27 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
+            debug("dependentStopped() END tasks == " + tasks.size());
         }
         doExecute(tasks);
     }
 
     void newDependent(final Dependent dependent) {
         assert holdsLock(this);
-        if (isFailed()) dependent.dependencyFailed();
-        if (isUnavailable()) dependent.dependencyUnavailable();
-        if (isUp()) dependent.dependencyUp();
+        debug("newDependent(" + dependent + ") START");
+        if (isFailed()) {
+            debug("newDependent(" + dependent + ") FAILED");
+	        dependent.dependencyFailed();
+	    }
+        if (isUnavailable()) {
+            debug("newDependent(" + dependent + ") UNAVAILABLE");
+	        dependent.dependencyUnavailable();
+	    }
+        if (isUp()) {
+            debug("newDependent(" + dependent + ") UP");
+	        dependent.dependencyUp();
+	    }
+        debug("newDependent(" + dependent + ") END");
     }
 
     private boolean isFailed() {
@@ -926,12 +1004,14 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     void addDemands(final int demandedByCount) {
+        debug("addDemands(" + demandedByCount + ") START");
         assert !holdsLock(this);
         final boolean propagate;
         final List<Runnable> tasks;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
             final int cnt = this.demandedByCount;
+            debug("addDemands(" + demandedByCount + ") MIDDLE demandedByCount == " + (demandedByCount + cnt));
             this.demandedByCount += demandedByCount;
             if (ignoreNotification()) return;
             boolean notStartedLazy = mode == Mode.LAZY && state != Substate.UP;
@@ -942,15 +1022,18 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             updateStabilityState(leavingRestState);
         }
         doExecute(tasks);
+        debug("addDemands(" + demandedByCount + ") END");
     }
 
     void removeDemand() {
+        debug("removeDemand() START");
         assert !holdsLock(this);
         final boolean propagate;
         final List<Runnable> tasks;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
             assert demandedByCount > 0;
+            debug("removeDemand(" + demandedByCount + ") MIDDLE demandedByCount == " + (demandedByCount-1));
             final int cnt = --demandedByCount;
             if (ignoreNotification()) return;
             boolean notStartedLazy = mode == Mode.LAZY && state != Substate.UP;
@@ -961,32 +1044,39 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             updateStabilityState(leavingRestState);
         }
         doExecute(tasks);
+        debug("removeDemand() END");
     }
 
     void addChild(final ServiceControllerImpl<?> child) {
+        debug("addChild(" + child.getName() + ") START");
         assert !holdsLock(this);
         synchronized (this) {
+            debug("addChild(" + child.getName() + ") MIDDLE state == " + state);
             if (state.getState() != State.STARTING && state.getState() != State.UP) {
                 throw new IllegalStateException("Children cannot be added in state " + state.getState());
             }
             children.add(child);
             newDependent(child);
         }
+        debug("addChild(" + child.getName() + ") END");
     }
 
     void removeChild(final ServiceControllerImpl<?> child) {
+        debug("removeChild(" + child.getName() + ") START");
         assert !holdsLock(this);
         final List<Runnable> tasks;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
             if (!children.remove(child)) return; // may happen if child installation process failed
             if (ignoreNotification() || children.size() > 0) return;
+            debug("removeChild(" + child.getName() + ") MIDDLE state == " + state);
             // we dropped it to 0
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
         }
         doExecute(tasks);
+        debug("removeChild(" + child.getName() + ") END");
     }
 
     Set<ServiceControllerImpl<?>> getChildren() {
@@ -1100,6 +1190,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     void addListener(final ContainerShutdownListener listener) {
+        debug("addShutdownListener(" + listener + ") START");
         assert !holdsLock(this);
         synchronized (this) {
             if (state == Substate.REMOVED && asyncTasks == 0) {
@@ -1110,10 +1201,13 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             }
             shutdownListener = listener;
             shutdownListener.controllerAlive();
+            debug("shutdownListener.controllerAlive()");
         }
+        debug("addShutdownListener(" + listener + ") END");
     }
 
     public void addListener(final LifecycleListener listener) {
+        debug("addLifecycleListener(" + listener + ") START");
         if (listener == null) return;
         final List<Runnable> tasks;
         synchronized (this) {
@@ -1136,12 +1230,15 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             updateStabilityState(leavingRestState);
         }
         doExecute(tasks);
+        debug("addLifecycleListener(" + listener + ") END");
     }
 
     public void removeListener(final LifecycleListener listener) {
+        debug("removeListener(" + listener + ") START");
         synchronized (this) {
             lifecycleListeners.remove(listener);
         }
+        debug("removeListener(" + listener + ") END");
     }
 
     @Override
@@ -1153,6 +1250,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     @Override
     public void retry() {
+        debug("retry() START");
         assert !holdsLock(this);
         final List<Runnable> tasks;
         synchronized (this) {
@@ -1164,6 +1262,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             updateStabilityState(leavingRestState);
         }
         doExecute(tasks);
+        debug("retry() END");
     }
 
     @Override
@@ -1319,9 +1418,12 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     void addMonitor(final StabilityMonitor monitor) {
         assert !holdsLock(this);
         synchronized (this) {
+            if (!monitors.contains(monitor)) {
+                debug("addMonitor(" + monitor + ")");
+            }
             if (!monitors.add(monitor)) return;
             if (!isStableRestState()) {
-                monitor.incrementUnstableServices();
+                monitor.incrementUnstableServices(this);
             }
             if (state == Substate.START_FAILED) {
                 monitor.addFailed(this);
@@ -1334,9 +1436,12 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     void removeMonitor(final StabilityMonitor monitor) {
         assert !holdsLock(this);
         synchronized (this) {
+            if (monitors.contains(monitor)) {
+                debug("removeMonitor(" + monitor + ")");
+            }
             if (!monitors.remove(monitor)) return;
             if (!isStableRestState()) {
-                monitor.decrementUnstableServices();
+                monitor.decrementUnstableServices(this);
             }
             monitor.removeProblem(this);
             monitor.removeFailed(this);
@@ -1346,6 +1451,9 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     void removeMonitorNoCallback(final StabilityMonitor monitor) {
         assert !holdsLock(this);
         synchronized (this) {
+            if (monitors.contains(monitor)) {
+                debug("removeMonitorNoCallback(" + monitor + ")");
+            }
             monitors.remove(monitor);
         }
     }
@@ -1428,10 +1536,12 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     private abstract class ControllerTask implements Runnable {
         private ControllerTask() {
+            debug(this.getClass().getName() + " constructor()");
             assert holdsLock(ServiceControllerImpl.this);
         }
 
         public final void run() {
+            debug(this.getClass().getName() + " run() START");
             assert !holdsLock(ServiceControllerImpl.this);
             try {
                 beforeExecute();
@@ -1448,8 +1558,10 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 doExecute(tasks);
             } catch (Throwable t) {
                 ServiceLogger.SERVICE.internalServiceError(t, getName());
+                debug(t);
             } finally {
                 afterExecute();
+                debug(this.getClass().getName() + " run() END");
             }
         }
 
@@ -1463,16 +1575,23 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             Lockable lock;
             for (Dependency dependency : requires) {
                 lock = dependency.getLock();
+                debug(getName() + "$" + this.getClass().getName() + " WRITE LOCK ATTEMPT " + dependency);
                 synchronized (lock) {
                     lock.acquireWrite();
+                    debug(getName() + "$" + this.getClass().getName() + " WRITE LOCK ACQUIRED " + dependency);
                     try {
+                        debug(getName() + "$" + this.getClass().getName() + " NOTIFYING DEPENDENCY " + dependency);
                         inform(dependency);
                     } finally {
                         lock.releaseWrite();
+                        debug(getName() + "$" + this.getClass().getName() + " WRITE LOCK RELEASED " + dependency);
                     }
                 }
             }
-            if (parent != null) inform(parent);
+            if (parent != null) {
+                debug(getName() + "$" + this.getClass().getName() + " NOTIFYING PARENT " + parent);
+                inform(parent);
+            }
             return true;
         }
 
@@ -1491,14 +1610,18 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         final boolean execute() {
             for (ServiceRegistrationImpl registration : provides.keySet()) {
                 for (Dependent dependent : registration.getDependents()) {
+                    debug(registration.getName() + "$" + this.getClass().getName() + " NOTIFYING DEPENDENT " + dependent);
                     inform(dependent);
                 }
             }
             synchronized (ServiceControllerImpl.this) {
+                debug(ServiceControllerImpl.this.getName() + " INTRINSIC LOCK ACQUIRED " + ServiceControllerImpl.this);
                 for (Dependent child : children) {
+                    debug(ServiceControllerImpl.this.getName() + "$" + this.getClass().getName() + " NOTIFYING CHILD " + child);
                     inform(child);
                 }
                 execFlags |= execFlag;
+                debug(ServiceControllerImpl.this.getName() + " INTRINSIC LOCK RELEASED " + ServiceControllerImpl.this);
             }
             return true;
         }
@@ -1509,7 +1632,11 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             Lockable lock;
             for (ServiceRegistrationImpl registration : provides.keySet()) {
                 lock = registration.getLock();
-                synchronized (lock) { lock.acquireRead(); }
+                debug(registration.getName() + "$" + this.getClass().getName() + " READ LOCK ATTEMPT " + registration);
+                synchronized (lock) {
+                    debug(registration.getName() + "$" + this.getClass().getName() + " READ LOCK ACQUIRED " + registration);
+		            lock.acquireRead();
+		        }
             }
         }
 
@@ -1517,7 +1644,10 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             Lockable lock;
             for (ServiceRegistrationImpl registration : provides.keySet()) {
                 lock = registration.getLock();
-                synchronized (lock) { lock.releaseRead(); }
+                synchronized (lock) {
+		            lock.releaseRead();
+                    debug(registration.getName() + "$" + this.getClass().getName() + " READ LOCK RELEASED " + registration);
+		        }
             }
         }
     }
@@ -1603,9 +1733,11 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     checkProvidedValues();
                 }
             } catch (StartException e) {
+                debug(e);
                 e.setServiceName(getName());
                 startFailed(e, context);
             } catch (Throwable t) {
+                debug(t);
                 startFailed(new StartException("Failed to start service", t, getName()), context);
             }
             return true;
@@ -1641,6 +1773,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 stopService(service, context);
                 ok = true;
             } catch (Throwable t) {
+                debug(t);
                 ServiceLogger.FAIL.stopFailed(t, getName());
             } finally {
                 synchronized (context.lock) {
@@ -1700,7 +1833,9 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     private final class RemoveChildrenTask extends ControllerTask {
         boolean execute() {
             synchronized (ServiceControllerImpl.this) {
+                debug(getName() + "$" + this.getClass().getName() + " INTRINSIC LOCK ACQUIRED " + ServiceControllerImpl.this);
                 for (ServiceControllerImpl<?> child : children) child.setMode(Mode.REMOVE);
+                debug(getName() + "$" + this.getClass().getName() + " INTRINSIC LOCK RELEASED " + ServiceControllerImpl.this);
             }
             return true;
         }
@@ -1718,8 +1853,10 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 registration = provided.getKey();
                 injector = provided.getValue();
                 lock = registration.getLock();
+                debug(registration.getName() + "$" + this.getClass().getName() + " WRITE LOCK ATTEMPT " + registration);
                 synchronized (lock) {
                     lock.acquireWrite();
+                    debug(registration.getName() + "$" + this.getClass().getName() + " WRITE LOCK ACQUIRED " + registration);
                     try {
                         if (injector != null) {
                             injector.setInstance(null);
@@ -1730,13 +1867,16 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                         }
                     } finally {
                         lock.releaseWrite();
+                        debug(registration.getName() + "$" + this.getClass().getName() + " WRITE LOCK RELEASED " + registration);
                     }
                 }
             }
             for (Dependency dependency : requires) {
                 lock = dependency.getLock();
+                debug(dependency.getName() + "$" + this.getClass().getName() + " DEPENDENCY WRITE LOCK ATTEMPT " + dependency);
                 synchronized (lock) {
                     lock.acquireWrite();
+                    debug(dependency.getName() + "$" + this.getClass().getName() + " DEPENDENCY WRITE LOCK ACQUIRED " + dependency);
                     try {
                         removeRegistration = dependency.removeDependent(ServiceControllerImpl.this);
                         if (removeRegistration) {
@@ -1744,6 +1884,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                         }
                     } finally {
                         lock.releaseWrite();
+                        debug(dependency.getName() + "$" + this.getClass().getName() + " DEPENDENCY WRITE LOCK RELEASED " + dependency);
                     }
                 }
             }
