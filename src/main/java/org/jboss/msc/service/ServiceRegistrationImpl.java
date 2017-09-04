@@ -132,21 +132,31 @@ final class ServiceRegistrationImpl extends Lockable implements StabilityMonitor
     @Override
     public void addMonitor(final StabilityMonitor monitor) {
         assert isWriteLocked();
+        DebugUtils.debug(this + ".addMonitor(" + monitor + ") START");
+        DebugUtils.debug(this + ".addMonitor() monitors.contains(" + monitor + ") == " + monitors.contains(monitor));
         if (monitors.contains(monitor)) return;
         if (monitor.addListener(this)) {
+            DebugUtils.debug(this + ".addMonitor() " + monitor + ".addListener(" + this + ") == true");
             monitors.add(monitor);
             if (instance != null) {
+                DebugUtils.debug(this + ".addMonitor() " + monitor + ".addControllerNoCallback(" + instance + ")");
                 monitor.addControllerNoCallback(instance);
+                DebugUtils.debug(this + ".addMonitor() " + monitor + ".addControllerNoCallback(" + instance + ")");
                 instance.addMonitor(monitor);
             }
+        } else {
+            DebugUtils.debug(this + ".addMonitor() " + monitor + ".addListener(" + this + ") == false");
         }
+        DebugUtils.debug(this + ".addMonitor(" + monitor + ") END");
     }
 
     @Override
     public void onClean(final StabilityMonitor monitor) {
+        DebugUtils.debug(this + ".onClean(" + monitor + ") START");
         synchronized (this) {
             monitors.remove(monitor);
         }
+        DebugUtils.debug(this + ".onClean(" + monitor + ") END");
     }
 
     void set(final ServiceControllerImpl<?> newInstance, final WritableValueImpl newInjector) throws DuplicateServiceException {
@@ -226,6 +236,11 @@ final class ServiceRegistrationImpl extends Lockable implements StabilityMonitor
         assert isWriteLocked();
         demandedByCount--;
         if (instance != null) instance.removeDemand();
+    }
+
+    @Override
+    public String toString() {
+        return "REG(" + getName() + ")@" + System.identityHashCode(this);
     }
 
 }
