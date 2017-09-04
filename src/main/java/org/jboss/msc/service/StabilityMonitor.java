@@ -90,6 +90,7 @@ import java.util.concurrent.TimeUnit;
 @Deprecated
 public final class StabilityMonitor {
 
+    private final String ID;
     private final Object stabilityLock = new Object();
     private final Object controllersLock = new Object();
     private final Set<ServiceController<?>> problems = new IdentityHashSet<>();
@@ -99,6 +100,11 @@ public final class StabilityMonitor {
     private boolean cleanupInProgress;
     private boolean removeInProgress;
     private int unstableServices;
+
+    public StabilityMonitor() {
+        ID = getClass().getName() + "@" + System.identityHashCode(this);
+        debug(new Exception());
+    }
 
     /**
      * Register controller with this monitor.
@@ -119,6 +125,7 @@ public final class StabilityMonitor {
         synchronized (controllersLock) {
             awaitCleanupCompletion();
             awaitAddCompletion();
+            debug(".addController(" + controller + ")");
             addInProgress = addMonitorToController = controllers.add(serviceController);
         }
         if (!addMonitorToController) return;
@@ -137,6 +144,7 @@ public final class StabilityMonitor {
     void addControllerNoCallback(final ServiceControllerImpl<?> controller) {
         synchronized (controllersLock) {
             awaitCleanupCompletion();
+            debug(".addControllerNoCallback(" + controller + ")");
             controllers.add(controller);
         }
     }
@@ -160,6 +168,7 @@ public final class StabilityMonitor {
         synchronized (controllersLock) {
             if (cleanupInProgress) return;
             awaitRemoveCompletion();
+            debug(".removeController(" + controller + ")");
             removeInProgress = removeMonitorFromController = controllers.remove(serviceController);
         }
         if (!removeMonitorFromController) return;
@@ -178,6 +187,7 @@ public final class StabilityMonitor {
     void removeControllerNoCallback(final ServiceControllerImpl<?> controller) {
         synchronized (controllersLock) {
             if (!cleanupInProgress) {
+                debug(".removeControllerNoCallback(" + controller + ")");
                 controllers.remove(controller);
             } else {
                 // currently running cleanup process will remove this controller from controllers set
@@ -196,6 +206,9 @@ public final class StabilityMonitor {
                 if (cleanupInProgress) return;
                 cleanupInProgress = true;
                 controllers = this.controllers;
+                for (ServiceControllerImpl controller : controllers) {
+                    debug(".clear(" + controller + ")");
+                }
                 this.controllers = new IdentityHashSet<>();
                 failed.clear();
                 problems.clear();
@@ -312,6 +325,7 @@ public final class StabilityMonitor {
         final int failedCount;
         final int problemsCount;
         synchronized (stabilityLock) {
+            debug(".awaitStability() START");
             while (unstableServices != 0) {
                 stabilityLock.wait();
             }
@@ -325,6 +339,15 @@ public final class StabilityMonitor {
                 problems.addAll(this.problems);
             }
             problemsCount = this.problems.size();
+            String problemsDump = "";
+            if (this.problems != null && this.problems.size() > 0) {
+                problemsDump = " problems: " + this.problems;
+            }
+            String failuresDump = "";
+            if (this.failed != null && this.failed.size() > 0) {
+                failuresDump = " failures: " + this.failed;
+            }
+            debug(".awaitStability() END" + problemsDump + failuresDump);
         }
         // propagate statistics
         provideStatistics(failedCount, problemsCount, statistics);
@@ -349,6 +372,7 @@ public final class StabilityMonitor {
         final int failedCount;
         final int problemsCount;
         synchronized (stabilityLock) {
+            debug(".awaitStability() START");
             while (unstableServices != 0) {
                 if (remaining <= 0L) {
                     return false;
@@ -366,6 +390,15 @@ public final class StabilityMonitor {
                 problems.addAll(this.problems);
             }
             problemsCount = this.problems.size();
+            String problemsDump = "";
+            if (this.problems != null && this.problems.size() > 0) {
+                problemsDump = " problems: " + this.problems;
+            }
+            String failuresDump = "";
+            if (this.failed != null && this.failed.size() > 0) {
+                failuresDump = " failures: " + this.failed;
+            }
+            debug(".awaitStability() END" + problemsDump + failuresDump);
         }
         // propagate statistics
         provideStatistics(failedCount, problemsCount, statistics);
@@ -374,46 +407,76 @@ public final class StabilityMonitor {
 
     void addProblem(final ServiceController<?> controller) {
         assert holdsLock(controller);
-        synchronized (stabilityLock) {
-            if (cleanupInProgress) return;
-            problems.add(controller);
+        synchronized (controllersLock) {
+            synchronized (stabilityLock) {
+                if (cleanupInProgress) return;
+                if (controllers.contains(controller)) {
+                    debug(".addProblem(" + controller + ")");
+                } else {
+                    debug(".addProblem(" + controller + ") !!!WTF!!!");
+                }
+                problems.add(controller);
+            }
         }
     }
 
     void removeProblem(final ServiceController<?> controller) {
         assert holdsLock(controller);
-        synchronized (stabilityLock) {
-            if (cleanupInProgress) return;
-            problems.remove(controller);
+        synchronized (controllersLock) {
+            synchronized (stabilityLock) {
+                if (cleanupInProgress) return;
+                if (controllers.contains(controller)) {
+                    debug(".removeProblem(" + controller + ")");
+                } else {
+                    debug(".removeProblem(" + controller + ") !!!WTF!!!");
+                }
+                problems.remove(controller);
+            }
         }
     }
 
     void addFailed(final ServiceController<?> controller) {
         assert holdsLock(controller);
-        synchronized (stabilityLock) {
-            if (cleanupInProgress) return;
-            failed.add(controller);
+        synchronized (controllersLock) {
+            synchronized (stabilityLock) {
+                if (cleanupInProgress) return;
+                if (controllers.contains(controller)) {
+                    debug(".addFailed(" + controller + ")");
+                } else {
+                    debug(".addFailed(" + controller + ") !!!WTF!!!");
+                }
+                failed.add(controller);
+            }
         }
     }
 
     void removeFailed(final ServiceController<?> controller) {
         assert holdsLock(controller);
-        synchronized (stabilityLock) {
-            if (cleanupInProgress) return;
-            failed.remove(controller);
+        synchronized (controllersLock) {
+            synchronized (stabilityLock) {
+                if (cleanupInProgress) return;
+                if (controllers.contains(controller)) {
+                    debug(".removeFailed(" + controller + ")");
+                } else {
+                    debug(".removeFailed(" + controller + ") !!!WTF!!!");
+                }
+                failed.remove(controller);
+            }
         }
     }
 
-    void incrementUnstableServices() {
+    void incrementUnstableServices(final ServiceControllerImpl controller) {
         synchronized (stabilityLock) {
             if (cleanupInProgress) return;
+            debug(".incrementUnstableServices(" + controller + ") " + (unstableServices + 1));
             unstableServices++;
         }
     }
 
-    void decrementUnstableServices() {
+    void decrementUnstableServices(final ServiceControllerImpl controller) {
         synchronized (stabilityLock) {
             if (cleanupInProgress) return;
+            debug(".decrementUnstableServices(" + controller + ") " + (unstableServices - 1));
             if (--unstableServices == 0) {
                 stabilityLock.notifyAll();
             }
@@ -432,6 +495,7 @@ public final class StabilityMonitor {
         final Set<ServiceControllerImpl<?>> controllers = new IdentityHashSet<>();
         synchronized (controllersLock) {
             controllers.addAll(this.controllers); 
+            debug(".provideStatistics()");
         }
         // collect statistics
         int active = 0, lazy = 0, onDemand = 0, never = 0, passive = 0, started = 0;
@@ -508,5 +572,18 @@ public final class StabilityMonitor {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return ID;
+    }
+
+    private void debug(final String msg) {
+        DebugUtils.debug(ID + " " + msg);
+    }
+
+    private void debug(final Throwable e) {
+        DebugUtils.debug(e, ID + " EXCEPTION CAUGHT");
     }
 }

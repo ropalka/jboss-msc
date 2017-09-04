@@ -204,4 +204,9 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         if (instance != null) instance.removeDemand();
     }
 
+    @Override
+    public String toString() {
+        return "REG(" + getName() + ")@" + System.identityHashCode(this);
+    }
+
 }
