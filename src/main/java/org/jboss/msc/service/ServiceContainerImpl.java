@@ -410,26 +410,30 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
     }
 
-    void incrementUnstableServices() {
+    void incrementUnstableServices(final ServiceControllerImpl controller) {
         synchronized (lock) {
+            org.jboss.msc.service.DebugUtils.debug("CONTAINER.incrementUnstableServices(" + controller + ") " + (unstableServices + 1));
             unstableServices++;
         }
     }
 
     void addProblem(ServiceController<?> controller) {
         synchronized (lock) {
+            org.jboss.msc.service.DebugUtils.debug("CONTAINER.addProblem(" + controller + "");
             problems.add(controller);
         }
     }
 
     void addFailed(ServiceController<?> controller) {
         synchronized (lock) {
+            org.jboss.msc.service.DebugUtils.debug("CONTAINER.addFailed(" + controller + "");
             failed.add(controller);
         }
     }
 
-    void decrementUnstableServices() {
+    void decrementUnstableServices(final ServiceControllerImpl controller) {
         synchronized (lock) {
+            org.jboss.msc.service.DebugUtils.debug("CONTAINER.decrementUnstableServices(" + controller + ") " + (unstableServices - 1));
             if (--unstableServices == 0) {
                 lock.notifyAll();
             }
@@ -532,6 +536,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             if (down) return;
             down = true;
             shutdownInitiated = System.nanoTime();
+            DebugUtils.debug(new Exception(), "ServiceContainerImpl.shutdown()");
         }
         // unregistering shutdown hook
         if (shutdownThread != null) {
@@ -552,6 +557,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         final ContainerShutdownListener shutdownListener = new ContainerShutdownListener(new Runnable() {
             public void run() {
                 executor.shutdown();
+                DebugUtils.debug("ServiceContainerImpl.shutdown() FINISHED");
             }
         });
         ServiceControllerImpl<?> controller;
