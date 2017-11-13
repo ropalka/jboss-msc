@@ -332,7 +332,7 @@ public interface ServiceController<S> extends Value<S> {
         /**
          * Controller is down.
          */
-        DOWN(State.DOWN, false),
+        DOWN(State.DOWN, true),
         /**
          * Controller is waiting for an external condition to start, such as a dependent demand.
          */
@@ -505,7 +505,6 @@ public interface ServiceController<S> extends Value<S> {
          * Transition from {@link Substate#REMOVING REMOVING} to {@link Substate#DOWN DOWN}.
          * @deprecated was never supposed to work
          */
-        @Deprecated
         REMOVING_to_DOWN(Substate.REMOVING, Substate.DOWN),
         /**
          * Transition from {@link Substate#DOWN DOWN} to {@link Substate#REMOVING REMOVING}.
