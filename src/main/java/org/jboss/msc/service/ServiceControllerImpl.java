@@ -425,7 +425,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             }
             case DOWN: {
                 if (mode == ServiceController.Mode.REMOVE) {
-                    return Transition.DOWN_to_REMOVING;
+                    return Transition.DOWN_to_REMOVED;
                 } else if (mode == ServiceController.Mode.NEVER) {
                     return Transition.DOWN_to_WONT_START;
                 } else if (shouldStart() && (mode != Mode.PASSIVE || stoppingDependencies == 0)) {
@@ -517,9 +517,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     return Transition.PROBLEM_to_START_REQUESTED;
                 }
                 break;
-            }
-            case REMOVING: {
-                return Transition.REMOVING_to_REMOVED;
             }
             case CANCELLED: {
                 return Transition.CANCELLED_to_REMOVED;
@@ -723,12 +720,9 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     tasks.add(new RemoveChildrenTask());
                     break;
                 }
-                case DOWN_to_REMOVING: {
-                    break;
-                }
                 case CANCELLED_to_REMOVED:
                     break;
-                case REMOVING_to_REMOVED: {
+                case DOWN_to_REMOVED: {
                     tasks.add(new RemoveTask());
                     break;
                 }
@@ -832,7 +826,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         assert holdsLock(this);
         final ServiceController.Mode oldMode = mode;
         if (oldMode == Mode.REMOVE) {
-            if (state.compareTo(Substate.REMOVING) >= 0) {
+            if (state.compareTo(Substate.REMOVED) >= 0) {
                 throw new IllegalStateException("Service already removed");
             }
         }
@@ -981,7 +975,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     private boolean isUnavailable() {
         assert holdsLock(this);
-        if (state == Substate.CANCELLED || state == Substate.REMOVING || state == Substate.REMOVED || state == Substate.TERMINATED) return true;
+        if (state == Substate.CANCELLED || state == Substate.REMOVED || state == Substate.TERMINATED) return true;
         if (state == Substate.NEW || state == Substate.WAITING || state == Substate.WONT_START) return true;
         if (state == Substate.PROBLEM && finishedTask(DEPENDENCY_UNAVAILABLE_TASK)) return true;
         if (state == Substate.DOWN && finishedTask(DEPENDENCY_UNAVAILABLE_TASK)) return true;
@@ -1228,7 +1222,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             listenerAddedTask = new ListenerTask(listener, ListenerNotification.LISTENER_ADDED);
             incrementAsyncTasks();
             if (state == Substate.REMOVED) {
-                listenerRemovedTask = new ListenerTask(listener, Transition.REMOVING_to_REMOVED);
+                listenerRemovedTask = new ListenerTask(listener, Transition.DOWN_to_REMOVED);
                 incrementAsyncTasks();
             }
             updateStabilityState(leavingRestState);

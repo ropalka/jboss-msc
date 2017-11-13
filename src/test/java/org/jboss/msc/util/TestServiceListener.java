@@ -237,13 +237,13 @@ public class TestServiceListener implements ServiceListener<Object> {
 
     public Future<ServiceController<?>> expectServiceRemoval(final ServiceName serviceName) {
         final ServiceFuture future = new ServiceFuture();
-        expectedTransitions.get(ServiceController.Transition.REMOVING_to_REMOVED).put(serviceName, future);
+        expectedTransitions.get(ServiceController.Transition.DOWN_to_REMOVED).put(serviceName, future);
         return future;
     }
 
     public Future<ServiceController<?>> expectNoServiceRemoval(final ServiceName serviceName) {
         final ServiceFuture future = new ServiceFuture(100);
-        expectedTransitions.get(ServiceController.Transition.REMOVING_to_REMOVED).put(serviceName, future);
+        expectedTransitions.get(ServiceController.Transition.DOWN_to_REMOVED).put(serviceName, future);
         return future;
     }
 

@@ -511,6 +511,10 @@ public interface ServiceController<S> extends Value<S> {
          */
         DOWN_to_REMOVING(Substate.DOWN, Substate.REMOVING),
         /**
+         * Transition from {@link Substate#DOWN DOWN} to {@link Substate#REMOVED REMOVED}.
+         */
+        DOWN_to_REMOVED(Substate.DOWN, Substate.REMOVED),
+        /**
          * Transition from {@link Substate#DOWN DOWN} to {@link Substate#START_REQUESTED START_REQUESTED}.
          */
         DOWN_to_START_REQUESTED(Substate.DOWN, Substate.START_REQUESTED),
