@@ -199,30 +199,6 @@ public class TestServiceListener implements ServiceListener<Object> {
         return future;
     }
 
-    public Future<ServiceController<?>> expectServiceWaiting(final ServiceName serviceName) {
-        final ServiceFuture future = new ServiceFuture();
-        expectedTransitions.get(ServiceController.Transition.DOWN_to_WAITING).put(serviceName, future);
-        return future;
-    }
-
-    public Future<ServiceController<?>> expectNoServiceWaiting(final ServiceName serviceName) {
-        final ServiceFuture future = new ServiceFuture(100);
-        expectedTransitions.get(ServiceController.Transition.DOWN_to_WAITING).put(serviceName, future);
-        return future;
-    }
-
-    public Future<ServiceController<?>> expectServiceWaitingCleared(final ServiceName serviceName) {
-        final ServiceFuture future = new ServiceFuture();
-        expectedTransitions.get(ServiceController.Transition.WAITING_to_DOWN).put(serviceName, future);
-        return future;
-    }
-
-    public Future<ServiceController<?>> expectNoServiceWaitingCleared(final ServiceName serviceName) {
-        final ServiceFuture future = new ServiceFuture(100);
-        expectedTransitions.get(ServiceController.Transition.WAITING_to_DOWN).put(serviceName, future);
-        return future;
-    }
-
     public Future<ServiceController<?>> expectServiceWontStart(final ServiceName serviceName) {
         final ServiceFuture future = new ServiceFuture();
         expectedTransitions.get(ServiceController.Transition.DOWN_to_WONT_START).put(serviceName, future);
