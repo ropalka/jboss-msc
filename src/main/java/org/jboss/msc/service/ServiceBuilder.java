@@ -25,7 +25,6 @@ package org.jboss.msc.service;
 import org.jboss.msc.inject.Injector;
 import org.jboss.msc.value.Value;
 
-import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -273,44 +272,5 @@ public interface ServiceBuilder<T> {
      */
     @Deprecated
     ServiceBuilder<T> addMonitors(final StabilityMonitor... monitors);
-
-    /**
-     * Add a service listener that will be added to this service.
-     *
-     * @param listener the listener to add to the service
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #addListener(LifecycleListener)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addListener(ServiceListener<? super T> listener);
-
-    /**
-     * Add service listeners that will be added to this service.
-     *
-     * @param listeners a list of listeners to add to the service
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #addListener(LifecycleListener)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addListener(ServiceListener<? super T>... listeners);
-
-    /**
-     * Add service listeners that will be added to this service.
-     *
-     * @param listeners a collection of listeners to add to the service
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #addListener(LifecycleListener)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addListener(Collection<? extends ServiceListener<? super T>> listeners);
 
 }

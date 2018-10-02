@@ -179,29 +179,4 @@ public class DelegatingServiceBuilder<T> implements ServiceBuilder<T> {
         getDelegate().addMonitors(monitors);
         return this;
     }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public ServiceBuilder<T> addListener(final ServiceListener<? super T> listener) {
-        getDelegate().addListener(listener);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public ServiceBuilder<T> addListener(final ServiceListener<? super T>... listeners) {
-        getDelegate().addListener(listeners);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public ServiceBuilder<T> addListener(final Collection<? extends ServiceListener<? super T>> listeners) {
-        getDelegate().addListener(listeners);
-        return this;
-    }
-
 }
