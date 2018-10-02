@@ -156,20 +156,6 @@ public interface ServiceBuilder<T> {
     /**
      * Add multiple, non-injected dependencies.
      *
-     * @param dependencyType the dependency type; must not be {@code null}
-     * @param dependencies the service names to depend on
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Optional dependencies are <em>unsafe</em> and should not be used.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addDependencies(DependencyType dependencyType, ServiceName... dependencies);
-
-    /**
-     * Add multiple, non-injected dependencies.
-     *
      * @param dependencies the service names to depend on
      * @return this builder
      * @throws UnsupportedOperationException if this service builder
@@ -179,20 +165,6 @@ public interface ServiceBuilder<T> {
      */
     @Deprecated
     ServiceBuilder<T> addDependencies(Iterable<ServiceName> dependencies);
-
-    /**
-     * Add multiple, non-injected dependencies.
-     *
-     * @param dependencyType the dependency type; must not be {@code null}
-     * @param dependencies the service names to depend on
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Optional dependencies are <em>unsafe</em> and should not be used.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addDependencies(DependencyType dependencyType, Iterable<ServiceName> dependencies);
 
     /**
      * Add a dependency.  Calling this method multiple times for the same service name will only add it as a
@@ -209,21 +181,6 @@ public interface ServiceBuilder<T> {
     ServiceBuilder<T> addDependency(ServiceName dependency);
 
     /**
-     * Add a dependency.  Calling this method multiple times for the same service name will only add it as a
-     * dependency one time; however this may be useful to specify multiple injections for one dependency.
-     *
-     * @param dependencyType the dependency type; must not be {@code null}
-     * @param dependency the name of the dependency
-     * @return an injection builder for optionally injecting the dependency
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Optional dependencies are <em>unsafe</em> and should not be used.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addDependency(DependencyType dependencyType, ServiceName dependency);
-
-    /**
      * Add a service dependency.  Calling this method multiple times for the same service name will only add it as a
      * dependency one time; however this may be useful to specify multiple injections for one dependency.
      *
@@ -237,22 +194,6 @@ public interface ServiceBuilder<T> {
      */
     @Deprecated
     ServiceBuilder<T> addDependency(ServiceName dependency, Injector<Object> target);
-
-    /**
-     * Add a service dependency.  Calling this method multiple times for the same service name will only add it as a
-     * dependency one time; however this may be useful to specify multiple injections for one dependency.
-     *
-     * @param dependencyType the dependency type; must not be {@code null}
-     * @param dependency the name of the dependency
-     * @param target the injector into which the dependency should be stored
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Optional dependencies are <em>unsafe</em> and should not be used.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addDependency(DependencyType dependencyType, ServiceName dependency, Injector<Object> target);
 
     /**
      * Add a service dependency.  The type of the dependency is checked before it is passed into the (type-safe) injector
@@ -271,25 +212,6 @@ public interface ServiceBuilder<T> {
      */
     @Deprecated
     <I> ServiceBuilder<T> addDependency(ServiceName dependency, Class<I> type, Injector<I> target);
-
-    /**
-     * Add a service dependency.  The type of the dependency is checked before it is passed into the (type-safe) injector
-     * instance.  Calling this method multiple times for the same service name will only add it as a
-     * dependency one time; however this may be useful to specify multiple injections for one dependency.
-     *
-     * @param dependencyType the dependency type; must not be {@code null}
-     * @param dependency the name of the dependency
-     * @param type the class of the value of the dependency
-     * @param target the injector into which the dependency should be stored
-     * @param <I> the type of the value of the dependency
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Optional dependencies are <em>unsafe</em> and should not be used.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    <I> ServiceBuilder<T> addDependency(DependencyType dependencyType, ServiceName dependency, Class<I> type, Injector<I> target);
 
     /**
      * Add an injection.  The given value will be injected into the given injector before service start, and uninjected
@@ -390,25 +312,5 @@ public interface ServiceBuilder<T> {
      */
     @Deprecated
     ServiceBuilder<T> addListener(Collection<? extends ServiceListener<? super T>> listeners);
-
-    /**
-     * The dependency type.
-     *
-     * @deprecated Optional dependencies are <em>unsafe</em> and should not be used.
-     * This enum will be removed in a future release.
-     */
-    @Deprecated
-    enum DependencyType {
-
-        /**
-         * A required dependency.
-         */
-        REQUIRED,
-        /**
-         * An optional dependency.
-         */
-        OPTIONAL,
-        ;
-    }
 
 }
