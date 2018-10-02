@@ -187,11 +187,6 @@ public class DelegatingServiceContainer implements ServiceContainer {
     }
 
     /** {@inheritDoc} */
-    public BatchServiceTarget batchTarget() {
-        return getServiceTargetDelegate().batchTarget();
-    }
-
-    /** {@inheritDoc} */
     public ServiceController<?> getRequiredService(final ServiceName serviceName) throws ServiceNotFoundException {
         return getServiceRegistryDelegate().getRequiredService(serviceName);
     }
