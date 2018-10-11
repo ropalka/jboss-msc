@@ -227,20 +227,4 @@ public interface ServiceBuilder<T> {
      */
     @Deprecated
     <I> ServiceBuilder<T> addInjection(Injector<? super I> target, I value);
-
-    /**
-     * Add an injection of this service into another target.  The given injector will be given this service after
-     * start, and uninjected when this service stops.
-     * <p> Differently from other injection types, failures to perform an outward injection will not result in a failure
-     * to start the service.
-     *
-     * @param target the injector target
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #provides(ServiceName...)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addInjection(Injector<? super T> target);
 }
