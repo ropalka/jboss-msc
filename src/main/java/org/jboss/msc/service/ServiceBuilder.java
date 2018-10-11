@@ -243,18 +243,4 @@ public interface ServiceBuilder<T> {
      */
     @Deprecated
     ServiceBuilder<T> addInjection(Injector<? super T> target);
-    
-    /**
-     * Add service stability monitors that will be added to this service.
-     * 
-     * @param monitors a list of stability monitors to add to the service
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #addMonitor(StabilityMonitor)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addMonitors(final StabilityMonitor... monitors);
-
 }
