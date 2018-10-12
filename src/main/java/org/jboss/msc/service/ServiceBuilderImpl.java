@@ -27,8 +27,6 @@ import static java.lang.Thread.currentThread;
 import org.jboss.msc.Service;
 import org.jboss.msc.inject.Injector;
 import org.jboss.msc.inject.Injectors;
-import org.jboss.msc.value.ImmediateValue;
-import org.jboss.msc.value.Value;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,7 +61,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private Map<ServiceName, Dependency> requires;
     private Set<StabilityMonitor> monitors;
     private Set<LifecycleListener> lifecycleListeners;
-    private List<ValueInjection<?>> valueInjections;
     private boolean installed;
 
     ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final org.jboss.msc.service.Service<T> service, final ServiceControllerImpl<?> parent) {
@@ -260,22 +257,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         return this;
     }
 
-    @Override
-    public <I> ServiceBuilder<T> addInjection(final Injector<? super I> target, final I value) {
-        return addInjectionValue(target, new ImmediateValue<>(value));
-    }
-
-    private <I> ServiceBuilder<T> addInjectionValue(final Injector<? super I> target, final Value<I> value) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(target);
-        assertNotNull(value);
-        assertThreadSafety();
-        // implementation
-        addValueInjectionInternal(new ValueInjection<>(value, target));
-        return this;
-    }
-
     // implementation internals
 
     void addLifecycleListenersNoCheck(final Set<LifecycleListener> listeners) {
@@ -347,11 +328,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         lifecycleListeners.add(listener);
     }
 
-    void addValueInjectionInternal(final ValueInjection<?> valueInjection) {
-        if (valueInjections == null) valueInjections = new ArrayList<>();
-        valueInjections.add(valueInjection);
-    }
-
     Collection<ServiceName> getServiceAliases() {
         return aliases == null ? Collections.emptySet() : aliases;
     }
@@ -381,10 +357,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     ServiceController.Mode getInitialMode() {
         return initialMode;
-    }
-
-    List<ValueInjection<?>> getValueInjections() {
-        return valueInjections == null ? new ArrayList<>() : valueInjections;
     }
 
     // implementation assertions

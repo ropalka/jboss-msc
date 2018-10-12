@@ -145,12 +145,4 @@ public class DelegatingServiceBuilder<T> implements ServiceBuilder<T> {
         getDelegate().addDependency(dependency, type, target);
         return this;
     }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public <I> ServiceBuilder<T> addInjection(final Injector<? super I> target, final I value) {
-        getDelegate().addInjection(target, value);
-        return this;
-    }
 }
