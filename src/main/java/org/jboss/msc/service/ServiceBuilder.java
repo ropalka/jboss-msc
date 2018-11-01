@@ -140,32 +140,6 @@ public interface ServiceBuilder<T> {
     ServiceBuilder<T> addAliases(ServiceName... aliases);
 
     /**
-     * Add multiple, non-injected dependencies.
-     *
-     * @param dependencies the service names to depend on
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #requires(ServiceName)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addDependencies(ServiceName... dependencies);
-
-    /**
-     * Add multiple, non-injected dependencies.
-     *
-     * @param dependencies the service names to depend on
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #requires(ServiceName)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addDependencies(Iterable<ServiceName> dependencies);
-
-    /**
      * Add a dependency.  Calling this method multiple times for the same service name will only add it as a
      * dependency one time; however this may be useful to specify multiple injections for one dependency.
      *
