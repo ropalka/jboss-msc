@@ -140,21 +140,6 @@ public interface ServiceBuilder<T> {
     ServiceBuilder<T> addAliases(ServiceName... aliases);
 
     /**
-     * Add a service dependency.  Calling this method multiple times for the same service name will only add it as a
-     * dependency one time; however this may be useful to specify multiple injections for one dependency.
-     *
-     * @param dependency the name of the dependency
-     * @param target the injector into which the dependency should be stored
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #requires(ServiceName)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addDependency(ServiceName dependency, Injector<Object> target);
-
-    /**
      * Add a service dependency.  The type of the dependency is checked before it is passed into the (type-safe) injector
      * instance.  Calling this method multiple times for the same service name will only add it as a
      * dependency one time; however this may be useful to specify multiple injections for one dependency.
