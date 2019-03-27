@@ -237,6 +237,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             sb.append(" }");
         }
         debug(sb.toString());
+        DebugUtils.debug(serviceId, provides.keySet(), parent, requires);
     }
 
     /**
