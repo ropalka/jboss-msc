@@ -108,7 +108,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     /**
      * Provided dependencies by this service.
      */
-    private final Map<ServiceRegistrationImpl, WritableValueImpl> provides;
+    public final Map<ServiceRegistrationImpl, WritableValueImpl> provides;
     /**
      * The parent of this service.
      */
@@ -221,6 +221,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         int depCount = requires.size();
         stoppingDependencies = parent == null ? depCount : depCount + 1;
         children = new IdentityHashSet<>();
+        DebugUtils.debug(serviceId, provides.keySet(), parent, requires);
     }
 
     /**
