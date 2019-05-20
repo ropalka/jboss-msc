@@ -77,25 +77,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> addAliases(final ServiceName... aliases) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(aliases);
-        assertThreadSafety();
-        for (final ServiceName alias : aliases) {
-            assertNotNull(alias);
-            assertNotRequired(alias, false);
-        }
-        // implementation
-        for (final ServiceName alias : aliases) {
-            if (!alias.equals(serviceId) && addAliasInternal(alias)) {
-                addProvidesInternal(alias, null);
-            }
-        }
-        return this;
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public <V> Supplier<V> requires(final ServiceName dependency) {
         // preconditions

@@ -57,13 +57,6 @@ public class DelegatingServiceBuilder<T> implements ServiceBuilder<T> {
     }
 
     /** {@inheritDoc} */
-    @Override
-    public ServiceBuilder<T> addAliases(final ServiceName... aliases) {
-        getDelegate().addAliases(aliases);
-        return this;
-    }
-
-    /** {@inheritDoc} */
     public <V> Supplier<V> requires(final ServiceName name) {
         return getDelegate().requires(name);
     }

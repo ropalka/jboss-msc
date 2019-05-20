@@ -23,7 +23,6 @@
 package org.jboss.msc.service;
 
 import org.jboss.msc.inject.Injector;
-import org.jboss.msc.value.Value;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -125,19 +124,6 @@ public interface ServiceBuilder<T> {
     ////////////////////////
     // DEPRECATED METHODS //
     ////////////////////////
-
-    /**
-     * Adds aliases for this service.
-     *
-     * @param aliases the service names to use as aliases
-     * @return the builder
-     * @throws UnsupportedOperationException if this service builder
-     * wasn't created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #provides(ServiceName...)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceBuilder<T> addAliases(ServiceName... aliases);
 
     /**
      * Add a service dependency.  The type of the dependency is checked before it is passed into the (type-safe) injector
