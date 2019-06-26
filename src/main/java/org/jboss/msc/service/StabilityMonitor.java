@@ -76,7 +76,7 @@ import java.util.concurrent.TimeUnit;
  * try {
  *    <b>monitor.awaitStability();</b>
  * } finally {
- *    <b>monitor.removeController(controller);</b>
+ *    <b>monitor.clear();</b>
  * }
  * // do something after controller have been removed from container
  * </pre>
@@ -144,7 +144,9 @@ public final class StabilityMonitor {
      * @param controller to be unregistered from stability detection.
      * @throws java.lang.IllegalArgumentException if {@code controller} is null
      * @throws java.lang.IllegalStateException if {@code controller}s lock is held by current thread
+     * @deprecated use {@link #clear()} instead
      */
+    @Deprecated
     public void removeController(final ServiceController<?> controller) throws IllegalArgumentException, IllegalStateException {
         if (controller == null) {
             throw new IllegalArgumentException("Controller is null");
