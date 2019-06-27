@@ -95,7 +95,7 @@ public final class StabilityMonitor {
     private boolean addInProgress;
     private boolean cleanupInProgress;
     private boolean removeInProgress;
-    private int unstableServices;
+    private final IdentityHashSet<ServiceControllerImpl<?>> unstableServices = new IdentityHashSet<>();
 
     /**
      * Register controller with this monitor.
@@ -198,7 +198,7 @@ public final class StabilityMonitor {
                 this.controllers = new IdentityHashSet<>();
                 failed.clear();
                 problems.clear();
-                unstableServices = 0;
+                unstableServices.clear();
             }
         }
         try {
@@ -311,7 +311,7 @@ public final class StabilityMonitor {
         final int failedCount;
         final int problemsCount;
         synchronized (stabilityLock) {
-            while (unstableServices != 0) {
+            while (unstableServices.size() != 0) {
                 stabilityLock.wait();
             }
             // propagate failures
@@ -348,7 +348,7 @@ public final class StabilityMonitor {
         final int failedCount;
         final int problemsCount;
         synchronized (stabilityLock) {
-            while (unstableServices != 0) {
+            while (unstableServices.size() != 0) {
                 if (remaining <= 0L) {
                     return false;
                 }
@@ -403,20 +403,20 @@ public final class StabilityMonitor {
         }
     }
 
-    void incrementUnstableServices() {
+    void addUnstableService(final ServiceControllerImpl<?> controller) {
         synchronized (stabilityLock) {
             if (cleanupInProgress) return;
-            unstableServices++;
+            unstableServices.add(controller);
         }
     }
 
-    void decrementUnstableServices() {
+    void removeUnstableService(final ServiceControllerImpl<?> controller) {
         synchronized (stabilityLock) {
             if (cleanupInProgress) return;
-            if (--unstableServices == 0) {
+            unstableServices.remove(controller);
+            if (unstableServices.size() == 0) {
                 stabilityLock.notifyAll();
             }
-            assert unstableServices >= 0;
         }
     }
 

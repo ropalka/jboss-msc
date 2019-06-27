@@ -389,14 +389,14 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             if (!enteringStableRestState) {
                 container.incrementUnstableServices();
                 for (StabilityMonitor monitor : monitors) {
-                    monitor.incrementUnstableServices();
+                    monitor.addUnstableService(this);
                 }
             }
         } else {
             if (enteringStableRestState) {
                 container.decrementUnstableServices();
                 for (StabilityMonitor monitor : monitors) {
-                    monitor.decrementUnstableServices();
+                    monitor.removeUnstableService(this);
                 }
                 if (state == Substate.REMOVED) {
                     for (StabilityMonitor monitor : monitors) {
@@ -1434,7 +1434,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         synchronized (this) {
             if (!monitors.add(monitor)) return;
             if (!isStableRestState()) {
-                monitor.incrementUnstableServices();
+                monitor.addUnstableService(this);
             }
             if (state == Substate.START_FAILED) {
                 monitor.addFailed(this);
@@ -1449,7 +1449,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         synchronized (this) {
             if (!monitors.remove(monitor)) return;
             if (!isStableRestState()) {
-                monitor.decrementUnstableServices();
+                monitor.removeUnstableService(this);
             }
             monitor.removeProblem(this);
             monitor.removeFailed(this);
