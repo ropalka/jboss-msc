@@ -29,7 +29,6 @@ import static org.jboss.msc.service.SecurityUtils.setTCCL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,7 +39,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.management.ServiceStatus;
 
 /**
@@ -213,9 +211,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         this.listeners = new IdentityHashSet<>(listeners);
         this.lifecycleListeners = new IdentityHashSet<>(lifecycleListeners);
         this.monitors = new IdentityHashSet<>(monitors);
-        // We also need to register this controller with monitors explicitly.
-        // This allows inherited monitors to have registered all child controllers
-        // and later to remove them when inherited stability monitor is cleared.
         for (final StabilityMonitor monitor : monitors) {
             monitor.addControllerNoCallback(this);
         }
@@ -614,6 +609,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 case NEW_to_DOWN: {
                     getListenerTasks(LifecycleEvent.DOWN, listenerTransitionTasks);
                     tasks.add(new DependencyAvailableTask());
+                    tasks.add(new AddMonitorsToDependenciesTask(new IdentityHashSet<>(monitors)));
                     break;
                 }
                 case DOWN_to_WAITING: {
@@ -1431,7 +1427,9 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     void addMonitor(final StabilityMonitor monitor) {
         assert !holdsLock(this);
+        final List<Runnable> tasks = new ArrayList<>();
         synchronized (this) {
+            final boolean leavingRestState = isStableRestState();
             if (!monitors.add(monitor)) return;
             if (!isStableRestState()) {
                 monitor.addUnstableService(this);
@@ -1441,7 +1439,12 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             } else if (state == Substate.PROBLEM) {
                 monitor.addProblem(this);
             }
+            if (ignoreNotification()) return;
+            tasks.add(new AddMonitorToDependenciesTask(monitor));
+            incrementAsyncTasks();
+            updateStabilityState(leavingRestState);
         }
+        doExecute(tasks);
     }
 
     void removeMonitor(final StabilityMonitor monitor) {
@@ -1596,8 +1599,8 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return true;
         }
 
-        abstract void inform(Dependency dependency);
-        abstract void inform(ServiceControllerImpl parent);
+        void inform(Dependency dependency) {}
+        void inform(ServiceControllerImpl parent) {}
     }
 
     private abstract class DependentsControllerTask extends ControllerTask {
@@ -1638,6 +1641,26 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             for (ServiceRegistrationImpl registration : provides.keySet()) {
                 lock = registration.getLock();
                 synchronized (lock) { lock.releaseRead(); }
+            }
+        }
+    }
+
+    private final class AddMonitorToDependenciesTask extends DependenciesControllerTask {
+        private final StabilityMonitor monitor;
+        private AddMonitorToDependenciesTask(final StabilityMonitor monitor) {
+            this.monitor = monitor;
+        }
+        void inform(final Dependency dependency) { dependency.addMonitor(monitor); }
+    }
+
+    private final class AddMonitorsToDependenciesTask extends DependenciesControllerTask {
+        private final Set<StabilityMonitor> monitors;
+        private AddMonitorsToDependenciesTask(final Set<StabilityMonitor> monitors) {
+            this.monitors = monitors;
+        }
+        void inform(final Dependency dependency) {
+            for (final StabilityMonitor monitor : monitors) {
+                dependency.addMonitor(monitor);
             }
         }
     }

@@ -30,6 +30,7 @@ import static org.jboss.msc.service.ServiceController.Mode.ON_DEMAND;
 import static org.jboss.msc.service.ServiceController.Mode.PASSIVE;
 import static org.jboss.msc.service.ServiceController.State.UP;
 
+import java.util.EventListener;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -92,6 +93,7 @@ public final class StabilityMonitor {
     private final Set<ServiceController<?>> problems = new IdentityHashSet<>();
     private final Set<ServiceController<?>> failed = new IdentityHashSet<>();
     private IdentityHashSet<ServiceControllerImpl<?>> controllers = new IdentityHashSet<>();
+    private IdentityHashSet<Listener> listeners = new IdentityHashSet<>();
     private boolean addInProgress;
     private boolean cleanupInProgress;
     private boolean removeInProgress;
@@ -184,18 +186,28 @@ public final class StabilityMonitor {
         }
     }
 
+    boolean addListener(final Listener listener) {
+        synchronized (stabilityLock) {
+            if (cleanupInProgress) return false;
+            return listeners.add(listener);
+        }
+    }
+
     /**
      * Removes all the registered controllers in this monitor.
      * The monitor can be later reused for stability detection again.
      */
     public void clear() {
         final Set<ServiceControllerImpl<?>> controllers;
+        final Set<Listener> listeners;
         synchronized (controllersLock) {
             synchronized (stabilityLock) {
                 if (cleanupInProgress) return;
                 cleanupInProgress = true;
                 controllers = this.controllers;
                 this.controllers = new IdentityHashSet<>();
+                listeners = this.listeners;
+                this.listeners = new IdentityHashSet<>();
                 failed.clear();
                 problems.clear();
                 unstableServices.clear();
@@ -205,9 +217,12 @@ public final class StabilityMonitor {
             // We cannot call removeMonitorNoCallback neither under stabilityLock nor controllersLock
             // because of deadlock possibility. In order for removing controllers
             // to don't break stability invariants we're setting cleanupInProgress flag
-            // until all the controllers are removed.
+            // until all the controllers are removed and all listeners called.
             for (final ServiceControllerImpl<?> controller : controllers) {
                 controller.removeMonitorNoCallback(this);
+            }
+            for (final Listener listener : listeners) {
+                listener.onClean(this);
             }
         } finally {
             synchronized (controllersLock) {
@@ -507,5 +522,9 @@ public final class StabilityMonitor {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    static interface Listener extends EventListener {
+        void onClean(StabilityMonitor monitor);
     }
 }

@@ -38,14 +38,21 @@ interface Dependency extends Value<Object> {
      *
      * @param dependent added dependent
      */
-    void addDependent(final Dependent dependent);
+    void addDependent(Dependent dependent);
 
     /**
      * Remove dependent from this dependency
      *
      * @param dependent removed dependent
      */
-    void removeDependent(final Dependent dependent);
+    void removeDependent(Dependent dependent);
+
+    /**
+     * Add monitor to this dependency.
+     *
+     * @param monitor added monitor
+     */
+    void addMonitor(StabilityMonitor monitor);
 
     /**
      * Add demand on this dependency.

@@ -52,6 +52,11 @@ final class OptionalDependencyImpl implements Dependency, Dependent {
     }
 
     @Override
+    public void addMonitor(final StabilityMonitor monitor) {
+        dependency.addMonitor(monitor);
+    }
+
+    @Override
     public void addDemand() {
         dependency.addDemand();
     }

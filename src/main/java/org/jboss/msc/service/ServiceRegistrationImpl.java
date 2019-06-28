@@ -30,7 +30,7 @@ import static java.lang.Thread.holdsLock;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class ServiceRegistrationImpl extends Lockable implements Dependency {
+final class ServiceRegistrationImpl extends Lockable implements StabilityMonitor.Listener, Dependency {
 
     /**
      * The name of this registration.
@@ -40,6 +40,10 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
      * The set of dependents on this registration.
      */
     private final IdentityHashSet<Dependent> dependents = new IdentityHashSet<>(0);
+    /**
+     * The set of monitors on this registration.
+     */
+    private final IdentityHashSet<StabilityMonitor> monitors = new IdentityHashSet<>(0);
     /**
      * The dependency value provided by this registration.
      */
@@ -125,6 +129,26 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         dependents.remove(dependent);
     }
 
+    @Override
+    public void addMonitor(final StabilityMonitor monitor) {
+        assert isWriteLocked();
+        if (monitors.contains(monitor)) return;
+        if (monitor.addListener(this)) {
+            monitors.add(monitor);
+            if (instance != null) {
+                monitor.addControllerNoCallback(instance);
+                instance.addMonitor(monitor);
+            }
+        }
+    }
+
+    @Override
+    public void onClean(final StabilityMonitor monitor) {
+        synchronized (this) {
+            monitors.remove(monitor);
+        }
+    }
+
     void set(final ServiceControllerImpl<?> newInstance, final WritableValueImpl newInjector) throws DuplicateServiceException {
         assert newInstance != null;
         assert isWriteLocked();
@@ -135,6 +159,9 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         injector = newInjector;
         if (demandedByCount > 0) instance.addDemands(demandedByCount);
         if (dependentsStartedCount > 0) instance.dependentsStarted(dependentsStartedCount);
+        for (final StabilityMonitor monitor : monitors) {
+            instance.addMonitor(monitor);
+        }
     }
 
     boolean clear(final ServiceControllerImpl<?> oldInstance) {
