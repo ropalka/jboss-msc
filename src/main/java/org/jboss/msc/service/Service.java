@@ -93,9 +93,4 @@ public interface Service<T> extends org.jboss.msc.Service, Value<T> {
      * @param context the context which can be used to trigger an asynchronous service stop
      */
     void stop(StopContext context);
-
-    /**
-     * A simple null service which performs no start or stop action.
-     */
-    Service<Void> NULL = NullService.INSTANCE;
 }
