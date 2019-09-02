@@ -336,7 +336,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     static final class Dependency {
         private final ServiceRegistrationImpl registration;
-        private List<Injector<Object>> injectorList = new ArrayList<>(0);
 
         Dependency(final ServiceRegistrationImpl registration) {
             this.registration = registration;
@@ -344,10 +343,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
         ServiceRegistrationImpl getRegistration() {
             return registration;
-        }
-
-        List<Injector<Object>> getInjectorList() {
-            return injectorList;
         }
     }
 
