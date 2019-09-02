@@ -105,16 +105,6 @@ public interface ServiceTarget {
     <T> ServiceBuilder<T> addService(ServiceName name, Service<T> service);
 
     /**
-     * Add a stability monitors that will be added to all the ServiceBuilders installed in this target.
-     *
-     * @param monitors the monitors to add to the target
-     * @return this target
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceTarget addMonitors(StabilityMonitor... monitors);
-
-    /**
      * Returns a set of the monitors added to this target.
      * 
      * @return the monitors added to this target
