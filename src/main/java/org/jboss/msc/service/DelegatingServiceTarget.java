@@ -102,14 +102,6 @@ public class DelegatingServiceTarget implements ServiceTarget {
     /** {@inheritDoc} */
     @Deprecated
     @Override
-    public ServiceTarget removeDependency(final ServiceName dependency) {
-        getDelegate().removeDependency(dependency);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
     public Set<ServiceName> getDependencies() {
         return getDelegate().getDependencies();
     }

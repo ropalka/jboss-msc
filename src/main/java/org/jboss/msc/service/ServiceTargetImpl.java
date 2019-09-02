@@ -114,15 +114,6 @@ class ServiceTargetImpl implements ServiceTarget {
     }
 
     @Override
-    public ServiceTarget removeDependency(final ServiceName dependency) {
-        if (dependency == null) {
-            return this;
-        }
-        dependencies.remove(dependency);
-        return this;
-    }
-
-    @Override
     public Set<ServiceName> getDependencies() {
         return unmodifiableSet(dependencies);
     }

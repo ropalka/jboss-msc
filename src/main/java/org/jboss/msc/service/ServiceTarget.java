@@ -105,16 +105,6 @@ public interface ServiceTarget {
     <T> ServiceBuilder<T> addService(ServiceName name, Service<T> service);
 
     /**
-     * Remove a dependency from this target.  Subsequently defined services will not have this dependency.
-     *
-     * @param dependency the dependency
-     * @return this target
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceTarget removeDependency(ServiceName dependency);
-
-    /**
      * Returns a set of all dependencies added to this target.
      * 
      * @return all dependencies of this target
