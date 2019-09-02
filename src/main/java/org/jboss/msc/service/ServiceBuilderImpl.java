@@ -25,8 +25,6 @@ package org.jboss.msc.service;
 import static java.lang.Thread.currentThread;
 
 import org.jboss.msc.Service;
-import org.jboss.msc.inject.Injector;
-import org.jboss.msc.inject.Injectors;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -166,21 +164,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         if (service == null) service = Service.NULL;
         if (initialMode == null) initialMode = ServiceController.Mode.ACTIVE;
         return serviceTarget.install(this);
-    }
-
-    // deprecated methods
-
-    @Override
-    public <I> ServiceBuilder<T> addDependency(final ServiceName dependency, final Class<I> type, final Injector<I> target) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(dependency);
-        assertNotNull(type);
-        assertNotNull(target);
-        assertThreadSafety();
-        // implementation
-        addRequiresInternal(dependency).getInjectorList().add(Injectors.cast(target, type));
-        return this;
     }
 
     // implementation internals

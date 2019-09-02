@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import org.jboss.msc.inject.Injector;
-
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -120,26 +118,4 @@ public interface ServiceBuilder<T> {
      * @throws ServiceRegistryException if installation fails for any reason
      */
     ServiceController<T> install();
-
-    ////////////////////////
-    // DEPRECATED METHODS //
-    ////////////////////////
-
-    /**
-     * Add a service dependency.  The type of the dependency is checked before it is passed into the (type-safe) injector
-     * instance.  Calling this method multiple times for the same service name will only add it as a
-     * dependency one time; however this may be useful to specify multiple injections for one dependency.
-     *
-     * @param dependency the name of the dependency
-     * @param type the class of the value of the dependency
-     * @param target the injector into which the dependency should be stored
-     * @param <I> the type of the value of the dependency
-     * @return this builder
-     * @throws UnsupportedOperationException if this service builder
-     * was created via {@link ServiceTarget#addService(ServiceName)} method.
-     * @deprecated Use {@link #requires(ServiceName)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    <I> ServiceBuilder<T> addDependency(ServiceName dependency, Class<I> type, Injector<I> target);
 }
