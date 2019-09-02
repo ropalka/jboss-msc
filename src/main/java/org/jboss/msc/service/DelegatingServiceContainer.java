@@ -104,24 +104,6 @@ public class DelegatingServiceContainer implements ServiceContainer {
     }
 
     /** {@inheritDoc} */
-    public ServiceContainer addDependency(final ServiceName dependency) {
-        getServiceTargetDelegate().addDependency(dependency);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    public ServiceContainer addDependency(final ServiceName... dependencies) {
-        getServiceTargetDelegate().addDependency(dependencies);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    public ServiceContainer addDependency(final Collection<ServiceName> dependencies) {
-        getServiceTargetDelegate().addDependency(dependencies);
-        return this;
-    }
-
-    /** {@inheritDoc} */
     public ServiceContainer removeDependency(final ServiceName dependency) {
         getServiceTargetDelegate().removeDependency(dependency);
         return this;
