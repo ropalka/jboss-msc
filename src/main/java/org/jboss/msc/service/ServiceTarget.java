@@ -105,15 +105,6 @@ public interface ServiceTarget {
     <T> ServiceBuilder<T> addService(ServiceName name, Service<T> service);
 
     /**
-     * Returns a set of the monitors added to this target.
-     * 
-     * @return the monitors added to this target
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    Set<StabilityMonitor> getMonitors();
-
-    /**
      * Add a dependency that will be added to the all ServiceBuilders installed in this target.
      *
      * @param dependency the dependency to add to the target
