@@ -99,11 +99,4 @@ public class DelegatingServiceTarget implements ServiceTarget {
         return getDelegate().addService(name, service);
     }
 
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public Set<ServiceName> getDependencies() {
-        return getDelegate().getDependencies();
-    }
-
 }

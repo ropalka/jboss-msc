@@ -104,11 +104,6 @@ public class DelegatingServiceContainer implements ServiceContainer {
     }
 
     /** {@inheritDoc} */
-    public Set<ServiceName> getDependencies() {
-        return getServiceTargetDelegate().getDependencies();
-    }
-
-    /** {@inheritDoc} */
     public ServiceTarget subTarget() {
         return getServiceTargetDelegate().subTarget();
     }

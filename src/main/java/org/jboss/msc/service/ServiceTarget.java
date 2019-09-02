@@ -104,13 +104,4 @@ public interface ServiceTarget {
     @Deprecated
     <T> ServiceBuilder<T> addService(ServiceName name, Service<T> service);
 
-    /**
-     * Returns a set of all dependencies added to this target.
-     * 
-     * @return all dependencies of this target
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    Set<ServiceName> getDependencies();
-
 }
