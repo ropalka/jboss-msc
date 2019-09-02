@@ -88,20 +88,4 @@ public interface ServiceTarget {
      */
     ServiceTarget subTarget();
 
-    ////////////////////////
-    // DEPRECATED METHODS //
-    ////////////////////////
-
-    /**
-     * Get a builder which can be used to add a service to this target.
-     *
-     * @param name the service name
-     * @param service the service
-     * @return the builder for the service
-     * @deprecated Use {@link #addService(ServiceName)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    <T> ServiceBuilder<T> addService(ServiceName name, Service<T> service);
-
 }

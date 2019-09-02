@@ -88,15 +88,4 @@ public class DelegatingServiceTarget implements ServiceTarget {
         return getDelegate().subTarget();
     }
 
-    ////////////////////////
-    // DEPRECATED METHODS //
-    ////////////////////////
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
-        return getDelegate().addService(name, service);
-    }
-
 }

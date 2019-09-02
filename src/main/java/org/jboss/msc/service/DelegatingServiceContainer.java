@@ -70,11 +70,6 @@ public class DelegatingServiceContainer implements ServiceContainer {
     }
 
     /** {@inheritDoc} */
-    public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
-        return getServiceTargetDelegate().addService(name, service);
-    }
-
-    /** {@inheritDoc} */
     public ServiceBuilder<?> addService(final ServiceName name) throws IllegalArgumentException {
         return getServiceTargetDelegate().addService(name);
     }
