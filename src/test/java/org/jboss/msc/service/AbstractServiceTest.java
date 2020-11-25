@@ -203,27 +203,6 @@ public class AbstractServiceTest {
     }
 
     /**
-     * Asserts that {@code serviceController} has the specified immediate unavailable dependencies.
-     *
-     * @param serviceController   the service controller to test
-     * @param missingDependencies a complete list of all unavailable dependencies expected. The assertion will succeed
-     *                            only if {@link ServiceController#getImmediateUnavailableDependencies()
-     *                            serviceController.getImmediateUnavailableDependencies} returns a set containing all
-     *                            service names specified by this parameter. If no unavailable dependency is provided,
-     *                            the test asserts that {@code serviceController} has no immediate unavailable
-     *                            dependencies
-     */
-    protected final void assertImmediateUnavailableDependencies(ServiceController<?> serviceController, ServiceName... missingDependencies) {
-        assertNotNull(serviceController);
-        Collection<ServiceName> result = serviceController.getImmediateUnavailableDependencies();
-        assertEquals(missingDependencies.length, result.size());
-        for (ServiceName missingDependency: missingDependencies) {
-            assertTrue("Unavailable dependency " + missingDependency + " not found in controller missing immediate dependency set",
-                    result.contains(missingDependency));
-        }
-    }
-
-    /**
      * @author Stuart Douglas
      */
     private static final PrivilegedAction<ClassLoader> GET_TCCL_ACTION = new PrivilegedAction<ClassLoader>() {
