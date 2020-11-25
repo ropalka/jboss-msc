@@ -51,7 +51,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private Service service;
     private ServiceController.Mode initialMode;
     private Map<ServiceName, Dependency> requires;
-    private Set<StabilityMonitor> monitors;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
@@ -121,17 +120,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> addMonitor(final StabilityMonitor monitor) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(monitor);
-        assertThreadSafety();
-        // implementation
-        addMonitorInternal(monitor);
-        return this;
-    }
-
-    @Override
     public ServiceBuilder<T> addListener(final LifecycleListener listener) {
         // preconditions
         assertNotInstalled();
@@ -163,12 +151,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         }
     }
 
-    void addMonitorsNoCheck(final Collection<? extends StabilityMonitor> monitors) {
-        for (final StabilityMonitor monitor : monitors) {
-            if (monitor != null) addMonitorInternal(monitor);
-        }
-    }
-
     Service getService() {
         return service;
     }
@@ -195,11 +177,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         }
     }
 
-    void addMonitorInternal(final StabilityMonitor monitor) {
-        if (monitors == null) monitors = new IdentityHashSet<>();
-        monitors.add(monitor);
-    }
-
     void addListenerInternal(final LifecycleListener listener) {
         if (lifecycleListeners == null) lifecycleListeners = new IdentityHashSet<>();
         lifecycleListeners.add(listener);
@@ -211,17 +188,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     Map<ServiceName, Dependency> getDependencies() {
         return requires == null ? Collections.emptyMap() : requires;
-    }
-
-    Set<StabilityMonitor> getMonitors() {
-        ServiceControllerImpl parent = this.parent;
-        while (parent != null) {
-            synchronized (parent) {
-                addMonitorsNoCheck(parent.getMonitors());
-                parent = parent.getParent();
-            }
-        }
-        return monitors == null ? Collections.emptySet() : monitors;
     }
 
     Set<LifecycleListener> getLifecycleListeners() {

@@ -237,16 +237,10 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             }
             builder.append('\n');
             for (ServiceStatus status : statuses) {
-                final String serviceName = status.getServiceName();
                 final String[] dependencies = status.getDependencies();
                 final Set<String> filteredDependencies = new HashSet<>(Arrays.asList(dependencies));
                 final String parentName = status.getParentName();
                 if (parentName != null) filteredDependencies.add(parentName);
-                for (String dependency : filteredDependencies) {
-                    builder.append("    ").append('"').append(serviceName.replace("\"", "\\\"")).append('"');
-                    builder.append(" -> \"").append(dependency.replace("\"", "\\\"")).append('"');
-                    builder.append(";\n");
-                }
             }
             builder.append("}\n");
             return builder.toString();
@@ -697,7 +691,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         final Collection<Dependency> requires = serviceBuilder.getDependencies().values();
         // Next create the actual controller
         final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
-                requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
+                requires, provides, serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
         boolean ok = false;
         try {
             synchronized (this) {
