@@ -50,19 +50,19 @@ public class MSC164TestCase extends AbstractServiceTest {
         sm.addController(dependencyController);
         sm.addController(dependentController);
         sm.awaitStability();
-        assertTrue(dependencyController.getSubstate() == ServiceController.Substate.UP);
-        assertTrue(dependentController.getSubstate() == ServiceController.Substate.START_FAILED);
+        assertTrue(dependencyController.getState() == ServiceController.State.UP);
+        assertTrue(dependentController.getState() == ServiceController.State.START_FAILED);
         // let's recover
         dependentController.retry();
         // assert started
         sm.awaitStability();
-        assertTrue(dependencyController.getSubstate() == ServiceController.Substate.UP);
-        assertTrue(dependentController.getSubstate() == ServiceController.Substate.UP);
+        assertTrue(dependencyController.getState() == ServiceController.State.UP);
+        assertTrue(dependentController.getState() == ServiceController.State.UP);
         // shutdown all services
         dependencyController.setMode(ServiceController.Mode.REMOVE);
         dependentController.setMode(ServiceController.Mode.REMOVE);
         sm.awaitStability();
-        assertTrue(dependentController.getSubstate() == ServiceController.Substate.TERMINATED);
+        assertTrue(dependentController.getState() == ServiceController.State.REMOVED);
     }
 
     /* Service that fails on first start attempt, but succeeds on retry */
