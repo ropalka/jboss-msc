@@ -395,7 +395,8 @@ public class LifecycleContextTestCase extends AbstractServiceTest{
                 final ServiceName serviceAName = ServiceName.of("A");
                 final ServiceName serviceBName = ServiceName.of("B");
                 final ServiceName serviceCName = ServiceName.of("C");
-                final MultipleRemoveListener<?> removeListener = MultipleRemoveListener.create(context);
+                final CountDownLatch latch = new CountDownLatch(4);
+                final MultipleRemoveListener removeListener = new MultipleRemoveListener(latch, context);
                 final ServiceController<?> serviceA = serviceContainer.addService(serviceAName, Service.NULL).addListener(removeListener).install();
                 final ServiceController<?> serviceB = serviceContainer.addService(serviceBName, Service.NULL).addListener(removeListener).install();
                 final ServiceController<?> serviceC = serviceContainer.addService(serviceCName, Service.NULL).addListener(removeListener).install();
@@ -403,7 +404,7 @@ public class LifecycleContextTestCase extends AbstractServiceTest{
                 serviceA.setMode(Mode.REMOVE);
                 serviceB.setMode(Mode.REMOVE);
                 serviceC.setMode(Mode.REMOVE);
-                removeListener.done();
+                latch.countDown();
             } catch (Throwable t) {
                 runError = t;
                 contextService.getStartContext().complete();
@@ -412,6 +413,22 @@ public class LifecycleContextTestCase extends AbstractServiceTest{
 
         public void assertNoError() {
             assertNull("Unexpected throwable " + runError, runError);
+        }
+    }
+
+    private static class MultipleRemoveListener implements LifecycleListener {
+        private CountDownLatch latch;
+        private StartContext context;
+
+        private MultipleRemoveListener(CountDownLatch latch, StartContext context) {
+            this.latch = latch;
+            this.context = context;
+        }
+
+        @Override
+        public void handleEvent(ServiceController<?> controller, LifecycleEvent event) {
+            if (event == LifecycleEvent.REMOVED) latch.countDown();
+            if (latch.getCount() == 0) context.complete();
         }
     }
 
