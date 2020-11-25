@@ -176,37 +176,6 @@ public abstract class AbstractServiceTargetTest extends AbstractServiceTest {
         } catch (IllegalStateException e) {}
     }
 
-    @Test
-    public void batchServiceTarget() throws Exception {
-        final ServiceTarget containerTarget = getServiceTarget(serviceContainer);
-        final BatchServiceTarget batchTarget = containerTarget.batchTarget();
-        // add testListener to containerTarget
-        containerTarget.addListener(testListener);
-
-        // install anotherService into containerTarget
-        final Future<ServiceController<?>> anotherServiceStart = testListener.expectServiceStart(anotherServiceName);
-        final ServiceController<?> anotherController = containerTarget.addService(anotherServiceName, Service.NULL)
-            .install();
-        assertController(anotherServiceName, anotherController);
-        assertController(anotherController, anotherServiceStart);
-
-        // install oneMoreService into batchTarget
-        final Future<ServiceController<?>> oneServiceStart = testListener.expectServiceStart(oneMoreServiceName);
-        final ServiceController<?> oneController = batchTarget.addService(oneMoreServiceName, Service.NULL).install();
-        assertController(oneMoreServiceName, oneController);
-        assertController(oneController, oneServiceStart);
-
-        // calling batchTarget.removeServices should remove oneMoreService only
-        Future<ServiceController<?>> oneServiceRemoval = testListener.expectServiceRemoval(oneMoreServiceName);
-        batchTarget.removeServices();
-        assertController(oneController, oneServiceRemoval);
-        // anotherService should continue in the UP state
-        assertSame(State.UP, anotherController.getState());
-
-        // there should be no effect on this call, as no new services have been added
-        batchTarget.removeServices(); 
-    }
-
     /**
      * Returns the ServiceTarget that should be tested.
      * 
