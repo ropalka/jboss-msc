@@ -70,10 +70,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      */
     private final ServiceName serviceId;
     /**
-     * The service aliases.
-     */
-    private final ServiceName[] serviceAliases;
-    /**
      * The service itself.
      */
     private final org.jboss.msc.Service service;
@@ -85,10 +81,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      * Container shutdown listener.
      */
     private ContainerShutdownListener shutdownListener;
-    /**
-     * The set of registered stability monitors.
-     */
-    private final Set<StabilityMonitor> monitors;
     /**
      * Required dependencies by this service.
      */
@@ -186,22 +178,14 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final ServiceName[] serviceAliases, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
-        this.serviceAliases = serviceAliases;
         this.service = service;
         this.requires = requires;
         this.provides = provides;
         this.lifecycleListeners = new IdentityHashSet<>(lifecycleListeners);
-        this.monitors = new IdentityHashSet<>(monitors);
-        // We also need to register this controller with monitors explicitly.
-        // This allows inherited monitors to have registered all child controllers
-        // and later to remove them when inherited stability monitor is cleared.
-        for (final StabilityMonitor monitor : monitors) {
-            monitor.addControllerNoCallback(this);
-        }
         this.parent = parent;
         int depCount = requires.size();
         stoppingDependencies = parent == null ? depCount : depCount + 1;
@@ -355,20 +339,11 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         if (leavingStableRestState) {
             if (!enteringStableRestState) {
                 container.incrementUnstableServices();
-                for (StabilityMonitor monitor : monitors) {
-                    monitor.incrementUnstableServices();
-                }
             }
         } else {
             if (enteringStableRestState) {
                 container.decrementUnstableServices();
-                for (StabilityMonitor monitor : monitors) {
-                    monitor.decrementUnstableServices();
-                }
                 if (state == Substate.TERMINATED) {
-                    for (StabilityMonitor monitor : monitors) {
-                        monitor.removeControllerNoCallback(this);
-                    }
                     if (shutdownListener != null) {
                         shutdownListener.controllerDied();
                         shutdownListener = null;
@@ -616,9 +591,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 case START_REQUESTED_to_PROBLEM: {
                     tasks.add(new DependencyUnavailableTask());
                     container.addProblem(this);
-                    for (StabilityMonitor monitor : monitors) {
-                        monitor.addProblem(this);
-                    }
                     break;
                 }
                 case UP_to_STOP_REQUESTED: {
@@ -639,9 +611,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 case STARTING_to_START_FAILED: {
                     getListenerTasks(LifecycleEvent.FAILED, listenerTransitionTasks);
                     container.addFailed(this);
-                    for (StabilityMonitor monitor : monitors) {
-                        monitor.addFailed(this);
-                    }
                     ChildServiceTarget childTarget = this.childTarget;
                     if (childTarget != null) {
                         childTarget.valid = false;
@@ -653,9 +622,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 }
                 case START_FAILED_to_STARTING: {
                     container.removeFailed(this);
-                    for (StabilityMonitor monitor : monitors) {
-                        monitor.removeFailed(this);
-                    }
                     tasks.add(new DependencyRetryingTask());
                     tasks.add(new StartTask());
                     break;
@@ -671,9 +637,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 case START_FAILED_to_DOWN: {
                     getListenerTasks(LifecycleEvent.DOWN, listenerTransitionTasks);
                     container.removeFailed(this);
-                    for (StabilityMonitor monitor : monitors) {
-                        monitor.removeFailed(this);
-                    }
                     startException = null;
                     tasks.add(new DependencyRetryingTask());
                     tasks.add(new DependentStoppedTask());
@@ -716,9 +679,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 case PROBLEM_to_START_REQUESTED: {
                     tasks.add(new DependencyAvailableTask());
                     container.removeProblem(this);
-                    for (StabilityMonitor monitor : monitors) {
-                        monitor.removeProblem(this);
-                    }
                     break;
                 }
                 default: {
@@ -1134,10 +1094,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         return serviceId;
     }
 
-    public ServiceName[] getAliases() {
-        return serviceAliases.clone();
-    }
-
     void addListener(final ContainerShutdownListener listener) {
         assert !holdsLock(this);
         synchronized (this) {
@@ -1243,17 +1199,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         synchronized (this) {
             final String parentName = parent == null ? null : parent.getName().getCanonicalName();
             final String name = getName().getCanonicalName();
-            final ServiceName[] aliasNames = getAliases();
-            final int aliasLength = aliasNames.length;
-            final String[] aliases;
-            if (aliasLength == 0) {
-                aliases = NO_STRINGS;
-            } else {
-                aliases = new String[aliasLength];
-                for (int i = 0; i < aliasLength; i++) {
-                    aliases[i] = aliasNames[i].getCanonicalName();
-                }
-            }
             String serviceClass = service.getClass().getName();
             final Collection<Dependency> dependencies = requires;
             final int dependenciesLength = dependencies.size();
@@ -1271,7 +1216,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return new ServiceStatus(
                     parentName,
                     name,
-                    aliases,
                     serviceClass,
                     mode.name(),
                     state.getState().name(),
@@ -1353,52 +1297,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             }
         }
         return b.toString();
-    }
-
-    void addMonitor(final StabilityMonitor monitor) {
-        assert !holdsLock(this);
-        synchronized (this) {
-            if (!monitors.add(monitor)) return;
-            if (!isStableRestState()) {
-                monitor.incrementUnstableServices();
-            }
-            if (state == Substate.START_FAILED) {
-                monitor.addFailed(this);
-            } else if (state == Substate.PROBLEM) {
-                monitor.addProblem(this);
-            }
-        }
-    }
-
-    void removeMonitor(final StabilityMonitor monitor) {
-        assert !holdsLock(this);
-        synchronized (this) {
-            if (!monitors.remove(monitor)) return;
-            if (!isStableRestState()) {
-                monitor.decrementUnstableServices();
-            }
-            monitor.removeProblem(this);
-            monitor.removeFailed(this);
-        }
-    }
-
-    void removeMonitorNoCallback(final StabilityMonitor monitor) {
-        assert !holdsLock(this);
-        synchronized (this) {
-            monitors.remove(monitor);
-        }
-    }
-
-    Set<StabilityMonitor> getMonitors() {
-        assert holdsLock(this);
-        return monitors;
-    }
-
-    private enum ListenerNotification {
-        /** Notify the listener that is has been added. */
-        LISTENER_ADDED,
-        /** Notifications related to the current state.  */
-        TRANSITION,
     }
 
     private Substate getSubstate() {

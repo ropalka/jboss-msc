@@ -22,11 +22,6 @@
 
 package org.jboss.msc.service;
 
-import java.util.Collection;
-import java.util.Set;
-
-import org.jboss.msc.value.Value;
-
 /**
  * The target of ServiceBuilder installations.
  *
@@ -56,22 +51,6 @@ public interface ServiceTarget {
      * @return this target
      */
     ServiceTarget removeListener(LifecycleListener listener);
-
-    /**
-     * Add a stability monitor that will be added to all the ServiceBuilders installed in this target.
-     *
-     * @param monitor the monitor to add to the target
-     * @return this target
-     */
-    ServiceTarget addMonitor(StabilityMonitor monitor);
-
-    /**
-     * Remove a monitor from this target, if it exists.
-     *
-     * @param monitor the monitor to remove
-     * @return this target
-     */
-    ServiceTarget removeMonitor(StabilityMonitor monitor);
 
     /**
      * Get a builder which can be used to add a service to this target.

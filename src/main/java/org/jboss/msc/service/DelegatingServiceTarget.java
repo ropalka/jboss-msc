@@ -67,18 +67,6 @@ public class DelegatingServiceTarget implements ServiceTarget {
     }
 
     /** {@inheritDoc} */
-    public ServiceTarget addMonitor(final StabilityMonitor monitor) {
-        getDelegate().addMonitor(monitor);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    public ServiceTarget removeMonitor(final StabilityMonitor monitor) {
-        getDelegate().removeMonitor(monitor);
-        return this;
-    }
-
-    /** {@inheritDoc} */
     public ServiceBuilder<?> addService(ServiceName name) {
         return getDelegate().addService(name);
     }

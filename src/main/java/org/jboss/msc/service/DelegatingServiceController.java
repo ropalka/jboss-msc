@@ -123,12 +123,6 @@ public class DelegatingServiceController<S> implements ServiceController<S> {
 
     /** {@inheritDoc} */
     @Override
-    public ServiceName[] getAliases() {
-        return getDelegate().getAliases();
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public void addListener(final LifecycleListener listener) {
         getDelegate().addListener(listener);
     }

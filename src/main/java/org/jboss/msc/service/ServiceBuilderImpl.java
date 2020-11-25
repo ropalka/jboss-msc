@@ -54,10 +54,8 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
     private Service service;
-    private Set<ServiceName> aliases;
     private ServiceController.Mode initialMode;
     private Map<ServiceName, Dependency> requires;
-    private Set<StabilityMonitor> monitors;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
@@ -133,17 +131,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> addMonitor(final StabilityMonitor monitor) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(monitor);
-        assertThreadSafety();
-        // implementation
-        addMonitorInternal(monitor);
-        return this;
-    }
-
-    @Override
     public ServiceBuilder<T> addListener(final LifecycleListener listener) {
         // preconditions
         assertNotInstalled();
@@ -175,23 +162,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         }
     }
 
-    void addMonitorsNoCheck(final Collection<? extends StabilityMonitor> monitors) {
-        for (final StabilityMonitor monitor : monitors) {
-            if (monitor != null) addMonitorInternal(monitor);
-        }
-    }
-
-    void addDependenciesNoCheck(final Iterable<ServiceName> dependencies) {
-        // For backward compatibility reasons when
-        // service dependencies are defined via ServiceTarget
-        for (final ServiceName dependency : dependencies) {
-            if (dependency == null) continue;
-            if (requires != null && requires.containsKey(dependency)) continue; // dependency already required
-            if (provides != null && provides.containsKey(dependency)) continue; // cannot depend on ourselves
-            addRequiresInternal(dependency);
-        }
-    }
-
     Service getService() {
         return service;
     }
@@ -210,15 +180,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         return dependency;
     }
 
-    boolean addAliasInternal(final ServiceName alias) {
-        if (aliases == null) aliases = new HashSet<>();
-        if (!aliases.contains(alias)) {
-            aliases.add(alias);
-            return true;
-        }
-        return false;
-    }
-
     void addProvidesInternal(final ServiceName name, final WritableValueImpl dependency) {
         if (dependency != null) {
             provides.put(name, dependency);
@@ -227,18 +188,9 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         }
     }
 
-    void addMonitorInternal(final StabilityMonitor monitor) {
-        if (monitors == null) monitors = new IdentityHashSet<>();
-        monitors.add(monitor);
-    }
-
     void addListenerInternal(final LifecycleListener listener) {
         if (lifecycleListeners == null) lifecycleListeners = new IdentityHashSet<>();
         lifecycleListeners.add(listener);
-    }
-
-    Collection<ServiceName> getServiceAliases() {
-        return aliases == null ? Collections.emptySet() : aliases;
     }
 
     Map<ServiceName, WritableValueImpl> getProvides() {
@@ -247,17 +199,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     Map<ServiceName, Dependency> getDependencies() {
         return requires == null ? Collections.emptyMap() : requires;
-    }
-
-    Set<StabilityMonitor> getMonitors() {
-        ServiceControllerImpl parent = this.parent;
-        while (parent != null) {
-            synchronized (parent) {
-                addMonitorsNoCheck(parent.getMonitors());
-                parent = parent.getParent();
-            }
-        }
-        return monitors == null ? Collections.emptySet() : monitors;
     }
 
     Set<LifecycleListener> getLifecycleListeners() {

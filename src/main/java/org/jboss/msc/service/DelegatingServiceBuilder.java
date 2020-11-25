@@ -77,12 +77,6 @@ public class DelegatingServiceBuilder<T> implements ServiceBuilder<T> {
     }
 
     /** {@inheritDoc} */
-    public ServiceBuilder<T> addMonitor(final StabilityMonitor monitor) {
-        getDelegate().addMonitor(monitor);
-        return this;
-    }
-
-    /** {@inheritDoc} */
     public ServiceBuilder<T> addListener(final LifecycleListener listener) {
         getDelegate().addListener(listener);
         return this;

@@ -87,18 +87,6 @@ public class DelegatingServiceContainer implements ServiceContainer {
     }
 
     /** {@inheritDoc} */
-    public ServiceTarget addMonitor(StabilityMonitor monitor) {
-        getServiceTargetDelegate().addMonitor(monitor);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    public ServiceTarget removeMonitor(StabilityMonitor monitor) {
-        getServiceTargetDelegate().removeMonitor(monitor);
-        return this;
-    }
-
-    /** {@inheritDoc} */
     public ServiceTarget subTarget() {
         return getServiceTargetDelegate().subTarget();
     }

@@ -96,14 +96,6 @@ public interface ServiceBuilder<T> {
     ServiceBuilder<T> setInstance(org.jboss.msc.Service service);
 
     /**
-     * Adds a stability monitor to be added to the service.
-     *
-     * @param monitor the monitor to add to the service
-     * @return this builder
-     */
-    ServiceBuilder<T> addMonitor(StabilityMonitor monitor);
-
-    /**
      * Adds a service listener to be added to the service.
      *
      * @param listener the listener to add to the service

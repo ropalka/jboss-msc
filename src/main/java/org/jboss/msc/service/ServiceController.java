@@ -140,13 +140,6 @@ public interface ServiceController<S> extends Value<S> {
     ServiceName getName();
 
     /**
-     * Get other names this service is known as.
-     *
-     * @return the aliases
-     */
-    ServiceName[] getAliases();
-
-    /**
      * Add a service lifecycle listener.
      *
      * @param listener the lifecycle listener

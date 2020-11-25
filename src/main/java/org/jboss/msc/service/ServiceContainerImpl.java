@@ -227,16 +227,10 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
         public String dumpServicesToGraphDescription() {
             final List<ServiceStatus> statuses = queryServiceStatuses();
-            final Map<String, String> aliases = new HashMap<>();
             final StringBuilder builder = new StringBuilder();
             builder.append("digraph Services {\n    node [shape=record];\n    graph [rankdir=\"RL\"];\n");
             for (ServiceStatus status : statuses) {
                 final String serviceName = status.getServiceName();
-                final String[] aliasesStrings = status.getAliases();
-                if (aliasesStrings != null) for (String alias : aliasesStrings) {
-                    aliases.put(alias, serviceName);
-                    aliases.put(serviceName, serviceName);
-                }
                 builder.append("    ");
                 final String quoted = serviceName.replace("\"", "\\\"");
                 builder.append('"').append(quoted).append('"');
@@ -250,18 +244,10 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             }
             builder.append('\n');
             for (ServiceStatus status : statuses) {
-                final String serviceName = status.getServiceName();
                 final String[] dependencies = status.getDependencies();
                 final Set<String> filteredDependencies = new HashSet<>(Arrays.asList(dependencies));
                 final String parentName = status.getParentName();
                 if (parentName != null) filteredDependencies.add(parentName);
-                for (String dependency : filteredDependencies) {
-                    builder.append("    ").append('"').append(serviceName.replace("\"", "\\\"")).append('"');
-                    String dep = aliases.get(dependency);
-                    if (dep == null) dep = dependency;
-                    builder.append(" -> \"").append(dep.replace("\"", "\\\"")).append('"');
-                    builder.append(";\n");
-                }
             }
             builder.append("}\n");
             return builder.toString();
@@ -702,16 +688,9 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             dependency = dependencyRegistration;
             requires.add(dependency);
         }
-        final Collection<ServiceName> serviceAliases = serviceBuilder.getServiceAliases();
-        final ServiceName[] aliases = new ServiceName[serviceAliases.size()];
-        int i = 0;
-        for (ServiceName alias : serviceAliases) {
-            aliases[i++] = alias;
-        }
-
         // Next create the actual controller
-        final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, aliases, serviceBuilder.getService(),
-                requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
+        final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
+                requires, provides, serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
         boolean ok = false;
         try {
             synchronized (this) {
