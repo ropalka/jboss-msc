@@ -1016,10 +1016,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         return parent;
     }
 
-    public ServiceContainerImpl getServiceContainer() {
-        return container;
-    }
-
     public ServiceController.State getState() {
         synchronized (this) {
             return state.getState();
