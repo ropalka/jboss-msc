@@ -54,7 +54,7 @@ public interface ServiceBuilder<T> {
      * @param <V> required dependency value type
      * @return readonly dependency reference
      * @throws IllegalStateException if this method
-     * have been called after {@link #setInstance(org.jboss.msc.Service)} method.
+     * have been called after {@link #setInstance(Service)} method.
      * @throws UnsupportedOperationException if this service builder
      * wasn't created via {@link ServiceTarget#addService(ServiceName)} method.
      */
@@ -67,7 +67,7 @@ public interface ServiceBuilder<T> {
      * @param <V> provided dependency value type
      * @return writable dependency reference
      * @throws IllegalStateException if this method
-     * have been called after {@link #setInstance(org.jboss.msc.Service)} method.
+     * have been called after {@link #setInstance(Service)} method.
      * @throws UnsupportedOperationException if this service builder
      * wasn't created via {@link ServiceTarget#addService(ServiceName)} method.
      */
@@ -93,7 +93,7 @@ public interface ServiceBuilder<T> {
      * @param service the service instance
      * @return this configurator
      */
-    ServiceBuilder<T> setInstance(org.jboss.msc.Service service);
+    ServiceBuilder<T> setInstance(Service service);
 
     /**
      * Adds a service listener to be added to the service.

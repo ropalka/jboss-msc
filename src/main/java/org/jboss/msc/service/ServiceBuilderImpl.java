@@ -24,15 +24,9 @@ package org.jboss.msc.service;
 
 import static java.lang.Thread.currentThread;
 
-import org.jboss.msc.Service;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -59,7 +53,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final org.jboss.msc.service.Service<T> service, final ServiceControllerImpl<?> parent) {
+    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final Service service, final ServiceControllerImpl<?> parent) {
         this(serviceId, serviceTarget, parent);
         if (service == null) throw new IllegalArgumentException("Service can not be null");
         this.service = service;

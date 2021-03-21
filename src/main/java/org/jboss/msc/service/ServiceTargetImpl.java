@@ -50,7 +50,7 @@ class ServiceTargetImpl implements ServiceTarget {
         this.parent = null;
     }
 
-    protected <T> ServiceBuilder<T> createServiceBuilder(final ServiceName name, final Service<T> service, final ServiceControllerImpl<?> parent) throws IllegalArgumentException {
+    protected <T> ServiceBuilder<T> createServiceBuilder(final ServiceName name, final Service service, final ServiceControllerImpl<?> parent) throws IllegalArgumentException {
         return new ServiceBuilderImpl<>(name, this, service, parent);
     }
 
