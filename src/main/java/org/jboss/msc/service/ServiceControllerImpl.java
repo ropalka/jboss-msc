@@ -162,11 +162,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      * Tasks executed last on transition outside the lock.
      */
     private final List<Runnable> listenerTransitionTasks = new ArrayList<>();
-    /**
-     * The service target for adding child services (can be {@code null} if none
-     * were added).
-     */
-    private volatile ChildServiceTarget childTarget;
 
     private static final String[] NO_STRINGS = new String[0];
 
@@ -603,11 +598,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 case STARTING_to_START_FAILED: {
                     getListenerTasks(LifecycleEvent.FAILED, listenerTransitionTasks);
                     container.addFailed(this);
-                    ChildServiceTarget childTarget = this.childTarget;
-                    if (childTarget != null) {
-                        childTarget.valid = false;
-                        this.childTarget = null;
-                    }
                     tasks.add(new DependencyFailedTask());
                     tasks.add(new RemoveChildrenTask());
                     break;
@@ -639,11 +629,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     break;
                 }
                 case STOP_REQUESTED_to_STOPPING: {
-                    ChildServiceTarget childTarget = this.childTarget;
-                    if (childTarget != null) {
-                        childTarget.valid = false;
-                        this.childTarget = null;
-                    }
                     tasks.add(new StopTask());
                     tasks.add(new RemoveChildrenTask());
                     break;
@@ -1707,20 +1692,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             }
         }
 
-        public ServiceTarget getChildTarget() {
-            synchronized (lock) {
-                if ((state & (COMPLETED | FAILED)) != 0) {
-                    throw new IllegalStateException("Lifecycle context is no longer valid");
-                }
-                synchronized (ServiceControllerImpl.this) {
-                    if (childTarget == null) {
-                        childTarget = new ChildServiceTarget(container);
-                    }
-                    return childTarget;
-                }
-            }
-        }
-
         void onComplete() {
             try {
                 checkProvidedValues();
@@ -1733,34 +1704,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     private final class StopContextImpl extends AbstractContext implements StopContext {
         void onComplete() {
             uninjectProvides(provides.values());
-        }
-    }
-
-    private final class ChildServiceTarget extends ServiceTargetImpl {
-        private volatile boolean valid = true;
-
-        private ChildServiceTarget(final ServiceTargetImpl parentTarget) {
-            super(parentTarget);
-        }
-
-        <T> ServiceController<T> install(final ServiceBuilderImpl<T> serviceBuilder) throws ServiceRegistryException {
-            if (! valid) {
-                throw new IllegalStateException("Service target is no longer valid");
-            }
-            return super.install(serviceBuilder);
-        }
-
-        protected <T> ServiceBuilder<T> createServiceBuilder(final ServiceName name, final Service<T> service, final ServiceControllerImpl<?> parent) {
-            return super.createServiceBuilder(name, service, ServiceControllerImpl.this);
-        }
-
-        protected ServiceBuilder<?> createServiceBuilder(final ServiceName name, final ServiceControllerImpl<?> parent) {
-            return super.createServiceBuilder(name, ServiceControllerImpl.this);
-        }
-
-        @Override
-        public ServiceTarget subTarget() {
-            return new ChildServiceTarget(this);
         }
     }
 
