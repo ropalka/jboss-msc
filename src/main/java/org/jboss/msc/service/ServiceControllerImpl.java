@@ -168,12 +168,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      * were added).
      */
     private volatile ChildServiceTarget childTarget;
-    /**
-     * The system nanotime of the moment in which the last lifecycle change was
-     * initiated.
-     */
-    @SuppressWarnings("VolatileLongOrDoubleField")
-    private volatile long lifecycleTime;
 
     private static final String[] NO_STRINGS = new String[0];
 
@@ -601,7 +595,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     break;
                 }
                 case START_REQUESTED_to_START_INITIATING: {
-                    lifecycleTime = System.nanoTime();
                     tasks.add(new DependentStartedTask());
                     break;
                 }
@@ -614,7 +607,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     break;
                 }
                 case UP_to_STOP_REQUESTED: {
-                    lifecycleTime = System.nanoTime();
                     if (mode == Mode.LAZY && demandedByCount == 0) {
                         assert dependenciesDemanded;
                         tasks.add(new UndemandDependenciesTask());
@@ -1236,12 +1228,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             b.append("Unavailable Dep Count: ").append(unavailableDependencies).append('\n');
             b.append("Dependencies Demanded: ").append(dependenciesDemanded ? "yes" : "no").append('\n');
             b.append("Async Tasks: ").append(asyncTasks).append('\n');
-            if (lifecycleTime != 0L) {
-                final long elapsedNanos = System.nanoTime() - lifecycleTime;
-                final long now = System.currentTimeMillis();
-                final long stamp = now - (elapsedNanos / 1000000L);
-                b.append("Lifecycle Timestamp: ").append(lifecycleTime).append(String.format(" = %tb %<td %<tH:%<tM:%<tS.%<tL%n", stamp));
-            }
         }
         b.append("Dependencies: ").append(requires.size()).append('\n');
         for (Dependency dependency : requires) {
@@ -1695,10 +1681,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
         public final void asynchronous() {
             setState(ASYNC);
-        }
-
-        public final long getElapsedTime() {
-            return System.nanoTime() - lifecycleTime;
         }
 
         public final ServiceController<?> getController() {
