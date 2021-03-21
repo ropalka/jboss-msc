@@ -33,7 +33,7 @@ public interface StartContext extends LifecycleContext {
     /**
      * Call within the service lifecycle method to trigger an <em>asynchronous</em> lifecycle action.
      * This action will not be considered complete until indicated so by calling 
-     * either {@link #complete()} or {@link #fail(StartException)} method on this interface.
+     * either {@link #complete()} or {@link #fail(Throwable)} method on this interface.
      */
     void asynchronous();
 
@@ -43,12 +43,12 @@ public interface StartContext extends LifecycleContext {
      * @param reason the reason for the failure
      * @throws IllegalStateException if called after {@link #complete()} was called
      */
-    void fail(StartException reason);
+    void fail(Throwable reason);
 
     /**
      * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle action is complete.
      *
-     * @throws IllegalStateException if called after {@link #fail(StartException)} was called or if called twice in a row
+     * @throws IllegalStateException if called after {@link #fail(Throwable)} was called or if called twice in a row
      */
     void complete();
 }
