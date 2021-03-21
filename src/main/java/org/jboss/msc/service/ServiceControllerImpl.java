@@ -1682,10 +1682,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         public final void asynchronous() {
             setState(ASYNC);
         }
-
-        public final ServiceController<?> getController() {
-            return ServiceControllerImpl.this;
-        }
     }
 
     private final class StartContextImpl extends AbstractContext implements StartContext {
