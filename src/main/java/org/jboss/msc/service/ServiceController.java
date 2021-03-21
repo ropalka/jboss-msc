@@ -42,13 +42,6 @@ public interface ServiceController<S> {
     ServiceController<?> getParent();
 
     /**
-     * Get the service container associated with this controller.
-     *
-     * @return the container
-     */
-    ServiceContainer getServiceContainer();
-
-    /**
      * Get the service controller's current mode.
      *
      * @return the controller mode

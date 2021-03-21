@@ -36,9 +36,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.jboss.msc.service.management.ServiceStatus;
 
 /**
@@ -984,10 +981,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     public ServiceControllerImpl<?> getParent() {
         return parent;
-    }
-
-    public ServiceContainerImpl getServiceContainer() {
-        return container;
     }
 
     public ServiceController.State getState() {
