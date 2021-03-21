@@ -28,7 +28,7 @@ package org.jboss.msc.service;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface LifecycleContext {
+interface LifecycleContext {
     /**
      * Call within the service lifecycle method to trigger an <em>asynchronous</em> lifecycle action.  This action
      * will not be considered complete until indicated so by calling a {@link #complete()} method on this interface.
