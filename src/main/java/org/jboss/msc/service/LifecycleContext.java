@@ -29,7 +29,6 @@ package org.jboss.msc.service;
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
 public interface LifecycleContext {
-
     /**
      * Call within the service lifecycle method to trigger an <em>asynchronous</em> lifecycle action.  This action
      * will not be considered complete until indicated so by calling a {@link #complete()} method on this interface.
@@ -44,11 +43,4 @@ public interface LifecycleContext {
      * @throws IllegalStateException if called twice in a row
      */
     void complete() throws IllegalStateException;
-
-    /**
-     * Get the associated service controller.
-     *
-     * @return the service controller
-     */
-    ServiceController<?> getController();
 }
