@@ -58,7 +58,6 @@ import java.util.function.Consumer;
  * <li>Use proper dependencies instead of explicitly waiting for services in your start/stop</li>
  * </ul>
  * <p>
- * Note that using {@link org.jboss.msc.service.LifecycleContext#execute(Runnable)} to execute the blocking task is also not permissible.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
