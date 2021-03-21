@@ -990,21 +990,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     @Override
-    public void retry() {
-        assert !holdsLock(this);
-        final List<Runnable> tasks;
-        synchronized (this) {
-            final boolean leavingRestState = isStableRestState();
-            if (failCount > 0 || state.getState() != ServiceController.State.START_FAILED) return;
-            startException = null;
-            tasks = transition();
-            addAsyncTasks(tasks.size());
-            updateStabilityState(leavingRestState);
-        }
-        doExecute(tasks);
-    }
-
-    @Override
     public Collection<ServiceName> getUnavailableDependencies() {
         final Set<ServiceName> retVal = new IdentityHashSet<>();
         for (Dependency dependency : requires) {
