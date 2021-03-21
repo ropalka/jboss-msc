@@ -69,7 +69,6 @@ import org.jboss.modules.management.ObjectProperties;
 import org.jboss.modules.ref.Reaper;
 import org.jboss.modules.ref.Reference;
 import org.jboss.modules.ref.WeakReference;
-import org.jboss.msc.Version;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.management.ServiceContainerMXBean;
 import org.jboss.msc.service.management.ServiceStatus;
@@ -83,10 +82,6 @@ import org.jboss.threads.EnhancedQueueExecutor;
 final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceContainer {
 
     private static final AtomicInteger SERIAL = new AtomicInteger(1);
-
-    static {
-        ServiceLogger.ROOT.greeting(Version.getVersionString());
-    }
 
     private final ConcurrentMap<ServiceName, ServiceRegistrationImpl> registry = new ConcurrentHashMap<>(512);
     private final long start = System.nanoTime();
