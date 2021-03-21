@@ -44,7 +44,6 @@ import java.util.function.Supplier;
 final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     final ServiceName serviceId;
-    final ServiceControllerImpl<?> parent;
     private final ServiceTargetImpl serviceTarget;
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
@@ -54,10 +53,15 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final ServiceControllerImpl<?> parent) {
+    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final Service service) {
+        this(serviceId, serviceTarget);
+        if (service == null) throw new IllegalArgumentException("Service can not be null");
+        this.service = service;
+    }
+
+    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget) {
         this.serviceId = serviceId;
         this.serviceTarget = serviceTarget;
-        this.parent = parent;
         addProvidesInternal(serviceId, null);
     }
 

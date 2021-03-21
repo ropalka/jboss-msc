@@ -50,8 +50,8 @@ class ServiceTargetImpl implements ServiceTarget {
         this.parent = null;
     }
 
-    protected ServiceBuilder<?> createServiceBuilder(final ServiceName name, final ServiceControllerImpl<?> parent) throws IllegalArgumentException {
-        return new ServiceBuilderImpl<>(name, this, parent);
+    protected ServiceBuilder<?> createServiceBuilder(final ServiceName name) throws IllegalArgumentException {
+        return new ServiceBuilderImpl<>(name, this);
     }
 
     @Override
@@ -59,7 +59,7 @@ class ServiceTargetImpl implements ServiceTarget {
         if (name == null) {
             throw new IllegalArgumentException("name is null");
         }
-        return createServiceBuilder(name, null);
+        return createServiceBuilder(name);
     }
 
     public ServiceTarget addListener(final LifecycleListener listener) {

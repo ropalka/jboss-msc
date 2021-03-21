@@ -38,13 +38,6 @@ import java.util.concurrent.TimeoutException;
 public interface ServiceController<S> {
 
     /**
-     * Get this service's parent service, or {@code null} if there is none.
-     *
-     * @return the parent service or {@code null} if this service has no parent
-     */
-    ServiceController<?> getParent();
-
-    /**
      * Get the service controller's current mode.
      *
      * @return the controller mode

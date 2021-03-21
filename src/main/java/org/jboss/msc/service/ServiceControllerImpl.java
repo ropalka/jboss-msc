@@ -87,14 +87,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      */
     private final Map<ServiceRegistrationImpl, WritableValueImpl> provides;
     /**
-     * The parent of this service.
-     */
-    private final ServiceControllerImpl<?> parent;
-    /**
-     * The children of this service (only valid during {@link State#UP}).
-     */
-    private final Set<ServiceControllerImpl<?>> children;
-    /**
      * The start exception.
      */
     private Throwable startException;
@@ -164,7 +156,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final Service service, final Collection<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final Service service, final Collection<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<LifecycleListener> lifecycleListeners) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
@@ -172,10 +164,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         this.requires = requires;
         this.provides = provides;
         this.lifecycleListeners = new IdentityHashSet<>(lifecycleListeners);
-        this.parent = parent;
-        int depCount = requires.size();
-        stoppingDependencies = parent == null ? depCount : depCount + 1;
-        children = new IdentityHashSet<>();
+        stoppingDependencies = requires.size();
     }
 
     /**
@@ -225,7 +214,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 }
             }
         }
-        if (parent != null) parent.addChild(this);
     }
 
     /**
@@ -379,10 +367,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 break;
             }
             case STOPPING: {
-                if (children.isEmpty()) {
-                    return Transition.STOPPING_to_DOWN;
-                }
-                break;
+                return Transition.STOPPING_to_DOWN;
             }
             case STOP_REQUESTED: {
                 if (shouldStart() && stoppingDependencies == 0) {
@@ -399,14 +384,12 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 break;
             }
             case START_FAILED: {
-                if (children.isEmpty()) {
-                    if (shouldStart() && stoppingDependencies == 0) {
-                        if (startException == null) {
-                            return Transition.START_FAILED_to_STARTING;
-                        }
-                    } else if (runningDependents == 0) {
-                        return Transition.START_FAILED_to_DOWN;
+                if (shouldStart() && stoppingDependencies == 0) {
+                    if (startException == null) {
+                        return Transition.START_FAILED_to_STARTING;
                     }
+                } else if (runningDependents == 0) {
+                    return Transition.START_FAILED_to_DOWN;
                 }
                 break;
             }
@@ -596,7 +579,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     getListenerTasks(LifecycleEvent.FAILED, listenerTransitionTasks);
                     container.addFailed(this);
                     tasks.add(new DependencyFailedTask());
-                    tasks.add(new RemoveChildrenTask());
                     break;
                 }
                 case START_FAILED_to_STARTING: {
@@ -627,7 +609,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 }
                 case STOP_REQUESTED_to_STOPPING: {
                     tasks.add(new StopTask());
-                    tasks.add(new RemoveChildrenTask());
                     break;
                 }
                 case DOWN_to_REMOVING: {
@@ -946,41 +927,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         doExecute(tasks);
     }
 
-    void addChild(final ServiceControllerImpl<?> child) {
-        assert !holdsLock(this);
-        synchronized (this) {
-            if (state.getState() != State.STARTING && state.getState() != State.UP) {
-                throw new IllegalStateException("Children cannot be added in state " + state.getState());
-            }
-            children.add(child);
-            newDependent(child);
-        }
-    }
-
-    void removeChild(final ServiceControllerImpl<?> child) {
-        assert !holdsLock(this);
-        final List<Runnable> tasks;
-        synchronized (this) {
-            final boolean leavingRestState = isStableRestState();
-            if (!children.remove(child)) return; // may happen if child installation process failed
-            if (ignoreNotification() || children.size() > 0) return;
-            // we dropped it to 0
-            tasks = transition();
-            addAsyncTasks(tasks.size());
-            updateStabilityState(leavingRestState);
-        }
-        doExecute(tasks);
-    }
-
-    Set<ServiceControllerImpl<?>> getChildren() {
-        assert holdsLock(this);
-        return children;
-    }
-
-    public ServiceControllerImpl<?> getParent() {
-        return parent;
-    }
-
     public ServiceController.State getState() {
         synchronized (this) {
             return state.getState();
@@ -1094,7 +1040,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     ServiceStatus getStatus() {
         synchronized (this) {
-            final String parentName = parent == null ? null : parent.getName().getCanonicalName();
             final String name = getName().getCanonicalName();
             String serviceClass = service.getClass().getName();
             final Collection<Dependency> dependencies = requires;
@@ -1111,7 +1056,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             }
             Throwable startException = this.startException;
             return new ServiceStatus(
-                    parentName,
                     name,
                     serviceClass,
                     mode.name(),
@@ -1141,17 +1085,8 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             }
         }
         synchronized (this) {
-            b.append("Children: ").append(children.size()).append('\n');
-            for (ServiceControllerImpl<?> child : children) {
-                synchronized (child) {
-                    b.append("    ").append(child.getName().toString()).append(" - State: ").append(child.state.getState()).append(" (Substate: ").append(child.state).append(")\n");
-                }
-            }
             final Substate state = this.state;
             b.append("State: ").append(state.getState()).append(" (Substate: ").append(state).append(")\n");
-            if (parent != null) {
-                b.append("Parent name: ").append(parent.getName()).append('\n');
-            }
             b.append("Service Mode: ").append(mode).append('\n');
             if (startException != null) {
                 b.append("Start Exception: ").append(startException.getClass().getName()).append(" (Message: ").append(startException.getMessage()).append(")\n");
@@ -1267,12 +1202,10 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     }
                 }
             }
-            if (parent != null) inform(parent);
             return true;
         }
 
         abstract void inform(Dependency dependency);
-        abstract void inform(ServiceControllerImpl parent);
     }
 
     private abstract class DependentsControllerTask extends ControllerTask {
@@ -1290,9 +1223,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 }
             }
             synchronized (ServiceControllerImpl.this) {
-                for (Dependent child : children) {
-                    inform(child);
-                }
                 execFlags |= execFlag;
             }
             return true;
@@ -1485,15 +1415,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    private final class RemoveChildrenTask extends ControllerTask {
-        boolean execute() {
-            synchronized (ServiceControllerImpl.this) {
-                for (ServiceControllerImpl<?> child : children) child.setMode(Mode.REMOVE);
-            }
-            return true;
-        }
-    }
-
     private final class RemoveTask extends ControllerTask {
         boolean execute() {
             assert getMode() == ServiceController.Mode.REMOVE;
@@ -1535,7 +1456,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     }
                 }
             }
-            if (parent != null) parent.removeChild(ServiceControllerImpl.this);
             return true;
         }
     }

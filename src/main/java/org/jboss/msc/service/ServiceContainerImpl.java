@@ -239,8 +239,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             for (ServiceStatus status : statuses) {
                 final String[] dependencies = status.getDependencies();
                 final Set<String> filteredDependencies = new HashSet<>(Arrays.asList(dependencies));
-                final String parentName = status.getParentName();
-                if (parentName != null) filteredDependencies.add(parentName);
             }
             builder.append("}\n");
             return builder.toString();
@@ -691,7 +689,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         final Collection<Dependency> requires = serviceBuilder.getDependencies().values();
         // Next create the actual controller
         final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
-                requires, provides, serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
+                requires, provides, serviceBuilder.getLifecycleListeners());
         boolean ok = false;
         try {
             synchronized (this) {
@@ -756,9 +754,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             if (visited.add(controller)) {
                 if (controller.getState() == ServiceController.State.REMOVED) continue;
                 visitStack.push(controller.getName());
-                synchronized(controller) {
-                    detectCircularity(controller.getChildren(), instance, visited, visitStack);
-                }
                 for (ServiceRegistrationImpl registration : controller.getRegistrations()) {
                     if (registration.getDependencyController() == null) continue; // concurrent removal
                     synchronized (registration) {
