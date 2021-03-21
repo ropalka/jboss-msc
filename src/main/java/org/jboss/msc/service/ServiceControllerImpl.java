@@ -983,7 +983,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     @Override
-    public Throwable getStartException() {
+    public Throwable reason() {
         synchronized (this) {
             return startException;
         }

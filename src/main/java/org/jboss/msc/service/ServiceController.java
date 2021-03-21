@@ -88,7 +88,7 @@ public interface ServiceController<S> {
      *
      * @return the last start exception, or {@code null} if the last start succeeded or the service has not yet started
      */
-    Throwable getStartException();
+    Throwable reason();
 
     /**
      * Get the complete list of dependencies that are unavailable.
