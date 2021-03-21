@@ -779,10 +779,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             super(runnable);
             this.container = container;
         }
-
-        ServiceContainerImpl getContainer() {
-            return container;
-        }
     }
 
     final class ThreadAction implements PrivilegedAction<ServiceThread> {
