@@ -1670,7 +1670,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     private final class StartContextImpl extends AbstractContext implements StartContext {
-        public void failed(StartException reason) throws IllegalStateException {
+        public void fail(StartException reason) throws IllegalStateException {
             if (reason == null) {
                 reason = new StartException("Start failed, and additionally, a null cause was supplied");
             }
