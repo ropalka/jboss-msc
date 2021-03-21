@@ -42,13 +42,11 @@ public class ServiceStatus implements Serializable {
     private final String[] dependencies;
     private final boolean dependencyFailed;
     private final boolean dependencyUnavailable;
-    private final String parentName;
     private final String exception;
 
     /**
      * Construct a new instance.
      *
-     * @param parentName the name of the parent
      * @param serviceName the service name
      * @param serviceClassName the name of the service class
      * @param modeName the service mode name
@@ -59,8 +57,8 @@ public class ServiceStatus implements Serializable {
      * @param exception the service start exception
      * @param dependencyUnavailable {@code true} if some dependency is unavailable
      */
-    @ConstructorProperties({"parentName", "serviceName", "serviceClassName", "modeName", "stateName", "substateName", "dependencies", "dependencyFailed", "exception", "dependencyUnavailable"})
-    public ServiceStatus(final String parentName, final String serviceName, final String serviceClassName, final String modeName, final String stateName, final String substateName, final String[] dependencies, final boolean dependencyFailed, final String exception, final boolean dependencyUnavailable) {
+    @ConstructorProperties({"serviceName", "serviceClassName", "modeName", "stateName", "substateName", "dependencies", "dependencyFailed", "exception", "dependencyUnavailable"})
+    public ServiceStatus(final String serviceName, final String serviceClassName, final String modeName, final String stateName, final String substateName, final String[] dependencies, final boolean dependencyFailed, final String exception, final boolean dependencyUnavailable) {
         if (serviceName == null) {
             throw new IllegalArgumentException("serviceName is null");
         }
@@ -87,7 +85,6 @@ public class ServiceStatus implements Serializable {
         this.dependencies = dependencies;
         this.dependencyFailed = dependencyFailed;
         this.dependencyUnavailable = dependencyUnavailable;
-        this.parentName = parentName;
         this.exception = exception;
     }
 
@@ -186,10 +183,6 @@ public class ServiceStatus implements Serializable {
         if (! stateName.equals(substateName)) {
             builder.append(" (").append(substateName).append(')');
         }
-        String parentName = this.parentName;
-        if (parentName != null) {
-            builder.append(" (parent: ").append(parentName).append(')');
-        }
         final String[] dependencies = this.dependencies;
         final int dependenciesLength = dependencies.length;
         if (dependenciesLength > 0) {
@@ -213,14 +206,5 @@ public class ServiceStatus implements Serializable {
             builder.append(" (has unavailable dependency)");
         }
         return builder.toString();
-    }
-
-    /**
-     * Get the name of the parent service, if any.
-     *
-     * @return the parent name
-     */
-    public String getParentName() {
-        return parentName;
     }
 }
