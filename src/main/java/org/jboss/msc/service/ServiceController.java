@@ -42,7 +42,7 @@ public interface ServiceController<S> {
      *
      * @return the controller mode
      */
-    Mode getMode();
+    Mode mode();
 
     /**
      * Change the service controller's current mode.  Might result in the service starting or stopping.  The mode

@@ -1010,7 +1010,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    public ServiceController.Mode getMode() {
+    public ServiceController.Mode mode() {
         synchronized (this) {
             return mode;
         }
@@ -1395,7 +1395,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     private final class RemoveTask extends ControllerTask {
         boolean execute() {
-            assert getMode() == ServiceController.Mode.REMOVE;
+            assert mode() == ServiceController.Mode.REMOVE;
             assert getSubstate() == Substate.REMOVED || getSubstate() == Substate.CANCELLED;
             ServiceRegistrationImpl registration;
             WritableValueImpl injector;
