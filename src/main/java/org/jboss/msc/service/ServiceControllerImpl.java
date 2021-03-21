@@ -929,7 +929,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         doExecute(tasks);
     }
 
-    public ServiceController.State getState() {
+    public ServiceController.State state() {
         synchronized (this) {
             return state.getState();
         }

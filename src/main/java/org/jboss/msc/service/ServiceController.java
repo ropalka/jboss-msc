@@ -57,7 +57,7 @@ public interface ServiceController<S> {
      *
      * @return the current state
      */
-    State getState();
+    State state();
 
     /**
      * Get the name of this service, if any.
