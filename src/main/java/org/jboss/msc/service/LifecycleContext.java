@@ -35,12 +35,12 @@ public interface LifecycleContext {
      *
      * @throws IllegalStateException if called twice in a row
      */
-    void asynchronous() throws IllegalStateException;
+    void asynchronous();
 
     /**
      * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle action is complete.
      *
      * @throws IllegalStateException if called twice in a row
      */
-    void complete() throws IllegalStateException;
+    void complete();
 }

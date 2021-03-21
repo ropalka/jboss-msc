@@ -43,12 +43,12 @@ public interface StartContext extends LifecycleContext {
      * @param reason the reason for the failure
      * @throws IllegalStateException if called after {@link #complete()} was called
      */
-    void fail(StartException reason) throws IllegalStateException;
+    void fail(StartException reason);
 
     /**
      * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle action is complete.
      *
      * @throws IllegalStateException if called after {@link #fail(StartException)} was called or if called twice in a row
      */
-    void complete() throws IllegalStateException;
+    void complete();
 }
