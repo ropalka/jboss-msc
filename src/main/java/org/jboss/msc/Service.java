@@ -63,12 +63,6 @@ import java.util.function.Consumer;
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
 public interface Service {
-
-    /**
-     * A simple null service whose start and stop methods do nothing.
-     */
-    Service NULL = NullService.INSTANCE;
-
     /**
      * Start the service.  Do not return until the service has been fully started, unless an asynchronous service
      * start is performed.  All injections will be complete before this method is called.
@@ -92,17 +86,4 @@ public interface Service {
      * @param context the context which can be used to trigger an asynchronous service stop
      */
     void stop(StopContext context);
-
-    /**
-     * Factory for services providing single value.
-     *
-     * @param injector target
-     * @param value to assign
-     * @param <V> provided value type
-     * @return new service instance
-     */
-    static <V> Service newInstance(final Consumer<V> injector, final V value) {
-        return new SimpleService<>(injector, value);
-    }
-
 }

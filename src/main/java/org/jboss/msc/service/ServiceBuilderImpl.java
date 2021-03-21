@@ -110,10 +110,11 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     public ServiceBuilder<T> setInstance(final Service service) {
         // preconditions
         assertNotInstalled();
+        assertNotNull(service);
         assertThreadSafety();
         assertServiceNotConfigured();
         // implementation
-        this.service = service != null ? service : Service.NULL;
+        this.service = service;
         return this;
     }
 
@@ -148,7 +149,8 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         assertThreadSafety();
         // implementation
         installed = true;
-        if (service == null) service = Service.NULL;
+        // TODO: ensure at least one provides exists
+        // TODO: ensure service is not null
         if (initialMode == null) initialMode = ServiceController.Mode.ACTIVE;
         return serviceTarget.install(this);
     }
