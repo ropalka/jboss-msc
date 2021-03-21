@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import org.jboss.msc.value.Value;
-
 /**
  * Dependencies of a service.
  *
@@ -31,14 +29,14 @@ import org.jboss.msc.value.Value;
  * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
  * @see Dependent
  */
-interface Dependency extends Value<Object> {
+interface Dependency {
 
     /**
      * Add dependent to this dependency.
      *
      * @param dependent added dependent
      */
-    void addDependent(final Dependent dependent);
+    void addDependent(Dependent dependent);
 
     /**
      * Remove dependent from this dependency
@@ -46,7 +44,7 @@ interface Dependency extends Value<Object> {
      * @param dependent removed dependent
      * @return true if registration must be removed from registry
      */
-    boolean removeDependent(final Dependent dependent);
+    boolean removeDependent(Dependent dependent);
 
     /**
      * Add demand on this dependency.

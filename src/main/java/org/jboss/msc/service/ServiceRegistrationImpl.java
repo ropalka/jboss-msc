@@ -156,11 +156,9 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
     }
 
     @Override
-    public Object getValue() throws IllegalStateException {
+    public Object getValue() {
         final WritableValueImpl injector = this.injector;
         if (injector != null) return injector.getValue();
-        final ServiceControllerImpl instance = this.instance;
-        if (instance != null) return instance.getValue();
         throw new IllegalStateException("Service is not installed");
     }
 
