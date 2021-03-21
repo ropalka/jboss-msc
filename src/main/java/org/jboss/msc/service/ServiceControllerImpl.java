@@ -990,7 +990,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     @Override
-    public Collection<ServiceName> getUnavailableDependencies() {
+    public Collection<ServiceName> missing() {
         final Set<ServiceName> retVal = new IdentityHashSet<>();
         for (Dependency dependency : requires) {
             synchronized (dependency.getLock()) {

@@ -95,7 +95,7 @@ public interface ServiceController<S> {
      *
      * @return a set containing the names of all unavailable dependencies
      */
-    Collection<ServiceName> getUnavailableDependencies();
+    Collection<ServiceName> missing();
 
     /**
      * A possible state for a service controller.
