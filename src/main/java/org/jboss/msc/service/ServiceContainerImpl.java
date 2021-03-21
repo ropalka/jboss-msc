@@ -37,7 +37,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -752,7 +751,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
                 throw new CircularDependencyException("Container " + name + " has a circular dependency: " + Arrays.asList(cycle), cycle);
             }
             if (visited.add(controller)) {
-                if (controller.getState() == ServiceController.State.REMOVED) continue;
+                if (controller.state() == ServiceController.State.REMOVED) continue;
                 visitStack.push(controller.getName());
                 for (ServiceRegistrationImpl registration : controller.getRegistrations()) {
                     if (registration.getDependencyController() == null) continue; // concurrent removal
