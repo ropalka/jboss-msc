@@ -1016,13 +1016,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    public boolean compareAndSetMode(final Mode expectedMode, final Mode newMode) {
-        if (expectedMode == null) {
-            throw new IllegalArgumentException("expectedMode is null");
-        }
-        return internalSetMode(expectedMode, newMode);
-    }
-
     ServiceStatus getStatus() {
         synchronized (this) {
             final String name = getName().getCanonicalName();
