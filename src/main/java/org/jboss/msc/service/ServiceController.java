@@ -98,11 +98,6 @@ public interface ServiceController<S> {
     Throwable getStartException();
 
     /**
-     * Retry a failed service.  Does nothing if the state is not {@link State#START_FAILED}.
-     */
-    void retry();
-
-    /**
      * Get the complete list of dependencies that are unavailable.
      *
      * @return a set containing the names of all unavailable dependencies
