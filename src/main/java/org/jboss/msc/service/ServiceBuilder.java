@@ -55,8 +55,6 @@ public interface ServiceBuilder<T> {
      * @return readonly dependency reference
      * @throws IllegalStateException if this method
      * have been called after {@link #instance(Service)} method.
-     * @throws UnsupportedOperationException if this service builder
-     * wasn't created via {@link ServiceTarget#addService(ServiceName)} method.
      */
     <V> Supplier<V> requires(ServiceName name);
 
@@ -68,8 +66,6 @@ public interface ServiceBuilder<T> {
      * @return writable dependency reference
      * @throws IllegalStateException if this method
      * have been called after {@link #instance(Service)} method.
-     * @throws UnsupportedOperationException if this service builder
-     * wasn't created via {@link ServiceTarget#addService(ServiceName)} method.
      */
     <V> Consumer<V> provides(ServiceName... names);
 

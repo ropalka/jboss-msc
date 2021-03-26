@@ -34,7 +34,9 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceContainer extends ServiceTarget, ServiceRegistry {
+public interface ServiceContainer extends ServiceRegistry {
+
+    ServiceBuilder<?> addService(ServiceName name);
 
     /**
      * Stop all services within this container.
