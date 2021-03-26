@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,16 +60,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.jboss.modules.management.ObjectProperties;
 import org.jboss.modules.ref.Reaper;
 import org.jboss.modules.ref.Reference;
 import org.jboss.modules.ref.WeakReference;
 import org.jboss.msc.service.ServiceController.Mode;
-import org.jboss.msc.service.management.ServiceContainerMXBean;
-import org.jboss.msc.service.management.ServiceStatus;
 import org.jboss.threads.EnhancedQueueExecutor;
 
 /**
@@ -148,184 +142,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     private final ContainerExecutor executor;
 
     private final String name;
-    private final MBeanServer mBeanServer;
-    private final ObjectName objectName;
-
-    private final ServiceContainerMXBean containerMXBean = new ServiceContainerMXBean() {
-        public ServiceStatus getServiceStatus(final String name) {
-            final ServiceRegistrationImpl registration = registry.get(ServiceName.parse(name));
-            if (registration != null) {
-                final ServiceControllerImpl<?> instance = registration.getDependencyController();
-                if (instance != null) {
-                    return instance.getStatus();
-                }
-            }
-            return null;
-        }
-
-        public List<String> queryServiceNames() {
-            final Set<ServiceName> names = registry.keySet();
-            final List<String> list = new ArrayList<>(names.size());
-            for (ServiceName serviceName : names) {
-                list.add(serviceName.getCanonicalName());
-            }
-            Collections.sort(list);
-            return list;
-        }
-
-        public List<ServiceStatus> queryServiceStatuses() {
-            final Collection<ServiceRegistrationImpl> registrations = registry.values();
-            final List<ServiceStatus> list = new ArrayList<>(registrations.size());
-            for (ServiceRegistrationImpl registration : registrations) {
-                final ServiceControllerImpl<?> instance = registration.getDependencyController();
-                if (instance != null) list.add(instance.getStatus());
-            }
-            Collections.sort(list, new Comparator<ServiceStatus>() {
-                public int compare(final ServiceStatus o1, final ServiceStatus o2) {
-                    return o1.getServiceName().compareTo(o2.getServiceName());
-                }
-            });
-            return list;
-        }
-
-        public void setServiceMode(final String name, final String mode) {
-            final ServiceRegistrationImpl registration = registry.get(ServiceName.parse(name));
-            if (registration != null) {
-                final ServiceControllerImpl<?> instance = registration.getDependencyController();
-                if (instance != null) {
-                    instance.setMode(Mode.valueOf(mode.toUpperCase(Locale.US)));
-                }
-            }
-        }
-
-        public void dumpServices() {
-            ServiceContainerImpl.this.dumpServices();
-        }
-
-        public String dumpServicesToString() {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream ps;
-            try {
-                ps = new PrintStream(baos, false, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalStateException(e);
-            }
-            ServiceContainerImpl.this.dumpServices(ps);
-            ps.flush();
-            try {
-                return new String(baos.toByteArray(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        public String dumpServicesToGraphDescription() {
-            final List<ServiceStatus> statuses = queryServiceStatuses();
-            final StringBuilder builder = new StringBuilder();
-            builder.append("digraph Services {\n    node [shape=record];\n    graph [rankdir=\"RL\"];\n");
-            for (ServiceStatus status : statuses) {
-                final String serviceName = status.getServiceName();
-                builder.append("    ");
-                final String quoted = serviceName.replace("\"", "\\\"");
-                builder.append('"').append(quoted).append('"');
-                builder.append(' ');
-                builder.append("[label=\"");
-                builder.append(quoted);
-                builder.append('|');
-                builder.append(status.getStateName()).append("\\ (").append(status.getSubstateName()).append(")");
-                builder.append("\"]");
-                builder.append(";\n");
-            }
-            builder.append('\n');
-            for (ServiceStatus status : statuses) {
-                final String[] dependencies = status.getDependencies();
-                final Set<String> filteredDependencies = new HashSet<>(Arrays.asList(dependencies));
-            }
-            builder.append("}\n");
-            return builder.toString();
-        }
-
-        public String dumpServiceDetails(final String serviceName) {
-            final ServiceRegistrationImpl registration = registry.get(ServiceName.parse(serviceName));
-            if (registration != null) {
-                final ServiceControllerImpl<?> instance = registration.getDependencyController();
-                if (instance != null) {
-                    return instance.dumpServiceDetails();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public void dumpServicesByStatus(String status) {
-            System.out.printf("Services for %s with status:%s\n", getName(), status);
-            Collection<ServiceStatus> services = this.queryServicesByStatus(status);
-            if (services.isEmpty()) {
-                System.out.printf("There are no services with status: %s\n", status);
-            } else {
-                this.printServiceStatus(services, System.out);
-            }
-        }
-
-        @Override
-        public String dumpServicesToStringByStatus(String status) {
-            Collection<ServiceStatus> services = this.queryServicesByStatus(status);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream ps = null;
-            try {
-                ps = new PrintStream(baos, false, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalStateException(e);
-            }
-            ps.printf("Services for %s with status:%s\n", getName(), status);
-            if (services.isEmpty()) {
-                ps.printf("There are no services with status: %s\n", status);
-            } else {
-                this.printServiceStatus(services, ps);
-            }
-            ps.flush();
-            try {
-                return new String(baos.toByteArray(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        /**
-         * Returns a collection of {@link ServiceStatus} of services, whose {@link org.jboss.msc.service.management.ServiceStatus#getStateName() status}
-         * matches the passed <code>status</code>. Returns an empty collection if there's no such services.
-         * @param status The status that we are interested in.
-         * @return
-         */
-        private Collection<ServiceStatus> queryServicesByStatus(String status) {
-            final Collection<ServiceRegistrationImpl> registrations = registry.values();
-            final List<ServiceStatus> list = new ArrayList<>(registrations.size());
-            for (ServiceRegistrationImpl registration : registrations) {
-                final ServiceControllerImpl<?> instance = registration.getDependencyController();
-                if (instance != null) {
-                    ServiceStatus serviceStatus = instance.getStatus();
-                    if (serviceStatus.getStateName().equals(status)) {
-                        list.add(serviceStatus);
-                    }
-                }
-            }
-            return list;
-        }
-
-        /**
-         * Print the passed {@link ServiceStatus}es to the {@link PrintStream}
-         * @param serviceStatuses
-         * @param out
-         */
-        private void printServiceStatus(Collection<ServiceStatus> serviceStatuses, PrintStream out) {
-            if (serviceStatuses == null || serviceStatuses.isEmpty()) {
-                return;
-            }
-            for (ServiceStatus status : serviceStatuses) {
-                out.printf("%s\n", status);
-            }
-        }
-    };
 
     ServiceContainerImpl(String name, int coreSize, long timeOut, TimeUnit timeOutUnit, final boolean autoShutdown) {
         this.autoShutdown = autoShutdown;
@@ -335,17 +151,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
         this.name = name;
         executor = new ContainerExecutor(coreSize, coreSize, timeOut, timeOutUnit);
-        ObjectName objectName = null;
-        MBeanServer mBeanServer = null;
-        try {
-            objectName = new ObjectName("jboss.msc", ObjectProperties.properties(property("type", "container"), property("name", name)));
-            mBeanServer = ManagementFactory.getPlatformMBeanServer();
-            mBeanServer.registerMBean(containerMXBean, objectName);
-        } catch (Exception e) {
-            ServiceLogger.ROOT.mbeanFailed(e);
-        }
-        this.mBeanServer = mBeanServer;
-        this.objectName = objectName;
         final Set<Reference<ServiceContainerImpl, Void>> set = ShutdownHookHolder.containers;
         synchronized (set) {
             // if the shutdown hook was triggered, then no services can ever come up in any new containers.
@@ -362,16 +167,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
                     }
                 }));
             }
-        }
-        if (objectName != null && mBeanServer != null) {
-            addTerminateListener(new TerminateListener() {
-                public void handleTermination(final Info info) {
-                    try {
-                        ServiceContainerImpl.this.mBeanServer.unregisterMBean(ServiceContainerImpl.this.objectName);
-                    } catch (Exception ignored) {
-                    }
-                }
-            });
         }
     }
 
@@ -536,32 +331,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
     public boolean isShutdownComplete() {
         return terminateInfo != null;
-    }
-
-    public void dumpServices() {
-        dumpServices(System.out);
-    }
-
-    public void dumpServices(PrintStream out) {
-        out.printf("Services for %s:\n", getName());
-        final Map<ServiceName, ServiceRegistrationImpl> registry = this.registry;
-        if (registry.isEmpty()) {
-            out.printf("(Registry is empty)\n");
-        } else {
-            int i = 0;
-            Set<ServiceControllerImpl<?>> set = new HashSet<>();
-            for (ServiceName name : new TreeSet<>(registry.keySet())) {
-                final ServiceRegistrationImpl registration = registry.get(name);
-                if (registration != null) {
-                    final ServiceControllerImpl<?> instance = registration.getDependencyController();
-                    if (instance != null && set.add(instance)) {
-                        i++;
-                        out.printf("%s\n", instance.getStatus());
-                    }
-                }
-            }
-            out.printf("%s services displayed\n", Integer.valueOf(i));
-        }
     }
 
     protected void finalize() throws Throwable {

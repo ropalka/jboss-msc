@@ -56,10 +56,6 @@ interface ServiceLogger {
     ServiceLogger SERVICE = Logger.getMessageLogger(ServiceLogger.class, "org.jboss.msc.service");
     ServiceLogger FAIL = Logger.getMessageLogger(ServiceLogger.class, "org.jboss.msc.service.fail");
 
-    @LogMessage(level = INFO)
-    @Message(value = "JBoss MSC version %s")
-    void greeting(String version);
-
     @LogMessage(level = ERROR)
     @Message(id = 1, value = "Failed to start %s")
     void startFailed(@Cause Throwable cause, ServiceName serviceName);
@@ -69,16 +65,8 @@ interface ServiceLogger {
     void listenerFailed(@Cause Throwable cause, Object listener);
 
     @LogMessage(level = WARN)
-    @Message(id = 3, value = "Exception thrown after start was already completed in %s")
-    void exceptionAfterComplete(@Cause Throwable cause, ServiceName serviceName);
-
-    @LogMessage(level = WARN)
     @Message(id = 4, value = "Failure during stop of %s")
     void stopFailed(@Cause Throwable cause, ServiceName serviceName);
-
-    @LogMessage(level = WARN)
-    @Message(id = 5, value = "Unexpected disappearance of %s during stop")
-    void stopServiceMissing(ServiceName serviceName);
 
     @LogMessage(level = WARN)
     @Message(id = 7, value = "An internal service error has occurred while processing an operation on %s")
@@ -87,20 +75,4 @@ interface ServiceLogger {
     @LogMessage(level = ERROR)
     @Message(id = 8, value = "Worker thread %s threw an uncaught exception")
     void uncaughtException(@Cause Throwable cause, Thread thread);
-
-    @LogMessage(level = WARN)
-    @Message(id = 9, value = "An error occurred while trying to close the profile output file: %s")
-    void profileOutputCloseFailed(/* ! @Cause */ IOException cause);
-
-    @LogMessage(level = ERROR)
-    @Message(id = 10, value = "Failed to register MBean with MBeanServer")
-    void mbeanFailed(@Cause Exception e);
-
-    @Message(id = 11, value = "Service not started")
-    IllegalStateException serviceNotStarted();
-
-    @LogMessage(level = ERROR)
-    @Message(id = 12, value = "Injection failed for service %s")
-    void injectFailed(@Cause Throwable cause, ServiceName serviceName);
-
 }
