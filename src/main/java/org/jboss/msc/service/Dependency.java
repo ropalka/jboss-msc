@@ -79,7 +79,7 @@ interface Dependency {
      *
      * @return the name
      */
-    ServiceName getName();
+    String getName();
 
     /**
      * Get the controller for this dependency, or {@code null} if there is none currently.
