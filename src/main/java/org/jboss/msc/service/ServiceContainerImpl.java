@@ -55,7 +55,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jboss.modules.ref.Reaper;
 import org.jboss.modules.ref.Reference;
 import org.jboss.modules.ref.WeakReference;
-import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.threads.EnhancedQueueExecutor;
 
 /**
@@ -316,7 +315,7 @@ final class ServiceContainerImpl implements ServiceContainer {
             if (controller != null) {
                 controller.addListener(shutdownListener);
                 try {
-                    controller.setMode(Mode.REMOVE);
+                    controller.setMode(ServiceMode.REMOVE);
                 } catch (IllegalArgumentException ignored) {
                     // controller removed in the meantime
                 }

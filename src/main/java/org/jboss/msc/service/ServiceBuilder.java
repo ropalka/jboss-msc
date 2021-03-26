@@ -75,7 +75,7 @@ public interface ServiceBuilder<T> {
      * @param mode initial service mode
      * @return this builder
      */
-    ServiceBuilder<T> mode(ServiceController.Mode mode);
+    ServiceBuilder<T> mode(ServiceMode mode);
 
     /**
      * Sets service instance. If {@link #install()} method call is issued
