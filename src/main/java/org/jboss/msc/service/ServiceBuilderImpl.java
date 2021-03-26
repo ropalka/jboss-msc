@@ -98,7 +98,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public ServiceBuilder<T> setInstance(final Service service) {
+    public ServiceBuilder<T> instance(final Service service) {
         // preconditions
         assertNotInstalled();
         assertThreadSafety();
@@ -109,7 +109,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> setInitialMode(final ServiceController.Mode mode) {
+    public ServiceBuilder<T> mode(final ServiceController.Mode mode) {
         // preconditions
         assertNotInstalled();
         assertNotNull(mode);

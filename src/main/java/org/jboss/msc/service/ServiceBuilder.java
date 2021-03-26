@@ -95,7 +95,7 @@ public interface ServiceBuilder<T> {
      * {@link #install()} method.
      * @throws NullPointerException if <code>mode</code> parameter is <code>null</code>.
      */
-    ServiceBuilder<T> setInitialMode(ServiceController.Mode mode);
+    ServiceBuilder<T> mode(ServiceController.Mode mode);
 
     /**
      * Sets service instance. If {@link #install()} method call is issued
@@ -113,7 +113,7 @@ public interface ServiceBuilder<T> {
      * @throws IllegalStateException if this method have been either called twice or it was called after
      * {@link #install()} method.
      */
-    ServiceBuilder<T> setInstance(Service service);
+    ServiceBuilder<T> instance(Service service);
 
     /**
      * Installs configured service into the container.
