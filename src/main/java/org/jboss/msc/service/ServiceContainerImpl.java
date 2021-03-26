@@ -396,21 +396,6 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     @Override
-    public ServiceController<?> getRequiredService(final ServiceName serviceName) throws ServiceNotFoundException {
-        final ServiceController<?> controller = getService(serviceName);
-        if (controller == null) {
-            throw new ServiceNotFoundException(serviceName + " not found");
-        }
-        return controller;
-    }
-
-    @Override
-    public ServiceController<?> getService(final ServiceName serviceName) {
-        final ServiceRegistrationImpl registration = registry.get(serviceName);
-        return registration == null ? null : registration.getDependencyController();
-    }
-
-    @Override
     public List<ServiceName> getServiceNames() {
         final List<ServiceName> result = new ArrayList<>(registry.size());
         for (Map.Entry<ServiceName, ServiceRegistrationImpl> registryEntry: registry.entrySet()) {
