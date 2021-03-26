@@ -1,30 +1,11 @@
-/*
- * JBoss, Home of Professional Open Source.
- * Copyright 2021, Red Hat, Inc., and individual contributors
- * as indicated by the @author tags. See the copyright.txt file in the
- * distribution for a full listing of individual contributors.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
- */
-
 package org.jboss.msc.service;
 
+import org.jboss.msc.service.ServiceController.State;
+
 /**
- * A transition from one substate to another.  The list of possible transitions may change over time, so users
- * should not rely on its permanence.
+ * A transition from one substate to another.  The list of possible transitions may change over time, so users should
+ * not rely on its permanence.
+ *
  * @deprecated this class will be removed in a future release
  */
 @Deprecated
@@ -40,7 +21,8 @@ enum Transition {
      */
     START_REQUESTED_to_PROBLEM(Substate.START_REQUESTED, Substate.PROBLEM),
     /**
-     * Transition from {@link Substate#START_REQUESTED START_REQUESTED} to {@link Substate#START_INITIATING START_INITIATING}.
+     * Transition from {@link Substate#START_REQUESTED START_REQUESTED} to {@link Substate#START_INITIATING
+     * START_INITIATING}.
      */
     START_REQUESTED_to_START_INITIATING(Substate.START_REQUESTED, Substate.START_INITIATING),
     /**
@@ -50,11 +32,12 @@ enum Transition {
     /**
      * Transition from {@link Substate#START_INITIATING START_INITIATING} to {@link Substate#STARTING STARTING}.
      */
-    START_INITIATING_to_STARTING (Substate.START_INITIATING, Substate.STARTING),
+    START_INITIATING_to_STARTING(Substate.START_INITIATING, Substate.STARTING),
     /**
-     * Transition from {@link Substate#START_INITIATING START_INITIATING} to {@link Substate#START_REQUESTED START_REQUESTED}.
+     * Transition from {@link Substate#START_INITIATING START_INITIATING} to {@link Substate#START_REQUESTED
+     * START_REQUESTED}.
      */
-    START_INITIATING_to_START_REQUESTED (Substate.START_INITIATING, Substate.START_REQUESTED),
+    START_INITIATING_to_START_REQUESTED(Substate.START_INITIATING, Substate.START_REQUESTED),
     /**
      * Transition from {@link Substate#STARTING STARTING} to {@link Substate#UP UP}.
      */
@@ -64,7 +47,8 @@ enum Transition {
      */
     STARTING_to_START_FAILED(Substate.STARTING, Substate.START_FAILED),
     /**
-     * Transition from {@link Substate#START_FAILED START_FAILED} to {@link Substate#START_INITIATING START_INITIATING}.
+     * Transition from {@link Substate#START_FAILED START_FAILED} to {@link Substate#START_INITIATING
+     * START_INITIATING}.
      */
     START_FAILED_to_STARTING(Substate.START_FAILED, Substate.START_INITIATING),
     /**
@@ -97,6 +81,7 @@ enum Transition {
     REMOVED_to_TERMINATED(Substate.REMOVED, Substate.TERMINATED),
     /**
      * Transition from {@link Substate#REMOVING REMOVING} to {@link Substate#DOWN DOWN}.
+     *
      * @deprecated was never supposed to work
      */
     @Deprecated
@@ -148,7 +133,7 @@ enum Transition {
      * @return {@code true} if this transition leaves a rest state
      */
     public boolean leavesRestState() {
-        return before.isRestState() && ! after.isRestState();
+        return before.isRestState() && !after.isRestState();
     }
 
     /**
@@ -157,7 +142,7 @@ enum Transition {
      * @return {@code true} if this transition enters a rest state
      */
     public boolean entersRestState() {
-        return ! before.isRestState() && after.isRestState();
+        return !before.isRestState() && after.isRestState();
     }
 
     /**
@@ -166,7 +151,7 @@ enum Transition {
      * @param state the state
      * @return {@code true} if the state is entered by this transition
      */
-    public boolean enters(ServiceController.State state) {
+    public boolean enters(State state) {
         return before.getState() != state && after.getState() == state;
     }
 
@@ -176,7 +161,7 @@ enum Transition {
      * @param state the state
      * @return {@code true} if the state is exited by this transition
      */
-    public boolean exits(ServiceController.State state) {
+    public boolean exits(State state) {
         return before.getState() == state && after.getState() != state;
     }
 
@@ -186,7 +171,7 @@ enum Transition {
      * @param state the state
      * @return {@code true} if the state is retained
      */
-    public boolean retains(ServiceController.State state) {
+    public boolean retains(State state) {
         return before.getState() == state && after.getState() == state;
     }
 
