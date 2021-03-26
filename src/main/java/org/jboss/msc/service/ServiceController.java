@@ -67,7 +67,7 @@ public interface ServiceController<S> {
      *
      * @return the name, or {@code null} if none was specified.
      */
-    ServiceName getName();
+    String getName();
 
     /**
      * Get the reason why the last start failed.
@@ -81,6 +81,6 @@ public interface ServiceController<S> {
      *
      * @return a set containing the names of all unavailable dependencies
      */
-    Collection<ServiceName> missing();
+    Collection<String> missing();
 
 }

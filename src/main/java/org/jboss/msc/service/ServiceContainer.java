@@ -36,8 +36,8 @@ import java.util.concurrent.TimeUnit;
  */
 public interface ServiceContainer {
 
-    Collection<ServiceName> getServiceNames();
-    ServiceBuilder<?> addService(ServiceName name);
+    Collection<String> getServiceNames();
+    ServiceBuilder<?> addService(String name);
 
     /**
      * Stop all services within this container.

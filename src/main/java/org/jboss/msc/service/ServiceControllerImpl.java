@@ -63,7 +63,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     /**
      * The service identifier.
      */
-    private final ServiceName serviceId;
+    private final String serviceId;
     /**
      * The service itself.
      */
@@ -150,7 +150,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final Service service, final Collection<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final String serviceId, final Service service, final Collection<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
@@ -913,7 +913,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    public ServiceName getName() {
+    public String getName() {
         return serviceId;
     }
 
@@ -939,8 +939,8 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     @Override
-    public Collection<ServiceName> missing() {
-        final Set<ServiceName> retVal = new IdentityHashSet<>();
+    public Collection<String> missing() {
+        final Set<String> retVal = new IdentityHashSet<>();
         for (Dependency dependency : requires) {
             synchronized (dependency.getLock()) {
                 if (isUnavailable(dependency)) {
@@ -1332,7 +1332,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             if (reason == null) {
                 reason = new IllegalArgumentException("Start failed, and additionally, a null cause was supplied");
             }
-            final ServiceName serviceName = getName();
+            final String serviceName = getName();
             ServiceLogger.FAIL.startFailed(reason, serviceName);
             final int state;
             synchronized (lock) {

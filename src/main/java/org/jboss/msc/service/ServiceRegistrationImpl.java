@@ -35,7 +35,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
     /**
      * The name of this registration.
      */
-    private final ServiceName name;
+    private final String name;
     /**
      * The set of dependents on this registration.
      */
@@ -73,7 +73,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
      */
     private boolean removed;
 
-    ServiceRegistrationImpl(final ServiceName name) {
+    ServiceRegistrationImpl(final String name) {
         this.name = name;
     }
 
@@ -132,7 +132,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         assert isWriteLocked();
         pendingInstallation--;
         if (instance != null) {
-            throw new DuplicateServiceException(String.format("Service %s is already registered", name.getCanonicalName()));
+            throw new DuplicateServiceException(String.format("Service %s is already registered", name));
         }
         instance = newInstance;
         injector = newInjector;
@@ -163,7 +163,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
     }
 
     @Override
-    public ServiceName getName() {
+    public String getName() {
         return name;
     }
 
