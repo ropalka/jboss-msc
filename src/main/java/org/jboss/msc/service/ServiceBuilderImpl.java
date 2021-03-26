@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     final ServiceName serviceId;
-    private final ServiceTargetImpl serviceTarget;
+    private final ServiceContainerImpl serviceContainer;
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
     private Service service;
@@ -51,15 +51,9 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private Map<ServiceName, Dependency> requires;
     private boolean installed;
 
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final Service service) {
-        this(serviceId, serviceTarget);
-        if (service == null) throw new IllegalArgumentException("Service can not be null");
-        this.service = service;
-    }
-
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget) {
+    ServiceBuilderImpl(final ServiceName serviceId, final ServiceContainerImpl serviceContainer) {
         this.serviceId = serviceId;
-        this.serviceTarget = serviceTarget;
+        this.serviceContainer = serviceContainer;
         addProvidesInternal(serviceId, null);
     }
 
@@ -130,7 +124,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         installed = true;
         if (service == null) service = NullService.INSTANCE;
         if (initialMode == null) initialMode = ServiceController.Mode.ACTIVE;
-        return serviceTarget.install(this);
+        return serviceContainer.install(this);
     }
 
     // implementation internals
@@ -148,7 +142,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         if (existing != null) {
             return existing;
         }
-        final Dependency dependency = serviceTarget.getOrCreateRegistration(name);
+        final Dependency dependency = serviceContainer.getOrCreateRegistration(name);
         requires.put(name, dependency);
         return dependency;
     }

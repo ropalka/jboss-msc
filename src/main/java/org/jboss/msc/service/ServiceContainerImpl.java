@@ -62,7 +62,7 @@ import org.jboss.threads.EnhancedQueueExecutor;
  * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceContainer {
+final class ServiceContainerImpl implements ServiceContainer {
 
     private static final AtomicInteger SERIAL = new AtomicInteger(1);
     private final ConcurrentMap<ServiceName, ServiceRegistrationImpl> registry = new ConcurrentHashMap<>(512);
@@ -145,6 +145,11 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             terminateInfo = new TerminateListener.Info(System.nanoTime(), System.nanoTime());
             down = true;
         }
+    }
+
+    @Override
+    public ServiceBuilder<?> addService(ServiceName name) {
+        return new ServiceBuilderImpl<>(name, this);
     }
 
     void removeProblem(ServiceController<?> controller) {
@@ -416,7 +421,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         return result;
     }
 
-    @Override
     <T> ServiceController<T> install(final ServiceBuilderImpl<T> serviceBuilder) throws DuplicateServiceException {
         // Initialize registrations and injectors map
         final Map<ServiceRegistrationImpl, WritableValueImpl> provides = new LinkedHashMap<>();
