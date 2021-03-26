@@ -24,8 +24,6 @@ package org.jboss.msc.service;
 
 import static java.util.Collections.synchronizedSet;
 
-import java.util.Set;
-
 /**
  * Abstract base class used for ServiceTargets.
  *
@@ -37,7 +35,6 @@ import java.util.Set;
 class ServiceTargetImpl implements ServiceTarget {
 
     private final ServiceTargetImpl parent;
-    private final Set<LifecycleListener> lifecycleListeners = synchronizedSet(new IdentityHashSet<>());
 
     ServiceTargetImpl(final ServiceTargetImpl parent) {
         if (parent == null) {
@@ -61,31 +58,6 @@ class ServiceTargetImpl implements ServiceTarget {
         }
         return createServiceBuilder(name);
     }
-
-    public ServiceTarget addListener(final LifecycleListener listener) {
-        if (listener != null) {
-            lifecycleListeners.add(listener);
-        }
-        return this;
-    }
-
-    @Override
-    public ServiceTarget removeListener(final LifecycleListener listener) {
-        if (listener != null) lifecycleListeners.remove(listener);
-        return this;
-    }
-
-    /**
-     * Apply listeners and dependencies to {@code serviceBuilder}.
-     * 
-     * @param serviceBuilder serviceBuilder which listeners and dependencies will be added to.
-     */
-    void apply(ServiceBuilderImpl<?> serviceBuilder) {
-        synchronized (lifecycleListeners) {
-            serviceBuilder.addLifecycleListenersNoCheck(lifecycleListeners);
-        }
-    }
-
     /**
      * Install {@code serviceBuilder} in this target.
      *
@@ -96,7 +68,6 @@ class ServiceTargetImpl implements ServiceTarget {
      * @throws ServiceRegistryException if a service registry issue occurred during installation
      */
     <T> ServiceController<T> install(ServiceBuilderImpl<T> serviceBuilder) throws ServiceRegistryException {
-        apply(serviceBuilder);
         return parent.install(serviceBuilder);
     }
 

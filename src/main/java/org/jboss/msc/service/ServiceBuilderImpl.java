@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -50,7 +49,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private Service service;
     private ServiceController.Mode initialMode;
     private Map<ServiceName, Dependency> requires;
-    private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
     ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final Service service) {
@@ -124,17 +122,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> addListener(final LifecycleListener listener) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(listener);
-        assertThreadSafety();
-        // implementation
-        addListenerInternal(listener);
-        return this;
-    }
-
-    @Override
     public ServiceController<T> install() throws ServiceRegistryException {
         // preconditions
         assertNotInstalled();
@@ -147,13 +134,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     // implementation internals
-
-    void addLifecycleListenersNoCheck(final Set<LifecycleListener> listeners) {
-        if (listeners == null || listeners.isEmpty()) return;
-        for (final LifecycleListener listener : listeners) {
-            if (listener != null) addListenerInternal(listener);
-        }
-    }
 
     Service getService() {
         return service;
@@ -181,21 +161,12 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         }
     }
 
-    void addListenerInternal(final LifecycleListener listener) {
-        if (lifecycleListeners == null) lifecycleListeners = new IdentityHashSet<>();
-        lifecycleListeners.add(listener);
-    }
-
     Map<ServiceName, WritableValueImpl> getProvides() {
         return provides;
     }
 
     Map<ServiceName, Dependency> getDependencies() {
         return requires == null ? Collections.emptyMap() : requires;
-    }
-
-    Set<LifecycleListener> getLifecycleListeners() {
-        return lifecycleListeners == null ? Collections.emptySet() : lifecycleListeners;
     }
 
     ServiceController.Mode getInitialMode() {

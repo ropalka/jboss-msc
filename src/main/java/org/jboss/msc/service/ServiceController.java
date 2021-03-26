@@ -70,20 +70,6 @@ public interface ServiceController<S> {
     ServiceName getName();
 
     /**
-     * Add a service lifecycle listener.
-     *
-     * @param listener the lifecycle listener
-     */
-    void addListener(LifecycleListener listener);
-
-    /**
-     * Remove a lifecycle listener.
-     *
-     * @param listener the lifecycle listener to remove
-     */
-    void removeListener(LifecycleListener listener);
-
-    /**
      * Get the reason why the last start failed.
      *
      * @return the last start exception, or {@code null} if the last start succeeded or the service has not yet started

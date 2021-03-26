@@ -116,18 +116,6 @@ public interface ServiceBuilder<T> {
     ServiceBuilder<T> setInstance(Service service);
 
     /**
-     * Adds a service listener to be added to the service.
-     *
-     * @param listener the listener to add to the service
-     * @return this builder
-     * @throws ConcurrentModificationException if builder is shared between threads.
-     * Only thread that created the builder can manipulate it.
-     * @throws IllegalStateException if this method have been called after {@link #install()} method.
-     * @throws NullPointerException if <code>listener</code> parameter is <code>null</code>.
-     */
-    ServiceBuilder<T> addListener(LifecycleListener listener);
-
-    /**
      * Installs configured service into the container.
      *
      * @return installed service controller

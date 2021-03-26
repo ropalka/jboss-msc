@@ -37,22 +37,6 @@ package org.jboss.msc.service;
 public interface ServiceTarget {
 
     /**
-     * Add a service lifecycle listener that will be added to this service.
-     *
-     * @param listener the lifecycle listener to add to the service
-     * @return this target
-     */
-    ServiceTarget addListener(LifecycleListener listener);
-
-    /**
-     * Remove a lifecycle listener from this target, if it exists.
-     *
-     * @param listener the lifecycle listener to remove
-     * @return this target
-     */
-    ServiceTarget removeListener(LifecycleListener listener);
-
-    /**
      * Get a builder which can be used to add a service to this target.
      *
      * @param name the service name

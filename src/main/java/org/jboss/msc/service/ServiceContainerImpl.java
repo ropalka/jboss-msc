@@ -23,27 +23,19 @@
 package org.jboss.msc.service;
 
 import static java.security.AccessController.doPrivileged;
-import static org.jboss.modules.management.ObjectProperties.property;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.security.PrivilegedAction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -59,9 +51,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.management.ObjectName;
-
-import org.jboss.modules.management.ObjectProperties;
 import org.jboss.modules.ref.Reaper;
 import org.jboss.modules.ref.Reference;
 import org.jboss.modules.ref.WeakReference;
@@ -429,8 +418,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
     @Override
     <T> ServiceController<T> install(final ServiceBuilderImpl<T> serviceBuilder) throws DuplicateServiceException {
-        apply(serviceBuilder);
-
         // Initialize registrations and injectors map
         final Map<ServiceRegistrationImpl, WritableValueImpl> provides = new LinkedHashMap<>();
         Entry<ServiceName, WritableValueImpl> entry;
@@ -443,7 +430,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         final Collection<Dependency> requires = serviceBuilder.getDependencies().values();
         // Next create the actual controller
         final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
-                requires, provides, serviceBuilder.getLifecycleListeners());
+                requires, provides);
         boolean ok = false;
         try {
             synchronized (this) {
