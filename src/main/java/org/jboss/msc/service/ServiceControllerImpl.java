@@ -87,7 +87,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     /**
      * The controller mode.
      */
-    private ServiceController.Mode mode = ServiceController.Mode.NEVER;
+    private ServiceMode mode = ServiceMode.NEVER;
     /**
      * The controller state.
      */
@@ -164,7 +164,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      * Set this instance into primary and alias registrations.
      * <p></p>
      * All notifications from registrations will be ignored until the
-     * installation is {@link #commitInstallation(org.jboss.msc.service.ServiceController.Mode) committed}.
+     * installation is {@link #commitInstallation(ServiceMode) committed}.
      */
     void startInstallation() {
         ServiceRegistrationImpl registration;
@@ -192,7 +192,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      * Start this service configuration connecting it to its parent and dependencies.
      * <p></p>
      * All notifications from dependencies and parents will be ignored until the
-     * installation is {@link #commitInstallation(org.jboss.msc.service.ServiceController.Mode) committed}.
+     * installation is {@link #commitInstallation(ServiceMode) committed}.
      */
     void startConfiguration() {
         Lockable lock;
@@ -214,7 +214,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      *
      * @param initialMode the initial service mode
      */
-    void commitInstallation(Mode initialMode) {
+    void commitInstallation(ServiceMode initialMode) {
         assert (state == Substate.NEW);
         assert initialMode != null;
         assert !holdsLock(this);
@@ -240,7 +240,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         final Runnable removeTask;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
-            mode = Mode.REMOVE;
+            mode = ServiceMode.REMOVE;
             state = Substate.CANCELLED;
             removeTask = new RemoveTask();
             incrementAsyncTasks();
@@ -278,7 +278,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      */
     private boolean shouldStart() {
         assert holdsLock(this);
-        return mode == Mode.ACTIVE || mode == Mode.PASSIVE || demandedByCount > 0 && (mode == Mode.ON_DEMAND || mode == Mode.LAZY);
+        return mode == ServiceMode.ACTIVE || mode == ServiceMode.PASSIVE || demandedByCount > 0 && (mode == ServiceMode.ON_DEMAND || mode == ServiceMode.LAZY);
     }
 
     /**
@@ -288,7 +288,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      */
     private boolean shouldStop() {
         assert holdsLock(this);
-        return mode == Mode.REMOVE || demandedByCount == 0 && mode == Mode.ON_DEMAND || mode == Mode.NEVER;
+        return mode == ServiceMode.REMOVE || demandedByCount == 0 && mode == ServiceMode.ON_DEMAND || mode == ServiceMode.NEVER;
     }
 
     /**
@@ -335,11 +335,11 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 break;
             }
             case DOWN: {
-                if (mode == ServiceController.Mode.REMOVE) {
+                if (mode == ServiceMode.REMOVE) {
                     return Transition.DOWN_to_REMOVING;
-                } else if (mode == ServiceController.Mode.NEVER) {
+                } else if (mode == ServiceMode.NEVER) {
                     return Transition.DOWN_to_WONT_START;
-                } else if (shouldStart() && (mode != Mode.PASSIVE || stoppingDependencies == 0)) {
+                } else if (shouldStart() && (mode != ServiceMode.PASSIVE || stoppingDependencies == 0)) {
                     return Transition.DOWN_to_START_REQUESTED;
                 } else {
                     // mode is either LAZY or ON_DEMAND with demandedByCount == 0, or mode is PASSIVE and downDep > 0
@@ -347,14 +347,14 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 }
             }
             case WAITING: {
-                if (((mode != Mode.ON_DEMAND && mode != Mode.LAZY) || demandedByCount > 0) &&
-                        (mode != Mode.PASSIVE || stoppingDependencies == 0)) {
+                if (((mode != ServiceMode.ON_DEMAND && mode != ServiceMode.LAZY) || demandedByCount > 0) &&
+                    (mode != ServiceMode.PASSIVE || stoppingDependencies == 0)) {
                     return Transition.WAITING_to_DOWN;
                 }
                 break;
             }
             case WONT_START: {
-                if (mode != ServiceController.Mode.NEVER){
+                if (mode != ServiceMode.NEVER){
                     return Transition.WONT_START_to_DOWN;
                 }
                 break;
@@ -403,7 +403,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             }
             case START_REQUESTED: {
                 if (shouldStart()) {
-                    if (mode == Mode.PASSIVE && stoppingDependencies > 0) {
+                    if (mode == ServiceMode.PASSIVE && stoppingDependencies > 0) {
                         return Transition.START_REQUESTED_to_DOWN;
                     }
                     if (unavailableDependencies > 0 || failCount > 0) {
@@ -419,7 +419,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 break;
             }
             case PROBLEM: {
-                if (! shouldStart() || (unavailableDependencies == 0 && failCount == 0) || mode == Mode.PASSIVE) {
+                if (! shouldStart() || (unavailableDependencies == 0 && failCount == 0) || mode == ServiceMode.PASSIVE) {
                     return Transition.PROBLEM_to_START_REQUESTED;
                 }
                 break;
@@ -553,7 +553,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     break;
                 }
                 case UP_to_STOP_REQUESTED: {
-                    if (mode == Mode.LAZY && demandedByCount == 0) {
+                    if (mode == ServiceMode.LAZY && demandedByCount == 0) {
                         assert dependenciesDemanded;
                         tasks.add(new UndemandDependenciesTask());
                         dependenciesDemanded = false;
@@ -649,22 +649,22 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    public void setMode(final ServiceController.Mode newMode) {
+    public void setMode(final ServiceMode newMode) {
         internalSetMode(null, newMode);
     }
 
-    private boolean internalSetMode(final ServiceController.Mode expectedMode, final ServiceController.Mode newMode) {
+    private boolean internalSetMode(final ServiceMode expectedMode, final ServiceMode newMode) {
         assert !holdsLock(this);
         if (newMode == null) {
             throw new IllegalArgumentException("newMode is null");
         }
-        if (newMode != Mode.REMOVE && container.isShutdown()) {
+        if (newMode != ServiceMode.REMOVE && container.isShutdown()) {
             throw new IllegalArgumentException("Container is shutting down");
         }
         final List<Runnable> tasks;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
-            final Mode oldMode = mode;
+            final ServiceMode oldMode = mode;
             if (expectedMode != null && expectedMode != oldMode) {
                 return false;
             }
@@ -680,10 +680,10 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         return true;
     }
 
-    private void internalSetMode(final Mode newMode) {
+    private void internalSetMode(final ServiceMode newMode) {
         assert holdsLock(this);
-        final ServiceController.Mode oldMode = mode;
-        if (oldMode == Mode.REMOVE) {
+        final ServiceMode oldMode = mode;
+        if (oldMode == ServiceMode.REMOVE) {
             if (state.compareTo(Substate.REMOVING) >= 0) {
                 throw new IllegalStateException("Service already removed");
             }
@@ -878,8 +878,8 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             final int cnt = this.demandedByCount;
             this.demandedByCount += demandedByCount;
             if (ignoreNotification()) return;
-            boolean notStartedLazy = mode == Mode.LAZY && state != Substate.UP;
-            propagate = cnt == 0 && (mode == Mode.ON_DEMAND || notStartedLazy || mode == Mode.PASSIVE);
+            boolean notStartedLazy = mode == ServiceMode.LAZY && state != Substate.UP;
+            propagate = cnt == 0 && (mode == ServiceMode.ON_DEMAND || notStartedLazy || mode == ServiceMode.PASSIVE);
             if (!propagate) return;
             tasks = transition();
             addAsyncTasks(tasks.size());
@@ -897,8 +897,8 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             assert demandedByCount > 0;
             final int cnt = --demandedByCount;
             if (ignoreNotification()) return;
-            boolean notStartedLazy = mode == Mode.LAZY && state != Substate.UP;
-            propagate = cnt == 0 && (mode == Mode.ON_DEMAND || notStartedLazy || mode == Mode.PASSIVE);
+            boolean notStartedLazy = mode == ServiceMode.LAZY && state != Substate.UP;
+            propagate = cnt == 0 && (mode == ServiceMode.ON_DEMAND || notStartedLazy || mode == ServiceMode.PASSIVE);
             if (!propagate) return;
             tasks = transition();
             addAsyncTasks(tasks.size());
@@ -959,7 +959,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    public ServiceController.Mode mode() {
+    public ServiceMode mode() {
         synchronized (this) {
             return mode;
         }
@@ -1236,7 +1236,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     private final class RemoveTask extends ControllerTask {
         boolean execute() {
-            assert mode() == ServiceController.Mode.REMOVE;
+            assert mode() == ServiceMode.REMOVE;
             assert getSubstate() == Substate.REMOVED || getSubstate() == Substate.CANCELLED;
             ServiceRegistrationImpl registration;
             WritableValueImpl injector;

@@ -95,7 +95,7 @@ public interface ServiceBuilder<T> {
      * {@link #install()} method.
      * @throws NullPointerException if <code>mode</code> parameter is <code>null</code>.
      */
-    ServiceBuilder<T> mode(ServiceController.Mode mode);
+    ServiceBuilder<T> mode(ServiceMode mode);
 
     /**
      * Sets service instance. If {@link #install()} method call is issued

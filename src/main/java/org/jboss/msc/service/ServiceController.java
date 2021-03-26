@@ -42,18 +42,18 @@ public interface ServiceController<S> {
      *
      * @return the controller mode
      */
-    Mode mode();
+    ServiceMode mode();
 
     /**
      * Change the service controller's current mode.  Might result in the service starting or stopping.  The mode
-     * may only be changed if it was not already set to {@link Mode#REMOVE}.  Calling this method with the controller's
+     * may only be changed if it was not already set to {@link ServiceMode#REMOVE}.  Calling this method with the controller's
      * current mode has no effect and is always allowed.
      *
      * @param mode the new controller mode
      * @throws IllegalStateException if the mode given is {@code null}, or the caller attempted to change the
-     *  service's mode from {@link Mode#REMOVE} to a different mode
+     *  service's mode from {@link ServiceMode#REMOVE} to a different mode
      */
-    void setMode(Mode mode);
+    void setMode(ServiceMode mode);
 
     /**
      * Get the current service controller state.
@@ -125,54 +125,6 @@ public interface ServiceController<S> {
          */
         public boolean in(State... states) {
             for (State test : states) {
-                if (this == test) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    /**
-     * The controller mode for a service.
-     */
-    enum Mode {
-
-        /**
-         * Remove this service and all of its dependents.
-         */
-        REMOVE,
-        /**
-         * Do not start; in addition, ignore demands from dependents.
-         */
-        NEVER,
-        /**
-         * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
-         */
-        ON_DEMAND,
-        /**
-         * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
-         * Once in the {@link State#UP UP} state, it will remain that way regardless of demands from dependents.
-         */
-        LAZY,
-        /**
-         * Come up automatically as soon as all dependencies are satisfied.
-         */
-        PASSIVE,
-        /**
-         * Demand to start, recursively demanding dependencies.  This is the default mode.
-         */
-        ACTIVE,
-        ;
-
-        /**
-         * Determine if this mode is one of the given modes.
-         *
-         * @param modes the modes to check
-         * @return {@code true} if this mode is in the set; {@code false} otherwise
-         */
-        public boolean in(Mode... modes) {
-            for (Mode test : modes) {
                 if (this == test) {
                     return true;
                 }
