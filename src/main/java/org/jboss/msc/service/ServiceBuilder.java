@@ -54,7 +54,7 @@ public interface ServiceBuilder<T> {
      * @param <V> required dependency value type
      * @return readonly dependency reference
      * @throws IllegalStateException if this method
-     * have been called after {@link #setInstance(Service)} method.
+     * have been called after {@link #instance(Service)} method.
      * @throws UnsupportedOperationException if this service builder
      * wasn't created via {@link ServiceTarget#addService(ServiceName)} method.
      */
@@ -67,7 +67,7 @@ public interface ServiceBuilder<T> {
      * @param <V> provided dependency value type
      * @return writable dependency reference
      * @throws IllegalStateException if this method
-     * have been called after {@link #setInstance(Service)} method.
+     * have been called after {@link #instance(Service)} method.
      * @throws UnsupportedOperationException if this service builder
      * wasn't created via {@link ServiceTarget#addService(ServiceName)} method.
      */
@@ -79,7 +79,7 @@ public interface ServiceBuilder<T> {
      * @param mode initial service mode
      * @return this builder
      */
-    ServiceBuilder<T> setInitialMode(ServiceController.Mode mode);
+    ServiceBuilder<T> mode(ServiceController.Mode mode);
 
     /**
      * Sets service instance. If {@link #install()} method call is issued
@@ -93,7 +93,7 @@ public interface ServiceBuilder<T> {
      * @param service the service instance
      * @return this configurator
      */
-    ServiceBuilder<T> setInstance(Service service);
+    ServiceBuilder<T> instance(Service service);
 
     /**
      * Installs configured service into the container.
