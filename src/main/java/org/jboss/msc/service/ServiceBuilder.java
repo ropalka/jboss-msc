@@ -95,7 +95,6 @@ public interface ServiceBuilder<T> {
      * Installs configured service into the container.
      *
      * @return installed service controller
-     * @throws ServiceRegistryException if installation fails for any reason
      */
     ServiceController<T> install();
 }
