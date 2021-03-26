@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import org.jboss.msc.service.ServiceController.State;
-
 import java.util.function.Consumer;
 
 /**
@@ -45,11 +43,11 @@ final class WritableValueImpl implements Consumer<Object> {
     public void accept(final Object newValue) {
         final ServiceController controller = this.controller;
         if (controller != null) synchronized (controller) {
-            final State state = controller.state();
-            if (state == State.STARTING) {
+            final ServiceState state = controller.state();
+            if (state == ServiceState.STARTING) {
                 value = newValue;
                 return;
-            } else if (state == State.STOPPING) {
+            } else if (state == ServiceState.STOPPING) {
                 if (newValue != null) {
                     throw new IllegalArgumentException("Null parameter expected");
                 }
@@ -63,8 +61,8 @@ final class WritableValueImpl implements Consumer<Object> {
     void uninject() {
         final ServiceController controller = this.controller;
         if (controller != null) synchronized (controller) {
-            final State state = controller.state();
-            if (state == State.STARTING || state == State.STOPPING) {
+            final ServiceState state = controller.state();
+            if (state == ServiceState.STARTING || state == ServiceState.STOPPING) {
                 value = UNDEFINED;
                 return;
             }

@@ -1,7 +1,5 @@
 package org.jboss.msc.service;
 
-import org.jboss.msc.service.ServiceController.State;
-
 /**
  * The controller mode for a service.
  */
@@ -21,7 +19,7 @@ public enum ServiceMode {
     ON_DEMAND,
     /**
      * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start. Once in the
-     * {@link State#UP UP} state, it will remain that way regardless of demands from dependents.
+     * {@link ServiceState#UP UP} state, it will remain that way regardless of demands from dependents.
      */
     LAZY,
     /**
