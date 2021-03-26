@@ -24,7 +24,7 @@ package org.jboss.msc.service;
 
 import static org.jboss.msc.service.SecurityUtils.getSystemProperty;
 
-import java.io.PrintStream;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -34,8 +34,9 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceContainer extends ServiceRegistry {
+public interface ServiceContainer {
 
+    Collection<ServiceName> getServiceNames();
     ServiceBuilder<?> addService(ServiceName name);
 
     /**
