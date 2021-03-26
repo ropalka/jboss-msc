@@ -1,9 +1,7 @@
 package org.jboss.msc.service;
 
-import org.jboss.msc.service.ServiceController.State;
-
 /**
- * A fine-grained substate of the more general basic controller {@link State}s.  The list of possible substates may
+ * A fine-grained substate of the more general basic controller {@link ServiceState}s.  The list of possible substates may
  * change over time, so users should not rely on its permanence.
  *
  * @deprecated this class will be removed in a future release
@@ -13,72 +11,72 @@ enum Substate {
     /**
      * New controller being installed.
      */
-    NEW(State.DOWN, true),
+    NEW(ServiceState.DOWN, true),
     /**
      * Cancelled controller installation due to duplicate or other problem.
      */
-    CANCELLED(State.REMOVED, true),
+    CANCELLED(ServiceState.REMOVED, true),
     /**
      * Controller is down.
      */
-    DOWN(State.DOWN, false),
+    DOWN(ServiceState.DOWN, false),
     /**
      * Controller is waiting for an external condition to start, such as a dependent demand.
      */
-    WAITING(State.DOWN, true),
+    WAITING(ServiceState.DOWN, true),
     /**
      * Controller is configured not to start.
      */
-    WONT_START(State.DOWN, true),
+    WONT_START(ServiceState.DOWN, true),
     /**
      * Controller cannot start due to a problem with a dependency or transitive dependency.
      */
-    PROBLEM(State.DOWN, true),
+    PROBLEM(ServiceState.DOWN, true),
     /**
      * A stopped controller has been requested to start.
      */
-    START_REQUESTED(State.DOWN, false),
+    START_REQUESTED(ServiceState.DOWN, false),
     /**
      * First phase of start processing.
      */
-    START_INITIATING(State.STARTING, false),
+    START_INITIATING(ServiceState.STARTING, false),
     /**
      * Second phase of start processing ({@link Service#start(StartContext) start()} method invoked).
      */
-    STARTING(State.STARTING, false),
+    STARTING(ServiceState.STARTING, false),
     /**
      * Start failed.
      */
-    START_FAILED(State.START_FAILED, true),
+    START_FAILED(ServiceState.START_FAILED, true),
     /**
      * Service is up.
      */
-    UP(State.UP, true),
+    UP(ServiceState.UP, true),
     /**
      * Service is up but has been requested to stop.
      */
-    STOP_REQUESTED(State.UP, false),
+    STOP_REQUESTED(ServiceState.UP, false),
     /**
      * Service is stopping.
      */
-    STOPPING(State.STOPPING, false),
+    STOPPING(ServiceState.STOPPING, false),
     /**
      * Service is being removed.
      */
-    REMOVING(State.DOWN, false),
+    REMOVING(ServiceState.DOWN, false),
     /**
      * Service has been removed.
      */
-    REMOVED(State.REMOVED, false),
+    REMOVED(ServiceState.REMOVED, false),
     /**
      * Service has been terminated.
      */
-    TERMINATED(State.REMOVED, true),
+    TERMINATED(ServiceState.REMOVED, true),
     ;
-    private final State state;
+    private final ServiceState state;
     private final boolean restState;
 
-    Substate(final State state, final boolean restState) {
+    Substate(final ServiceState state, final boolean restState) {
         this.state = state;
         this.restState = restState;
     }
@@ -97,7 +95,7 @@ enum Substate {
      *
      * @return the state
      */
-    public State getState() {
+    public ServiceState getState() {
         return state;
     }
 

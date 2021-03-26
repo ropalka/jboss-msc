@@ -1,7 +1,5 @@
 package org.jboss.msc.service;
 
-import org.jboss.msc.service.ServiceController.State;
-
 /**
  * A transition from one substate to another.  The list of possible transitions may change over time, so users should
  * not rely on its permanence.
@@ -151,7 +149,7 @@ enum Transition {
      * @param state the state
      * @return {@code true} if the state is entered by this transition
      */
-    public boolean enters(State state) {
+    public boolean enters(ServiceState state) {
         return before.getState() != state && after.getState() == state;
     }
 
@@ -161,7 +159,7 @@ enum Transition {
      * @param state the state
      * @return {@code true} if the state is exited by this transition
      */
-    public boolean exits(State state) {
+    public boolean exits(ServiceState state) {
         return before.getState() == state && after.getState() != state;
     }
 
@@ -171,7 +169,7 @@ enum Transition {
      * @param state the state
      * @return {@code true} if the state is retained
      */
-    public boolean retains(State state) {
+    public boolean retains(ServiceState state) {
         return before.getState() == state && after.getState() == state;
     }
 

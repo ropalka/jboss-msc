@@ -481,7 +481,7 @@ final class ServiceContainerImpl implements ServiceContainer {
                 throw new CircularDependencyException("Container " + name + " has a circular dependency: " + Arrays.asList(cycle), cycle);
             }
             if (visited.add(controller)) {
-                if (controller.state() == ServiceController.State.REMOVED) continue;
+                if (controller.state() == ServiceState.REMOVED) continue;
                 visitStack.push(controller.getName());
                 for (ServiceRegistrationImpl registration : controller.getRegistrations()) {
                     if (registration.getDependencyController() == null) continue; // concurrent removal
