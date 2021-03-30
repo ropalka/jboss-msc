@@ -59,10 +59,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private final ServiceContainerImpl container;
     /**
-     * The service identifier.
-     */
-    private final String serviceId;
-    /**
      * The service itself.
      */
     private final Service service;
@@ -144,14 +140,11 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private final List<Runnable> listenerTransitionTasks = new ArrayList<>();
 
-    private static final String[] NO_STRINGS = new String[0];
-
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final String serviceId, final Service service, final Map<String, Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
-        this.serviceId = serviceId;
         this.service = service;
         this.requires = requires;
         this.provides = provides;
@@ -911,10 +904,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    public String getName() {
-        return serviceId;
-    }
-
     void addListener(final ContainerShutdownListener listener) {
         assert !holdsLock(this);
         synchronized (this) {
@@ -992,7 +981,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     @Override
     public String toString() {
-        return String.format("Controller for %s@%x", getName(), Integer.valueOf(hashCode()));
+        return String.format("Controller for %s@%x", provides.keySet(), Integer.valueOf(hashCode()));
     }
 
     private abstract class ControllerTask implements Runnable {
@@ -1016,7 +1005,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 }
                 doExecute(tasks);
             } catch (Throwable t) {
-                ServiceLogger.SERVICE.internalServiceError(t, getName());
+                ServiceLogger.SERVICE.internalServiceError(t, provides.keySet().toString());
             } finally {
                 afterExecute();
             }
@@ -1181,7 +1170,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     }
 
     private void startFailed(final Throwable e, final StartContextImpl context) {
-        ServiceLogger.FAIL.startFailed(e, getName());
+        ServiceLogger.FAIL.startFailed(e, provides.keySet().toString());
         synchronized (context.lock) {
             context.state |= (AbstractContext.FAILED | AbstractContext.CLOSED);
             synchronized (ServiceControllerImpl.this) {
@@ -1199,7 +1188,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 stopService(service, context);
                 ok = true;
             } catch (Throwable t) {
-                ServiceLogger.FAIL.stopFailed(t, getName());
+                ServiceLogger.FAIL.stopFailed(t, provides.keySet().toString());
             } finally {
                 synchronized (context.lock) {
                     context.state |= AbstractContext.CLOSED;
@@ -1342,7 +1331,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             if (reason == null) {
                 reason = new IllegalArgumentException("Start failed, and additionally, a null cause was supplied");
             }
-            final String serviceName = getName();
+            final String serviceName = provides.keySet().toString();
             ServiceLogger.FAIL.startFailed(reason, serviceName);
             final int state;
             synchronized (lock) {

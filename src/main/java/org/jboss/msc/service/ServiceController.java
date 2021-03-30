@@ -61,13 +61,6 @@ public interface ServiceController {
     ServiceState state();
 
     /**
-     * Get the name of this service, if any.
-     *
-     * @return the name, or {@code null} if none was specified.
-     */
-    String getName();
-
-    /**
      * Get the reason why the last start failed.
      *
      * @return the last start exception, or {@code null} if the last start succeeded or the service has not yet started

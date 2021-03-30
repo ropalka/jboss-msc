@@ -148,8 +148,8 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     @Override
-    public ServiceBuilder addService(String name) {
-        return new ServiceBuilderImpl(name, this);
+    public ServiceBuilder addService() {
+        return new ServiceBuilderImpl(this);
     }
 
     void removeProblem(ServiceController controller) {
@@ -418,8 +418,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         // Dependencies
         final Map<String, Dependency> requires = serviceBuilder.getDependencies();
         // Next create the actual controller
-        final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.serviceId, serviceBuilder.getService(),
-                requires, provides);
+        final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.getService(), requires, provides);
         boolean ok = false;
         try {
             synchronized (this) {
@@ -456,8 +455,8 @@ final class ServiceContainerImpl implements ServiceContainer {
      */
     private <T> void detectCircularity(ServiceControllerImpl instance) throws CircularDependencyException {
         final Set<ServiceControllerImpl> visited = new IdentityHashSet<>();
-        final Deque<String> visitStack = new ArrayDeque<>();
-        visitStack.push(instance.getName());
+        final Deque<ServiceControllerImpl> visitStack = new ArrayDeque<>();
+        visitStack.push(instance);
         for (ServiceRegistrationImpl registration : instance.getRegistrations()) {
             synchronized (registration) {
                 detectCircularity(registration.getDependents(), instance, visited, visitStack);
@@ -465,7 +464,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         }
     }
 
-    private void detectCircularity(Set<? extends Dependent> dependents, ServiceControllerImpl instance, Set<ServiceControllerImpl> visited,  Deque<String> visitStack) {
+    private void detectCircularity(Set<? extends Dependent> dependents, ServiceControllerImpl instance, Set<ServiceControllerImpl> visited,  Deque<ServiceControllerImpl> visitStack) {
         for (Dependent dependent: dependents) {
             final ServiceControllerImpl controller = dependent.getDependentController();
             if (controller == instance) {
@@ -482,7 +481,7 @@ final class ServiceContainerImpl implements ServiceContainer {
             }
             if (visited.add(controller)) {
                 if (controller.state() == ServiceState.REMOVED) continue;
-                visitStack.push(controller.getName());
+                visitStack.push(controller);
                 for (ServiceRegistrationImpl registration : controller.getRegistrations()) {
                     if (registration.getDependencyController() == null) continue; // concurrent removal
                     synchronized (registration) {
