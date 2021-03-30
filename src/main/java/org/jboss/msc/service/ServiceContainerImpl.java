@@ -437,7 +437,7 @@ final class ServiceContainerImpl implements ServiceContainer {
             instance.startConfiguration();
             // detect circularity before committing
             detectCircularity(instance);
-            instance.commitInstallation(serviceBuilder.getInitialMode());
+            instance.commitInstallation(serviceBuilder.getMode());
             ok = true;
             return instance;
         } finally {

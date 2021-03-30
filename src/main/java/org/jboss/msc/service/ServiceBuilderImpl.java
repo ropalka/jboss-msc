@@ -42,9 +42,9 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private final ServiceContainerImpl serviceContainer;
     private final Thread thread = currentThread();
     private final Map<String, WritableValueImpl> provides = new HashMap<>();
-    private Service service;
-    private ServiceMode initialMode;
     private Map<String, Dependency> requires;
+    private Service service;
+    private ServiceMode mode;
     private boolean installed;
 
     ServiceBuilderImpl(final ServiceContainerImpl serviceContainer) {
@@ -105,7 +105,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertModeNotConfigured();
         assertThreadSafety();
         // implementation
-        this.initialMode = mode;
+        this.mode = mode;
         return this;
     }
 
@@ -116,8 +116,9 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertThreadSafety();
         // implementation
         installed = true;
-        if (service == null) service = NullService.INSTANCE;
-        if (initialMode == null) initialMode = ServiceMode.ACTIVE;
+        // TODO: ensure at least one provides exists
+        // TODO: ensure service is not null
+        if (mode == null) mode = ServiceMode.ACTIVE;
         return serviceContainer.install(this);
     }
 
@@ -154,8 +155,8 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return requires == null ? Collections.emptyMap() : requires;
     }
 
-    ServiceMode getInitialMode() {
-        return initialMode;
+    ServiceMode getMode() {
+        return mode;
     }
 
     // implementation assertions
@@ -201,7 +202,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     private void assertModeNotConfigured() {
-        if (initialMode != null) {
+        if (mode != null) {
             throw new IllegalStateException("setInitialMode() method called twice");
         }
     }
