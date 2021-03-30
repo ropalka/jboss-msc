@@ -43,4 +43,5 @@ interface LifecycleContext {
      * @throws IllegalStateException if called twice in a row
      */
     void complete();
+    <V> V getValue(String name);
 }

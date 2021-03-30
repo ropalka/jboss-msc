@@ -59,7 +59,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> Supplier<V> requires(final String dependency) {
+    public ServiceBuilder<T> requires(final String dependency) {
         // preconditions
         assertNotInstalled();
         assertNotNull(dependency);
@@ -67,7 +67,8 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         assertNotInstanceId(dependency);
         assertNotProvided(dependency, true);
         // implementation
-        return (Supplier<V>) ((ServiceRegistrationImpl)addRequiresInternal(dependency)).getReadableValue();
+        addRequiresInternal(dependency);
+        return this;
     }
 
     @Override
@@ -133,18 +134,15 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         return service;
     }
 
-    private Dependency addRequiresInternal(final String name) {
+    private void addRequiresInternal(final String name) {
         if (requires == null) requires = new HashMap<>();
         if (requires.size() == ServiceControllerImpl.MAX_DEPENDENCIES) {
             throw new IllegalArgumentException("Too many dependencies specified (max is " + ServiceControllerImpl.MAX_DEPENDENCIES + ")");
         }
         final Dependency existing = requires.get(name);
-        if (existing != null) {
-            return existing;
+        if (existing == null) {
+            requires.put(name, serviceContainer.getOrCreateRegistration(name));
         }
-        final Dependency dependency = serviceContainer.getOrCreateRegistration(name);
-        requires.put(name, dependency);
-        return dependency;
     }
 
     void addProvidesInternal(final String name, final WritableValueImpl dependency) {
@@ -232,5 +230,4 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
             throw new IllegalArgumentException("Initial service mode cannot be REMOVE");
         }
     }
-
 }

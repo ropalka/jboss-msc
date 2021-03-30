@@ -416,7 +416,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         }
 
         // Dependencies
-        final Collection<Dependency> requires = serviceBuilder.getDependencies().values();
+        final Map<String, Dependency> requires = serviceBuilder.getDependencies();
         // Next create the actual controller
         final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
                 requires, provides);
