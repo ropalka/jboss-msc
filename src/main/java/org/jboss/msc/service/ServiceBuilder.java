@@ -23,7 +23,7 @@
 package org.jboss.msc.service;
 
 public interface ServiceBuilder {
-    ServiceBuilder requires(String name);
+    ServiceBuilder requires(String... names);
     ServiceBuilder provides(String... names);
     ServiceBuilder mode(ServiceMode mode);
     ServiceBuilder instance(Service service);

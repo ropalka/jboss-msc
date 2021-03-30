@@ -53,14 +53,19 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     @Override
     @SuppressWarnings("unchecked")
-    public ServiceBuilder requires(final String dependency) {
+    public ServiceBuilder requires(final String... dependencies) {
         // preconditions
         assertNotInstalled();
-        assertNotNull(dependency);
+        assertNotNull(dependencies);
         assertThreadSafety();
-        assertNotProvided(dependency, true);
+        for (String dependency : dependencies) {
+            assertNotNull(dependency);
+            assertNotProvided(dependency, true);
+        }
         // implementation
-        addRequiresInternal(dependency);
+        for (String dependency : dependencies) {
+            addRequiresInternal(dependency);
+        }
         return this;
     }
 
@@ -71,13 +76,13 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertNotInstalled();
         assertNotNull(dependencies);
         assertThreadSafety();
-        for (final String dependency : dependencies) {
+        for (String dependency : dependencies) {
             assertNotNull(dependency);
             assertNotRequired(dependency, false);
             assertNotProvided(dependency, false);
         }
         // implementation
-        for (final String dependency : dependencies) {
+        for (String dependency : dependencies) {
             addProvidesInternal(dependency);
         }
         return this;
