@@ -38,7 +38,6 @@ import java.util.function.Consumer;
  */
 final class ServiceBuilderImpl implements ServiceBuilder {
 
-    final String serviceId;
     private final ServiceContainerImpl serviceContainer;
     private final Thread thread = currentThread();
     private final Map<String, WritableValueImpl> provides = new HashMap<>();
@@ -47,10 +46,8 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private Map<String, Dependency> requires;
     private boolean installed;
 
-    ServiceBuilderImpl(final String serviceId, final ServiceContainerImpl serviceContainer) {
-        this.serviceId = serviceId;
+    ServiceBuilderImpl(final ServiceContainerImpl serviceContainer) {
         this.serviceContainer = serviceContainer;
-        addProvidesInternal(serviceId, null);
     }
 
     @Override
@@ -60,7 +57,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertNotInstalled();
         assertNotNull(dependency);
         assertThreadSafety();
-        assertNotInstanceId(dependency);
         assertNotProvided(dependency, true);
         // implementation
         addRequiresInternal(dependency);
@@ -174,12 +170,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private void assertThreadSafety() {
         if (thread != currentThread()) {
             throw new ConcurrentModificationException("ServiceBuilder used by multiple threads");
-        }
-    }
-
-    private void assertNotInstanceId(final String dependency) {
-        if (serviceId.equals(dependency)) {
-            throw new IllegalArgumentException("Cannot both require and provide same dependency:" + dependency);
         }
     }
 
