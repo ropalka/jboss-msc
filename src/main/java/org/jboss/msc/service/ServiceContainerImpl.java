@@ -148,8 +148,8 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     @Override
-    public ServiceBuilder<?> addService(String name) {
-        return new ServiceBuilderImpl<>(name, this);
+    public ServiceBuilder addService(String name) {
+        return new ServiceBuilderImpl(name, this);
     }
 
     void removeProblem(ServiceController controller) {
@@ -406,7 +406,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         return result;
     }
 
-    <T> ServiceController install(final ServiceBuilderImpl<T> serviceBuilder) throws DuplicateServiceException {
+    ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateServiceException {
         // Initialize registrations and injectors map
         final Map<ServiceRegistrationImpl, WritableValueImpl> provides = new LinkedHashMap<>();
         Entry<String, WritableValueImpl> entry;

@@ -34,12 +34,10 @@ import java.util.function.Consumer;
 /**
  * Multi-value services {@link ServiceBuilder} implementation.
  *
- * @param <T> the type of service being built
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
+final class ServiceBuilderImpl implements ServiceBuilder {
 
     final String serviceId;
     private final ServiceContainerImpl serviceContainer;
@@ -58,7 +56,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public ServiceBuilder<T> requires(final String dependency) {
+    public ServiceBuilder requires(final String dependency) {
         // preconditions
         assertNotInstalled();
         assertNotNull(dependency);
@@ -92,7 +90,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public ServiceBuilder<T> instance(final Service service) {
+    public ServiceBuilder instance(final Service service) {
         // preconditions
         assertNotInstalled();
         assertThreadSafety();
@@ -103,7 +101,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> mode(final ServiceMode mode) {
+    public ServiceBuilder mode(final ServiceMode mode) {
         // preconditions
         assertNotInstalled();
         assertNotNull(mode);
