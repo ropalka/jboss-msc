@@ -30,7 +30,6 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Multi-value services {@link ServiceBuilder} implementation.
@@ -117,7 +116,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceController<T> install() {
+    public ServiceController install() {
         // preconditions
         assertNotInstalled();
         assertThreadSafety();

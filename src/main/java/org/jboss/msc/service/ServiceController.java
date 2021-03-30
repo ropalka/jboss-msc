@@ -30,12 +30,10 @@ import java.util.concurrent.TimeoutException;
 /**
  * A controller for a single service instance.
  *
- * @param <S> the service type
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceController<S> {
+public interface ServiceController {
 
     /**
      * Get the service controller's current mode.

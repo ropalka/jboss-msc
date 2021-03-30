@@ -68,8 +68,8 @@ final class ServiceContainerImpl implements ServiceContainer {
     private final ConcurrentMap<String, ServiceRegistrationImpl> registry = new ConcurrentHashMap<>(512);
     private final long start = System.nanoTime();
 
-    private final Set<ServiceController<?>> problems = new IdentityHashSet<>();
-    private final Set<ServiceController<?>> failed = new IdentityHashSet<>();
+    private final Set<ServiceController> problems = new IdentityHashSet<>();
+    private final Set<ServiceController> failed = new IdentityHashSet<>();
     private final Object lock = new Object();
 
     private int unstableServices;
@@ -152,13 +152,13 @@ final class ServiceContainerImpl implements ServiceContainer {
         return new ServiceBuilderImpl<>(name, this);
     }
 
-    void removeProblem(ServiceController<?> controller) {
+    void removeProblem(ServiceController controller) {
         synchronized (lock) {
             problems.remove(controller);
         }
     }
 
-    void removeFailed(ServiceController<?> controller) {
+    void removeFailed(ServiceController controller) {
         synchronized (lock) {
             failed.remove(controller);
         }
@@ -170,13 +170,13 @@ final class ServiceContainerImpl implements ServiceContainer {
         }
     }
 
-    void addProblem(ServiceController<?> controller) {
+    void addProblem(ServiceController controller) {
         synchronized (lock) {
             problems.add(controller);
         }
     }
 
-    void addFailed(ServiceController<?> controller) {
+    void addFailed(ServiceController controller) {
         synchronized (lock) {
             failed.add(controller);
         }
@@ -241,7 +241,7 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     @Override
-    public void awaitStability(Set<? super ServiceController<?>> failed, Set<? super ServiceController<?>> problem) throws InterruptedException {
+    public void awaitStability(Set<? super ServiceController> failed, Set<? super ServiceController> problem) throws InterruptedException {
         synchronized (lock) {
             while (unstableServices != 0) {
                 lock.wait();
@@ -256,7 +256,7 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     @Override
-    public boolean awaitStability(final long timeout, final TimeUnit unit, Set<? super ServiceController<?>> failed, Set<? super ServiceController<?>> problem) throws InterruptedException {
+    public boolean awaitStability(final long timeout, final TimeUnit unit, Set<? super ServiceController> failed, Set<? super ServiceController> problem) throws InterruptedException {
         long now = System.nanoTime();
         long remaining = unit.toNanos(timeout);
         synchronized (lock) {
@@ -308,7 +308,7 @@ final class ServiceContainerImpl implements ServiceContainer {
                 executor.shutdown();
             }
         });
-        ServiceControllerImpl<?> controller;
+        ServiceControllerImpl controller;
         for (ServiceRegistrationImpl registration : registry.values()) {
             controller = registration.getDependencyController();
             if (controller != null) {
@@ -406,7 +406,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         return result;
     }
 
-    <T> ServiceController<T> install(final ServiceBuilderImpl<T> serviceBuilder) throws DuplicateServiceException {
+    <T> ServiceController install(final ServiceBuilderImpl<T> serviceBuilder) throws DuplicateServiceException {
         // Initialize registrations and injectors map
         final Map<ServiceRegistrationImpl, WritableValueImpl> provides = new LinkedHashMap<>();
         Entry<String, WritableValueImpl> entry;
@@ -418,7 +418,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         // Dependencies
         final Map<String, Dependency> requires = serviceBuilder.getDependencies();
         // Next create the actual controller
-        final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
+        final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.serviceId, serviceBuilder.getService(),
                 requires, provides);
         boolean ok = false;
         try {
@@ -454,8 +454,8 @@ final class ServiceContainerImpl implements ServiceContainer {
      * @param instance                     the service being installed
      * @throws CircularDependencyException if a dependency cycle involving {@code instance} is detected
      */
-    private <T> void detectCircularity(ServiceControllerImpl<T> instance) throws CircularDependencyException {
-        final Set<ServiceControllerImpl<?>> visited = new IdentityHashSet<>();
+    private <T> void detectCircularity(ServiceControllerImpl instance) throws CircularDependencyException {
+        final Set<ServiceControllerImpl> visited = new IdentityHashSet<>();
         final Deque<String> visitStack = new ArrayDeque<>();
         visitStack.push(instance.getName());
         for (ServiceRegistrationImpl registration : instance.getRegistrations()) {
@@ -465,10 +465,9 @@ final class ServiceContainerImpl implements ServiceContainer {
         }
     }
 
-    private void detectCircularity(Set<? extends Dependent> dependents, ServiceControllerImpl<?> instance, Set<ServiceControllerImpl<?>> visited,  Deque<String> visitStack) {
+    private void detectCircularity(Set<? extends Dependent> dependents, ServiceControllerImpl instance, Set<ServiceControllerImpl> visited,  Deque<String> visitStack) {
         for (Dependent dependent: dependents) {
-            final ServiceControllerImpl<?> controller = dependent.getDependentController();
-            if (controller == null) continue; // [MSC-145] optional dependencies may return null
+            final ServiceControllerImpl controller = dependent.getDependentController();
             if (controller == instance) {
                 // change cycle from dependent order to dependency order
                 String[] cycle = new String[visitStack.size()];
