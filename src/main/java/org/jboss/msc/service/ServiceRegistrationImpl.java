@@ -32,6 +32,7 @@ import java.util.Set;
  */
 final class ServiceRegistrationImpl extends Lockable implements Dependency {
 
+    static final Object UNDEFINED = new Object();
     /**
      * The name of this registration.
      */
@@ -48,9 +49,9 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
      */
     private volatile ServiceControllerImpl instance;
     /**
-     * The injector providing value.
+     * The injected value.
      */
-    private volatile WritableValueImpl injector;
+    private volatile Object value = UNDEFINED;
     /**
      * The number of dependent instances which place a demand-to-start on this registration.  If this value is >0,
      * propagate a demand to the instance, if any.
@@ -123,7 +124,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         return removed;
     }
 
-    void set(final ServiceControllerImpl newInstance, final WritableValueImpl newInjector) throws DuplicateServiceException {
+    void set(final ServiceControllerImpl newInstance) throws DuplicateServiceException {
         assert newInstance != null;
         assert isWriteLocked();
         pendingInstallation--;
@@ -131,7 +132,6 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
             throw new DuplicateServiceException(String.format("Service %s is already registered", name));
         }
         instance = newInstance;
-        injector = newInjector;
         if (demandedByCount > 0) instance.addDemands(demandedByCount);
         if (dependentsStartedCount > 0) instance.dependentsStarted(dependentsStartedCount);
     }
@@ -141,17 +141,23 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         assert isWriteLocked();
         if (instance == oldInstance) {
             instance = null;
-            injector = null;
+            value = UNDEFINED;
             removed = dependents.size() == 0 && pendingInstallation == 0;
         }
         return removed;
     }
 
     @Override
-    public Object getValue() throws IllegalStateException {
-        final WritableValueImpl injector = this.injector;
-        if (injector != null) return injector.getValue();
-        throw new IllegalStateException("Service is not installed");
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(final Object newValue) {
+        value = newValue;
+    }
+
+    public void uninject() {
+        value = UNDEFINED;
     }
 
     @Override

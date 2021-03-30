@@ -51,4 +51,6 @@ public interface StartContext extends LifecycleContext {
      * @throws IllegalStateException if called after {@link #fail(Throwable)} was called or if called twice in a row
      */
     void complete();
+
+    <V> void setValue(String name, V value);
 }

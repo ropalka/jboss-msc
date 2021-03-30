@@ -41,7 +41,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     private final ServiceContainerImpl serviceContainer;
     private final Thread thread = currentThread();
-    private final Map<String, WritableValueImpl> provides = new HashMap<>();
+    private final Map<String, ServiceRegistrationImpl> provides = new HashMap<>();
     private Map<String, Dependency> requires;
     private Service service;
     private ServiceMode mode;
@@ -66,7 +66,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> Consumer<V> provides(final String... dependencies) {
+    public ServiceBuilder provides(final String... dependencies) {
         // preconditions
         assertNotInstalled();
         assertNotNull(dependencies);
@@ -77,11 +77,10 @@ final class ServiceBuilderImpl implements ServiceBuilder {
             assertNotProvided(dependency, false);
         }
         // implementation
-        final WritableValueImpl retVal = new WritableValueImpl();
         for (final String dependency : dependencies) {
-            addProvidesInternal(dependency, retVal);
+            addProvidesInternal(dependency);
         }
-        return (Consumer<V>)retVal;
+        return this;
     }
 
     @Override
@@ -139,15 +138,11 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    void addProvidesInternal(final String name, final WritableValueImpl dependency) {
-        if (dependency != null) {
-            provides.put(name, dependency);
-        } else if (!provides.containsKey(name)) {
-            provides.put(name, null);
-        }
+    void addProvidesInternal(final String name) {
+        provides.put(name, serviceContainer.getOrCreateRegistration(name));
     }
 
-    Map<String, WritableValueImpl> getProvides() {
+    Map<String, ServiceRegistrationImpl> getProvides() {
         return provides;
     }
 

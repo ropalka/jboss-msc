@@ -73,7 +73,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * Provided dependencies by this service.
      */
-    private final Map<ServiceRegistrationImpl, WritableValueImpl> provides;
+    private final Map<String, ServiceRegistrationImpl> provides;
     /**
      * The start exception.
      */
@@ -142,7 +142,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, Dependency> requires, final Map<String, ServiceRegistrationImpl> provides) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.service = service;
@@ -158,20 +158,13 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      * installation is {@link #commitInstallation(ServiceMode) committed}.
      */
     void startInstallation() {
-        ServiceRegistrationImpl registration;
-        WritableValueImpl injector;
         Lockable lock;
-        for (Entry<ServiceRegistrationImpl, WritableValueImpl> provided : provides.entrySet()) {
-            registration = provided.getKey();
-            injector = provided.getValue();
+        for (ServiceRegistrationImpl registration : provides.values()) {
             lock = registration.getLock();
             synchronized (lock) {
                 lock.acquireWrite();
                 try {
-                    registration.set(this, injector);
-                    if (injector != null) {
-                        injector.setInstance(this);
-                    }
+                    registration.set(this);
                 } finally {
                     lock.releaseWrite();
                 }
@@ -960,22 +953,20 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     }
 
     Collection<ServiceRegistrationImpl> getRegistrations() {
-        return provides.keySet();
+        return provides.values();
     }
 
     private void checkProvidedValues() {
-        WritableValueImpl injector;
-        for (Entry<ServiceRegistrationImpl, WritableValueImpl> entry : provides.entrySet()) {
-            injector = entry.getValue();
-            if (injector != null && injector.value == null) {
-                throw new IllegalStateException("Injector for " + entry.getKey().getName() + " was not initialized");
+        for (Entry<String, ServiceRegistrationImpl> entry : provides.entrySet()) {
+            if (entry.getValue().getValue() == ServiceRegistrationImpl.UNDEFINED) {
+                throw new IllegalStateException("Injector for " + entry.getKey() + " was not initialized");
             }
         }
     }
 
-    private void uninjectProvides(final Collection<WritableValueImpl> injectors) {
-        for (WritableValueImpl injector : injectors) {
-            if (injector != null) injector.uninject();
+    private void uninjectProvides(final Collection<ServiceRegistrationImpl> registrations) {
+        for (ServiceRegistrationImpl registration : registrations) {
+            registration.uninject();
         }
     }
 
@@ -1045,7 +1036,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
 
         final boolean execute() {
-            for (ServiceRegistrationImpl registration : provides.keySet()) {
+            for (ServiceRegistrationImpl registration : provides.values()) {
                 for (Dependent dependent : registration.getDependents()) {
                     inform(dependent);
                 }
@@ -1060,7 +1051,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
         void beforeExecute() {
             Lockable lock;
-            for (ServiceRegistrationImpl registration : provides.keySet()) {
+            for (ServiceRegistrationImpl registration : provides.values()) {
                 lock = registration.getLock();
                 synchronized (lock) { lock.acquireRead(); }
             }
@@ -1068,7 +1059,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
         void afterExecute() {
             Lockable lock;
-            for (ServiceRegistrationImpl registration : provides.keySet()) {
+            for (ServiceRegistrationImpl registration : provides.values()) {
                 lock = registration.getLock();
                 synchronized (lock) { lock.releaseRead(); }
             }
@@ -1225,20 +1216,13 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         boolean execute() {
             assert mode() == ServiceMode.REMOVE;
             assert getSubstate() == Substate.REMOVED || getSubstate() == Substate.CANCELLED;
-            ServiceRegistrationImpl registration;
-            WritableValueImpl injector;
             Lockable lock;
             boolean removeRegistration;
-            for (Entry<ServiceRegistrationImpl, WritableValueImpl> provided : provides.entrySet()) {
-                registration = provided.getKey();
-                injector = provided.getValue();
+            for (ServiceRegistrationImpl registration : provides.values()) {
                 lock = registration.getLock();
                 synchronized (lock) {
                     lock.acquireWrite();
                     try {
-                        if (injector != null) {
-                            injector.setInstance(null);
-                        }
                         removeRegistration = registration.clear(ServiceControllerImpl.this);
                         if (removeRegistration) {
                             container.removeRegistration(registration.getName());
@@ -1311,6 +1295,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
         @Override
         public <V> V getValue(final String name) {
+            // TODO: ensure context is still valid
             if (name == null) {
                 throw new IllegalArgumentException("Value name cannot be null"); // TODO: use logging
             }
@@ -1352,6 +1337,19 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             } catch (Throwable t) {
                 startFailed(t, this);
             }
+        }
+
+        @Override
+        public <V> void setValue(final String name, final V value) {
+            // TODO: ensure context is still valid
+            if (name == null || value == null) {
+                throw new IllegalArgumentException("Neither name nor value paramter can be null"); // TODO: use logging
+            }
+            final ServiceRegistrationImpl registration = provides.get(name);
+            if (registration == null) {
+                throw new IllegalArgumentException("Provided value '" + name + "' was not configured via ServiceBuilder.provides() method"); // TODO: use logging
+            }
+            registration.setValue(value);
         }
     }
 
