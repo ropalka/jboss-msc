@@ -22,11 +22,9 @@
 
 package org.jboss.msc.service;
 
-import java.util.function.Consumer;
-
 public interface ServiceBuilder {
     ServiceBuilder requires(String name);
-    <V> Consumer<V> provides(String... names);
+    ServiceBuilder provides(String... names);
     ServiceBuilder mode(ServiceMode mode);
     ServiceBuilder instance(Service service);
     ServiceController install();
