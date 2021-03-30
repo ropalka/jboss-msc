@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface ServiceBuilder<T> {
-    <V> Supplier<V> requires(String name);
+    ServiceBuilder<T> requires(String name);
     <V> Consumer<V> provides(String... names);
     ServiceBuilder<T> mode(ServiceMode mode);
     ServiceBuilder<T> instance(Service service);

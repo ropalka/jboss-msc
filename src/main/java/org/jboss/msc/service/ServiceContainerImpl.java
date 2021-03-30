@@ -417,15 +417,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         }
 
         // Dependencies
-        final Map<String, ServiceBuilderImpl.Dependency> dependencyMap = serviceBuilder.getDependencies();
-        final Set<Dependency> requires = new HashSet<>();
-        ServiceRegistrationImpl dependencyRegistration;
-        Dependency dependency;
-        for (Entry<String, ServiceBuilderImpl.Dependency> dependencyEntry : dependencyMap.entrySet()) {
-            dependencyRegistration = getOrCreateRegistration(dependencyEntry.getKey());
-            dependency = dependencyRegistration;
-            requires.add(dependency);
-        }
+        final Map<String, Dependency> requires = serviceBuilder.getDependencies();
         // Next create the actual controller
         final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
                 requires, provides);

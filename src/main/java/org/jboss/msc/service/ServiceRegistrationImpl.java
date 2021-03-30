@@ -40,10 +40,6 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
      * The set of dependents on this registration.
      */
     private final Set<Dependent> dependents = new IdentityHashSet<>();
-    /**
-     * The dependency value provided by this registration.
-     */
-    private final ReadableValueImpl value = new ReadableValueImpl(this);
 
     // Mutable properties
 
@@ -149,10 +145,6 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
             removed = dependents.size() == 0 && pendingInstallation == 0;
         }
         return removed;
-    }
-
-    ReadableValueImpl getReadableValue() {
-        return value;
     }
 
     @Override

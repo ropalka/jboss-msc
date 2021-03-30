@@ -75,7 +75,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     /**
      * Required dependencies by this service.
      */
-    private final Set<Dependency> requires;
+    private final Map<String, Dependency> requires;
     /**
      * Provided dependencies by this service.
      */
@@ -150,7 +150,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final String serviceId, final Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final String serviceId, final Service service, final Map<String, Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
@@ -196,7 +196,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      */
     void startConfiguration() {
         Lockable lock;
-        for (Dependency dependency : requires) {
+        for (Dependency dependency : requires.values()) {
             lock = dependency.getLock();
             synchronized (lock) {
                 lock.acquireWrite();
@@ -941,7 +941,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     @Override
     public Collection<String> missing() {
         final Set<String> retVal = new IdentityHashSet<>();
-        for (Dependency dependency : requires) {
+        for (Dependency dependency : requires.values()) {
             synchronized (dependency.getLock()) {
                 if (isUnavailable(dependency)) {
                     retVal.add(dependency.getName());
@@ -1031,7 +1031,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     private abstract class DependenciesControllerTask extends ControllerTask {
         final boolean execute() {
             Lockable lock;
-            for (Dependency dependency : requires) {
+            for (Dependency dependency : requires.values()) {
                 lock = dependency.getLock();
                 synchronized (lock) {
                     lock.acquireWrite();
@@ -1260,7 +1260,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     }
                 }
             }
-            for (Dependency dependency : requires) {
+            for (Dependency dependency : requires.values()) {
                 lock = dependency.getLock();
                 synchronized (lock) {
                     lock.acquireWrite();
@@ -1319,6 +1319,18 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 onComplete();
                 taskCompleted();
             }
+        }
+
+        @Override
+        public <V> V getValue(final String name) {
+            if (name == null) {
+                throw new IllegalArgumentException("Value name cannot be null"); // TODO: use logging
+            }
+            final Dependency dependency = requires.get(name);
+            if (dependency == null) {
+                throw new IllegalArgumentException("Requested value '" + name + "' was not configured via ServiceBuilder.requires() method"); // TODO: use logging
+            }
+            return (V)dependency.getValue(); // TODO: suppress warning of unchecked cast
         }
 
         public final void asynchronous() {
