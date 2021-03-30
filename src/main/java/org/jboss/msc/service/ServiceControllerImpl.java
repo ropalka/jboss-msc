@@ -39,13 +39,11 @@ import java.util.concurrent.RejectedExecutionException;
 /**
  * The service controller implementation.
  *
- * @param <S> the service type
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent {
+final class ServiceControllerImpl implements ServiceController, Dependent {
 
     private static final String ILLEGAL_CONTROLLER_STATE = "Illegal controller state";
 
@@ -723,7 +721,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     /** {@inheritDoc} */
-    public ServiceControllerImpl<?> getDependentController() {
+    public ServiceControllerImpl getDependentController() {
         return this;
     }
 

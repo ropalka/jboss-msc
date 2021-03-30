@@ -46,7 +46,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
     /**
      * The current instance.
      */
-    private volatile ServiceControllerImpl<?> instance;
+    private volatile ServiceControllerImpl instance;
     /**
      * The injector providing value.
      */
@@ -123,7 +123,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         return removed;
     }
 
-    void set(final ServiceControllerImpl<?> newInstance, final WritableValueImpl newInjector) throws DuplicateServiceException {
+    void set(final ServiceControllerImpl newInstance, final WritableValueImpl newInjector) throws DuplicateServiceException {
         assert newInstance != null;
         assert isWriteLocked();
         pendingInstallation--;
@@ -136,7 +136,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         if (dependentsStartedCount > 0) instance.dependentsStarted(dependentsStartedCount);
     }
 
-    boolean clear(final ServiceControllerImpl<?> oldInstance) {
+    boolean clear(final ServiceControllerImpl oldInstance) {
         assert oldInstance != null;
         assert isWriteLocked();
         if (instance == oldInstance) {
@@ -160,7 +160,7 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
     }
 
     @Override
-    public ServiceControllerImpl<?> getDependencyController() {
+    public ServiceControllerImpl getDependencyController() {
         synchronized (this) {
             return instance;
         }

@@ -66,6 +66,6 @@ interface Dependent {
      *
      * @return the controller
      */
-    ServiceControllerImpl<?> getDependentController();
+    ServiceControllerImpl getDependentController();
 
 }
