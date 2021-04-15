@@ -29,11 +29,8 @@ import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
- * Multi-value services {@link ServiceBuilder} implementation.
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
@@ -52,7 +49,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ServiceBuilder requires(final String... dependencies) {
         // preconditions
         assertNotInstalled();
@@ -70,7 +66,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ServiceBuilder provides(final String... dependencies) {
         // preconditions
         assertNotInstalled();
@@ -89,7 +84,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ServiceBuilder instance(final Service service) {
         // preconditions
         assertNotInstalled();
