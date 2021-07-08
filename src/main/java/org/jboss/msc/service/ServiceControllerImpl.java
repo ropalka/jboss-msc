@@ -70,6 +70,8 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      * Required dependencies by this service.
      */
     private final Map<String, Dependency> requires;
+    private final Collection<String> requiredValues;
+    private final Collection<String> providedValues;
     /**
      * Provided dependencies by this service.
      */
@@ -147,8 +149,20 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         this.container = container;
         this.service = service;
         this.requires = requires;
+        this.requiredValues = requires.size() > 0 ? Collections.unmodifiableSet(requires.keySet()) : Collections.EMPTY_SET;
         this.provides = provides;
+        this.providedValues = Collections.unmodifiableSet(provides.keySet());
         stoppingDependencies = requires.size();
+    }
+
+    @Override
+    public Collection<String> requires() {
+        return requiredValues;
+    }
+
+    @Override
+    public Collection<String> provides() {
+        return providedValues;
     }
 
     /**

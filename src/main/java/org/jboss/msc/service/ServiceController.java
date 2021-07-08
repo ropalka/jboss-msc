@@ -42,6 +42,9 @@ public interface ServiceController {
      */
     ServiceMode mode();
 
+    Collection<String> requires();
+    Collection<String> provides();
+
     /**
      * Get the current service controller state.
      *
