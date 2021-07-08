@@ -276,7 +276,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private boolean shouldStart() {
         assert holdsLock(this);
-        return mode == ServiceMode.ACTIVE || mode == ServiceMode.PASSIVE || demandedByCount > 0 && (mode == ServiceMode.ON_DEMAND || mode == ServiceMode.LAZY);
+        return mode == ServiceMode.ACTIVE || demandedByCount > 0 && (mode == ServiceMode.ON_DEMAND || mode == ServiceMode.LAZY);
     }
 
     /**
@@ -337,7 +337,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     return Transition.DOWN_to_REMOVING;
                 } else if (mode == ServiceMode.NEVER) {
                     return Transition.DOWN_to_WONT_START;
-                } else if (shouldStart() && (mode != ServiceMode.PASSIVE || stoppingDependencies == 0)) {
+                } else if (shouldStart() && stoppingDependencies == 0) {
                     return Transition.DOWN_to_START_REQUESTED;
                 } else {
                     // mode is either LAZY or ON_DEMAND with demandedByCount == 0, or mode is PASSIVE and downDep > 0
@@ -345,8 +345,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 }
             }
             case WAITING: {
-                if (((mode != ServiceMode.ON_DEMAND && mode != ServiceMode.LAZY) || demandedByCount > 0) &&
-                    (mode != ServiceMode.PASSIVE || stoppingDependencies == 0)) {
+                if (((mode != ServiceMode.ON_DEMAND && mode != ServiceMode.LAZY) || demandedByCount > 0) && stoppingDependencies == 0) {
                     return Transition.WAITING_to_DOWN;
                 }
                 break;
@@ -401,9 +400,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             }
             case START_REQUESTED: {
                 if (shouldStart()) {
-                    if (mode == ServiceMode.PASSIVE && stoppingDependencies > 0) {
-                        return Transition.START_REQUESTED_to_DOWN;
-                    }
                     if (unavailableDependencies > 0 || failCount > 0) {
                         return Transition.START_REQUESTED_to_PROBLEM;
                     }
@@ -417,7 +413,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 break;
             }
             case PROBLEM: {
-                if (! shouldStart() || (unavailableDependencies == 0 && failCount == 0) || mode == ServiceMode.PASSIVE) {
+                if (! shouldStart() || (unavailableDependencies == 0 && failCount == 0)) {
                     return Transition.PROBLEM_to_START_REQUESTED;
                 }
                 break;
@@ -490,8 +486,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     }
                     // fall thru!
                 }
-                case ON_DEMAND:
-                case PASSIVE: {
+                case ON_DEMAND: {
                     if (demandedByCount > 0 && !dependenciesDemanded) {
                         tasks.add(new DemandDependenciesTask());
                         dependenciesDemanded = true;
@@ -877,7 +872,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             this.demandedByCount += demandedByCount;
             if (ignoreNotification()) return;
             boolean notStartedLazy = mode == ServiceMode.LAZY && state != Substate.UP;
-            propagate = cnt == 0 && (mode == ServiceMode.ON_DEMAND || notStartedLazy || mode == ServiceMode.PASSIVE);
+            propagate = cnt == 0 && (mode == ServiceMode.ON_DEMAND || notStartedLazy);
             if (!propagate) return;
             tasks = transition();
             addAsyncTasks(tasks.size());
@@ -896,7 +891,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             final int cnt = --demandedByCount;
             if (ignoreNotification()) return;
             boolean notStartedLazy = mode == ServiceMode.LAZY && state != Substate.UP;
-            propagate = cnt == 0 && (mode == ServiceMode.ON_DEMAND || notStartedLazy || mode == ServiceMode.PASSIVE);
+            propagate = cnt == 0 && (mode == ServiceMode.ON_DEMAND || notStartedLazy);
             if (!propagate) return;
             tasks = transition();
             addAsyncTasks(tasks.size());

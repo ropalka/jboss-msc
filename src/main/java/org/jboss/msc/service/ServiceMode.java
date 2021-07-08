@@ -23,10 +23,6 @@ public enum ServiceMode {
      */
     LAZY,
     /**
-     * Come up automatically as soon as all dependencies are satisfied.
-     */
-    PASSIVE,
-    /**
      * Demand to start, recursively demanding dependencies.  This is the default mode.
      */
     ACTIVE,
