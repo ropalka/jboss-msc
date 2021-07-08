@@ -20,28 +20,52 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 /**
- * A context object for lifecycle events.
+ * Depends on one or more dependencies.
  *
- * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
+ * @see Dependency
  */
-interface LifecycleContext {
-    /**
-     * Call within the service lifecycle method to trigger an <em>asynchronous</em> lifecycle action.  This action
-     * will not be considered complete until indicated so by calling a {@link #complete()} method on this interface.
-     *
-     * @throws IllegalStateException if called twice in a row
-     */
-    void asynchronous();
+interface Dependent {
 
     /**
-     * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle action is complete.
-     *
-     * @throws IllegalStateException if called twice in a row
+     * Notify this dependent that one of its dependencies is available.
      */
-    void complete();
-    <V> V getValue(String name);
+    void dependencyAvailable();
+
+    /**
+     * Notify this dependent that one of its dependencies is unavailable.
+     */
+    void dependencyUnavailable();
+
+    /**
+     * Notify this dependent that one of its dependencies is up.
+     */
+    void dependencyUp();
+
+    /**
+     * Notify this dependent that one of its dependencies is down.
+     */
+    void dependencyDown();
+
+    /**
+     * Notify this dependent that one of its dependencies failed.
+     */
+    void dependencyFailed();
+
+    /**
+     * Notify this dependent that one of its depenencies was corrected.
+     */
+    void dependencySucceeded();
+
+    /**
+     * Get the controller of this dependent.
+     *
+     * @return the controller
+     */
+    ServiceControllerImpl getDependentController();
+
 }

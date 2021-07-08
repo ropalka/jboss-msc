@@ -20,12 +20,12 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
-public interface ServiceBuilder {
-    ServiceBuilder requires(String... names);
-    ServiceBuilder provides(String... names);
-    ServiceBuilder mode(ServiceMode mode);
-    ServiceBuilder instance(Service service);
-    ServiceController install();
+/**
+ * The stop lifecycle context.
+ *
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ */
+public interface StopContext extends LifecycleContext {
 }

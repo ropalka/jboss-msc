@@ -1,4 +1,4 @@
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 /**
  * A possible state for a service controller.

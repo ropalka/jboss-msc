@@ -20,13 +20,10 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 import static org.jboss.logging.Logger.Level.ERROR;
-import static org.jboss.logging.Logger.Level.INFO;
 import static org.jboss.logging.Logger.Level.WARN;
-
-import java.io.IOException;
 
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;

@@ -20,11 +20,11 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 import static java.lang.Thread.holdsLock;
-import static org.jboss.msc.service.SecurityUtils.getCL;
-import static org.jboss.msc.service.SecurityUtils.setTCCL;
+import static org.jboss.msc.SecurityUtils.getCL;
+import static org.jboss.msc.SecurityUtils.setTCCL;
 
 import java.util.ArrayList;
 import java.util.Collection;

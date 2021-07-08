@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2018, Red Hat, Inc., and individual contributors
+ * Copyright 2010, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -20,24 +20,47 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
-import java.util.function.Supplier;
+import java.util.Collection;
 
 /**
+ * A controller for a single service instance.
+ *
+ * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class ReadableValueImpl implements Supplier<Object> {
+public interface ServiceController {
 
-    private final Dependency dependency;
+    /**
+     * Get the service controller's current mode.
+     *
+     * @return the controller mode
+     */
+    ServiceMode mode();
 
-    ReadableValueImpl(final Dependency dependency) {
-        this.dependency = dependency;
-    }
+    Collection<String> requires();
+    Collection<String> provides();
 
-    @Override
-    public Object get() {
-        return dependency.getValue();
-    }
+    /**
+     * Get the current service controller state.
+     *
+     * @return the current state
+     */
+    ServiceState state();
+
+    /**
+     * Get the reason why the last start failed.
+     *
+     * @return the last start exception, or {@code null} if the last start succeeded or the service has not yet started
+     */
+    Throwable reason();
+
+    /**
+     * Get the complete list of dependencies that are unavailable.
+     *
+     * @return a set containing the names of all unavailable dependencies
+     */
+    Collection<String> missing();
 
 }
