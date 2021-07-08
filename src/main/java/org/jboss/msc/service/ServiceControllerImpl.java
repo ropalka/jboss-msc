@@ -633,7 +633,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    public void setMode(final ServiceMode newMode) {
+    void setMode(final ServiceMode newMode) {
         internalSetMode(null, newMode);
     }
 
