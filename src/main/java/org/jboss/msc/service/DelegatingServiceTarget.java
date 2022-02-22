@@ -83,13 +83,6 @@ public class DelegatingServiceTarget implements ServiceTarget {
     /** {@inheritDoc} */
     @Deprecated
     @Override
-    public <T> ServiceBuilder<T> addServiceValue(final ServiceName name, final Value<? extends Service<T>> value) throws IllegalArgumentException {
-        return getDelegate().addServiceValue(name, value);
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
     public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
         return getDelegate().addService(name, service);
     }
