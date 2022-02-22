@@ -27,8 +27,6 @@ import static java.lang.Thread.currentThread;
 import org.jboss.msc.Service;
 import org.jboss.msc.inject.Injector;
 import org.jboss.msc.inject.Injectors;
-import org.jboss.msc.value.ImmediateValue;
-import org.jboss.msc.value.Value;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,25 +74,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         this.serviceTarget = serviceTarget;
         this.parent = parent;
         addProvidesInternal(serviceId, null);
-    }
-
-    @Override
-    public ServiceBuilder<T> addAliases(final ServiceName... aliases) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(aliases);
-        assertThreadSafety();
-        for (final ServiceName alias : aliases) {
-            assertNotNull(alias);
-            assertNotRequired(alias, false);
-        }
-        // implementation
-        for (final ServiceName alias : aliases) {
-            if (!alias.equals(serviceId) && addAliasInternal(alias)) {
-                addProvidesInternal(alias, null);
-            }
-        }
-        return this;
     }
 
     @Override

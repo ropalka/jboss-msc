@@ -145,24 +145,6 @@ public interface ServiceBuilder<T> {
     ////////////////////////
 
     /**
-     * Adds aliases for this service.
-     *
-     * @param aliases the service names to use as aliases
-     * @return the builder
-     * @deprecated Use {@link #provides(ServiceName...)} instead.
-     * This method will be removed in a future release.
-     * @throws ConcurrentModificationException if builder is shared between threads.
-     * Only thread that created the builder can manipulate it.
-     * @throws IllegalArgumentException if value <code>name</code> was before used as parameter in
-     * in {@link #requires(ServiceName)} method call. Value can be either required or provided but not both.
-     * @throws IllegalStateException if this method have been called after {@link #install()}  method.
-     * @throws NullPointerException if <code>aliases</code> parameter is <code>null</code> or any value of the vararg
-     * array is <code>null</code>.
-     */
-    @Deprecated
-    ServiceBuilder<T> addAliases(ServiceName... aliases);
-
-    /**
      * Add a service dependency.  The type of the dependency is checked before it is passed into the (type-safe) injector
      * instance.  Calling this method multiple times for the same service name will only add it as a
      * dependency one time; however this may be useful to specify multiple injections for one dependency.
