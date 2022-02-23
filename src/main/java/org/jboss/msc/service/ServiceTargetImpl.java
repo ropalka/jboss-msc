@@ -25,12 +25,8 @@ package org.jboss.msc.service;
 import static java.util.Collections.synchronizedSet;
 import static java.util.Collections.unmodifiableSet;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.jboss.msc.value.Value;
 
 /**
  * Abstract base class used for ServiceTargets.
@@ -111,15 +107,6 @@ class ServiceTargetImpl implements ServiceTarget {
     @Override
     public ServiceTarget removeListener(final LifecycleListener listener) {
         if (listener != null) lifecycleListeners.remove(listener);
-        return this;
-    }
-
-    @Override
-    public ServiceTarget removeDependency(final ServiceName dependency) {
-        if (dependency == null) {
-            return this;
-        }
-        dependencies.remove(dependency);
         return this;
     }
 

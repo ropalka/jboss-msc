@@ -22,10 +22,7 @@
 
 package org.jboss.msc.service;
 
-import java.util.Collection;
 import java.util.Set;
-
-import org.jboss.msc.value.Value;
 
 /**
  * A service target which delegates to another service target.
@@ -85,14 +82,6 @@ public class DelegatingServiceTarget implements ServiceTarget {
     @Override
     public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
         return getDelegate().addService(name, service);
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public ServiceTarget removeDependency(final ServiceName dependency) {
-        getDelegate().removeDependency(dependency);
-        return this;
     }
 
     /** {@inheritDoc} */

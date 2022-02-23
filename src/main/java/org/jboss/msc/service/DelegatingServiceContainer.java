@@ -23,12 +23,9 @@
 package org.jboss.msc.service;
 
 import java.io.PrintStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import org.jboss.msc.value.Value;
 
 /**
  * A delegating container for things which depend on a service container rather than a specific
@@ -202,13 +199,6 @@ public class DelegatingServiceContainer implements ServiceContainer {
     @Deprecated
     public ServiceTarget removeMonitor(StabilityMonitor monitor) {
         getServiceTargetDelegate().removeMonitor(monitor);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    public ServiceContainer removeDependency(final ServiceName dependency) {
-        getServiceTargetDelegate().removeDependency(dependency);
         return this;
     }
 

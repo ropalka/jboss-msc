@@ -22,10 +22,7 @@
 
 package org.jboss.msc.service;
 
-import java.util.Collection;
 import java.util.Set;
-
-import org.jboss.msc.value.Value;
 
 /**
  * The target of ServiceBuilder installations.
@@ -109,16 +106,6 @@ public interface ServiceTarget {
      */
     @Deprecated
     ServiceTarget removeMonitor(StabilityMonitor monitor);
-
-    /**
-     * Remove a dependency from this target.  Subsequently defined services will not have this dependency.
-     *
-     * @param dependency the dependency
-     * @return this target
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceTarget removeDependency(ServiceName dependency);
 
     /**
      * Returns a set of all dependencies added to this target.
