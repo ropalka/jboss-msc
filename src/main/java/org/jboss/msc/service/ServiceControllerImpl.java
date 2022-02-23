@@ -78,10 +78,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      */
     private final org.jboss.msc.Service service;
     /**
-     * The injections of this service.
-     */
-    private final ValueInjection<?>[] injections;
-    /**
      * Lifecycle listeners.
      */
     private final Set<LifecycleListener> lifecycleListeners;
@@ -190,13 +186,12 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final ServiceName[] serviceAliases, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final ValueInjection<?>[] injections, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final ServiceName[] serviceAliases, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
         this.serviceAliases = serviceAliases;
         this.service = service;
-        this.injections = injections;
         this.requires = requires;
         this.provides = provides;
         this.lifecycleListeners = new IdentityHashSet<>(lifecycleListeners);
@@ -1417,46 +1412,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    private void inject(final ValueInjection<?>[] injections) {
-        boolean ok = false;
-        int i = 0;
-        try {
-            for (; i < injections.length; i++) {
-                inject(injections[i]);
-            }
-            ok = true;
-        } finally {
-            if (!ok) {
-                for (; i >= 0; i--) {
-                    uninject(injections[i]);
-                }
-            }
-        }
-    }
-
-    private <T> void inject(final ValueInjection<T> injection) {
-        try {
-            injection.getTarget().inject(injection.getSource().getValue());
-        } catch (final Throwable t) {
-            ServiceLogger.SERVICE.injectFailed(t, getName());
-            throw t;
-        }
-    }
-
-    private void uninject(final ValueInjection<?>[] injections) {
-        for (ValueInjection<?> injection : injections) {
-            uninject(injection);
-        }
-    }
-
-    private <T> void uninject(final ValueInjection<T> injection) {
-        try {
-            injection.getTarget().uninject();
-        } catch (Throwable t) {
-            ServiceLogger.ROOT.uninjectFailed(t, getName(), injection);
-        }
-    }
-
     private void uninjectProvides(final Collection<WritableValueImpl> injectors) {
         for (WritableValueImpl injector : injectors) {
             if (injector != null) injector.uninject();
@@ -1618,7 +1573,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         boolean execute() {
             final StartContextImpl context = new StartContextImpl();
             try {
-                inject(injections);
                 startService(service, context);
                 boolean startFailed;
                 synchronized (context.lock) {
@@ -1639,7 +1593,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                     startFailed = (context.state & AbstractContext.FAILED) != 0;
                 }
                 if (startFailed) {
-                    uninject(injections);
                     uninjectProvides(provides.values());
                 } else {
                     checkProvidedValues();
@@ -1671,7 +1624,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 startException = e;
             }
         }
-        uninject(injections);
         uninjectProvides(provides.values());
     }
 
@@ -1701,7 +1653,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                         }
                     }
                 }
-                uninject(injections);
                 uninjectProvides(provides.values());
             }
             return true;
@@ -1885,7 +1836,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
                 }
             }
             if ((state & CLOSED) != 0) {
-                uninject(injections);
                 uninjectProvides(provides.values());
                 taskCompleted();
             }
@@ -1916,7 +1866,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     private final class StopContextImpl extends AbstractContext implements StopContext {
         void onComplete() {
-            uninject(injections);
             uninjectProvides(provides.values());
         }
     }

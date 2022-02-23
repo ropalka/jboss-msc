@@ -81,10 +81,6 @@ interface ServiceLogger {
     void stopServiceMissing(ServiceName serviceName);
 
     @LogMessage(level = WARN)
-    @Message(id = 6, value = "Uninjection \"%2$s\" of %1$s failed unexpectedly")
-    void uninjectFailed(@Cause Throwable cause, ServiceName serviceName, ValueInjection<?> valueInjection);
-
-    @LogMessage(level = WARN)
     @Message(id = 7, value = "An internal service error has occurred while processing an operation on %s")
     void internalServiceError(@Cause Throwable cause, ServiceName serviceName);
 

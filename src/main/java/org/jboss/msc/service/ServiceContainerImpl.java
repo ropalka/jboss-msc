@@ -70,7 +70,6 @@ import org.jboss.modules.ref.Reaper;
 import org.jboss.modules.ref.Reference;
 import org.jboss.modules.ref.WeakReference;
 import org.jboss.msc.Version;
-import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.management.ServiceContainerMXBean;
 import org.jboss.msc.service.management.ServiceStatus;
@@ -707,16 +706,11 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         // Dependencies
         final Map<ServiceName, ServiceBuilderImpl.Dependency> dependencyMap = serviceBuilder.getDependencies();
         final Set<Dependency> requires = new HashSet<>();
-        final List<ValueInjection<?>> valueInjections = new ArrayList<>();
         Dependency dependency;
         for (ServiceBuilderImpl.Dependency dependencyDefinition : dependencyMap.values()) {
             dependency = dependencyDefinition.getRegistration();
             requires.add(dependency);
-            for (Injector<Object> injector : dependencyDefinition.getInjectorList()) {
-                valueInjections.add(new ValueInjection<>(dependency, injector));
-            }
         }
-        final ValueInjection<?>[] valueInjectionArray = valueInjections.toArray(new ValueInjection<?>[valueInjections.size()]);
         final Collection<ServiceName> serviceAliases = serviceBuilder.getServiceAliases();
         final ServiceName[] aliases = new ServiceName[serviceAliases.size()];
         int i = 0;
@@ -726,8 +720,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
         // Next create the actual controller
         final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, aliases, serviceBuilder.getService(),
-                requires, provides, valueInjectionArray,
-                serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
+                requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
         boolean ok = false;
         try {
             synchronized (this) {
