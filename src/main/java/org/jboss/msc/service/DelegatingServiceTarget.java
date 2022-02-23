@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import java.util.Set;
-
 /**
  * A service target which delegates to another service target.
  *
@@ -82,13 +80,6 @@ public class DelegatingServiceTarget implements ServiceTarget {
     @Override
     public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
         return getDelegate().addService(name, service);
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public Set<ServiceName> getDependencies() {
-        return getDelegate().getDependencies();
     }
 
     /** {@inheritDoc} */

@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import java.util.Set;
-
 /**
  * The target of ServiceBuilder installations.
  *
@@ -106,14 +104,5 @@ public interface ServiceTarget {
      */
     @Deprecated
     ServiceTarget removeMonitor(StabilityMonitor monitor);
-
-    /**
-     * Returns a set of all dependencies added to this target.
-     * 
-     * @return all dependencies of this target
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    Set<ServiceName> getDependencies();
 
 }
