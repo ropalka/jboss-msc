@@ -90,30 +90,6 @@ public class DelegatingServiceTarget implements ServiceTarget {
     /** {@inheritDoc} */
     @Deprecated
     @Override
-    public ServiceTarget addDependency(final ServiceName dependency) {
-        getDelegate().addDependency(dependency);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public ServiceTarget addDependency(final ServiceName... dependencies) {
-        getDelegate().addDependency(dependencies);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public ServiceTarget addDependency(final Collection<ServiceName> dependencies) {
-        getDelegate().addDependency(dependencies);
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
     public ServiceTarget removeDependency(final ServiceName dependency) {
         getDelegate().removeDependency(dependency);
         return this;
