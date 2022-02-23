@@ -26,7 +26,6 @@ import static java.lang.Thread.currentThread;
 
 import org.jboss.msc.Service;
 import org.jboss.msc.inject.Injector;
-import org.jboss.msc.inject.Injectors;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -168,21 +167,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         return serviceTarget.install(this);
     }
 
-    // deprecated methods
-
-    @Override
-    public <I> ServiceBuilder<T> addDependency(final ServiceName dependency, final Class<I> type, final Injector<I> target) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(dependency);
-        assertNotNull(type);
-        assertNotNull(target);
-        assertThreadSafety();
-        // implementation
-        addRequiresInternal(dependency).getInjectorList().add(Injectors.cast(target, type));
-        return this;
-    }
-
     // implementation internals
 
     void addLifecycleListenersNoCheck(final Set<LifecycleListener> listeners) {
@@ -195,17 +179,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     void addMonitorsNoCheck(final Collection<? extends StabilityMonitor> monitors) {
         for (final StabilityMonitor monitor : monitors) {
             if (monitor != null) addMonitorInternal(monitor);
-        }
-    }
-
-    void addDependenciesNoCheck(final Iterable<ServiceName> dependencies) {
-        // For backward compatibility reasons when
-        // service dependencies are defined via ServiceTarget
-        for (final ServiceName dependency : dependencies) {
-            if (dependency == null) continue;
-            if (requires != null && requires.containsKey(dependency)) continue; // dependency already required
-            if (provides != null && provides.containsKey(dependency)) continue; // cannot depend on ourselves
-            addRequiresInternal(dependency);
         }
     }
 

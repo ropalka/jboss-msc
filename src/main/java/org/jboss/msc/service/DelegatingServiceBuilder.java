@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import org.jboss.msc.inject.Injector;
-
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -92,14 +90,6 @@ public class DelegatingServiceBuilder<T> implements ServiceBuilder<T> {
     ////////////////////////
     // DEPRECATED METHODS //
     ////////////////////////
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
-    public <I> ServiceBuilder<T> addDependency(final ServiceName dependency, final Class<I> type, final Injector<I> target) {
-        getDelegate().addDependency(dependency, type, target);
-        return this;
-    }
 
     /** {@inheritDoc} */
     @Deprecated
