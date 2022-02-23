@@ -23,8 +23,6 @@
 package org.jboss.msc.service;
 
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * A service controller which delegates to another service controller.
@@ -86,27 +84,6 @@ public class DelegatingServiceController<S> implements ServiceController<S> {
     @Override
     public State getState() {
         return getDelegate().getState();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    @Deprecated
-    public S getValue() throws IllegalStateException {
-        return getDelegate().getValue();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    @Deprecated
-    public S awaitValue() throws IllegalStateException, InterruptedException {
-        return getDelegate().awaitValue();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    @Deprecated
-    public S awaitValue(final long time, final TimeUnit unit) throws IllegalStateException, InterruptedException, TimeoutException {
-        return getDelegate().awaitValue(time, unit);
     }
 
     /** {@inheritDoc} */

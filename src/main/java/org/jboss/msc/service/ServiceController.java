@@ -26,7 +26,6 @@ import java.util.Collection;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.jboss.msc.value.Value;
 
 /**
  * A controller for a single service instance.
@@ -36,7 +35,7 @@ import org.jboss.msc.value.Value;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceController<S> extends Value<S> {
+public interface ServiceController<S> {
 
     /**
      * Get this service's parent service, or {@code null} if there is none.
@@ -86,40 +85,6 @@ public interface ServiceController<S> extends Value<S> {
      * @return the current state
      */
     State getState();
-
-    /**
-     * Get the service value.
-     *
-     * @return the service value
-     * @throws IllegalStateException if the service is not available (i.e. it is not up)
-     * @deprecated this method will be removed in a future release
-     */
-    @Deprecated
-    S getValue() throws IllegalStateException;
-
-    /**
-     * Wait for a service to come up, and then return its value.
-     *
-     * @return the service value
-     * @throws IllegalStateException if the service is not available (i.e. it was removed or failed)
-     * @throws InterruptedException if the wait operation was interrupted
-     * @deprecated this method will be removed in a future release
-     */
-    @Deprecated
-    S awaitValue() throws IllegalStateException, InterruptedException;
-
-    /**
-     * Wait for a service to come up for a certain amount of time, and then return its value.
-     *
-     * @param time the amount of time to wait
-     * @param unit the unit of time to wait
-     * @return the service value
-     * @throws IllegalStateException if the service is not available (i.e. it was removed or failed)
-     * @throws InterruptedException if the wait operation was interrupted
-     * @deprecated this method will be removed in a future release
-     */
-    @Deprecated
-    S awaitValue(long time, TimeUnit unit) throws IllegalStateException, InterruptedException, TimeoutException;
 
     /**
      * Get the service.

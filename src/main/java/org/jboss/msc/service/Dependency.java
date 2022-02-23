@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import org.jboss.msc.value.Value;
-
 /**
  * Dependencies of a service.
  *
@@ -31,7 +29,7 @@ import org.jboss.msc.value.Value;
  * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
  * @see Dependent
  */
-interface Dependency extends Value<Object> {
+interface Dependency {
 
     /**
      * Add dependent to this dependency.

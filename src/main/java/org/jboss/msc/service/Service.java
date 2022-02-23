@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import org.jboss.msc.value.Value;
-
 /**
  * A service is a thing which can be started and stopped.  A service may be started or stopped from any thread.  In
  * general, injections will always happen from the same thread that will call {@code start()}, and uninjections will
@@ -68,7 +66,7 @@ import org.jboss.msc.value.Value;
  * This class will be removed in a future release.
  */
 @Deprecated
-public interface Service<T> extends org.jboss.msc.Service, Value<T> {
+public interface Service<T> extends org.jboss.msc.Service {
 
     /**
      * Start the service.  Do not return until the service has been fully started, unless an asynchronous service

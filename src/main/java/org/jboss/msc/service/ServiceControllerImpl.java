@@ -36,9 +36,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.jboss.msc.service.management.ServiceStatus;
 
 /**
@@ -1054,70 +1051,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     public ServiceController.State getState() {
         synchronized (this) {
             return state.getState();
-        }
-    }
-
-    public S getValue() throws IllegalStateException {
-        if (!(service instanceof Service)) {
-            throw new UnsupportedOperationException();
-        }
-        return ((Service<S>) service).getValue();
-    }
-
-    public S awaitValue() throws IllegalStateException, InterruptedException {
-        assert !holdsLock(this);
-        if (!(service instanceof Service)) {
-            throw new UnsupportedOperationException();
-        }
-        synchronized (this) {
-            for (;;) switch (state.getState()) {
-                case UP: {
-                    return ((Service<S>) service).getValue();
-                }
-                case START_FAILED: {
-                    throw new IllegalStateException("Failed to start service", startException);
-                }
-                case REMOVED: {
-                    throw new IllegalStateException("Service was removed");
-                }
-                default: {
-                    wait();
-                }
-            }
-        }
-    }
-
-    public S awaitValue(final long time, final TimeUnit unit) throws IllegalStateException, InterruptedException, TimeoutException {
-        assert !holdsLock(this);
-        if (!(service instanceof Service)) {
-            throw new UnsupportedOperationException();
-        }
-        long now;
-        long then = System.nanoTime();
-        long remaining = unit.toNanos(time);
-        synchronized (this) {
-            do {
-                switch (state.getState()) {
-                    case UP: {
-                        return ((Service<S>) service).getValue();
-                    }
-                    case START_FAILED: {
-                        throw new IllegalStateException("Failed to start service", startException);
-                    }
-                    case REMOVED: {
-                        throw new IllegalStateException("Service was removed");
-                    }
-                    default: {
-                        wait(remaining / 1000000L, (int) (remaining % 1000000L));
-                    }
-                }
-                // When will then be now?
-                now = System.nanoTime();
-                remaining -= now - then;
-                // soon...
-                then = now;
-            } while (remaining > 0L);
-            throw new TimeoutException("Operation timed out");
         }
     }
 
