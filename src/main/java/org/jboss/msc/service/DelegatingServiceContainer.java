@@ -184,12 +184,6 @@ public class DelegatingServiceContainer implements ServiceContainer {
 
     /** {@inheritDoc} */
     @Deprecated
-    public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
-        return getServiceTargetDelegate().addService(name, service);
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
     public ServiceTarget addMonitor(StabilityMonitor monitor) {
         getServiceTargetDelegate().addMonitor(monitor);
         return this;

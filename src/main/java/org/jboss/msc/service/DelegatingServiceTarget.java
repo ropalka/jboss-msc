@@ -78,13 +78,6 @@ public class DelegatingServiceTarget implements ServiceTarget {
     /** {@inheritDoc} */
     @Deprecated
     @Override
-    public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
-        return getDelegate().addService(name, service);
-    }
-
-    /** {@inheritDoc} */
-    @Deprecated
-    @Override
     public ServiceTarget addMonitor(final StabilityMonitor monitor) {
         getDelegate().addMonitor(monitor);
         return this;

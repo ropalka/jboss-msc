@@ -72,18 +72,6 @@ public interface ServiceTarget {
     ////////////////////////
 
     /**
-     * Get a builder which can be used to add a service to this target.
-     *
-     * @param name the service name
-     * @param service the service
-     * @return the builder for the service
-     * @deprecated Use {@link #addService(ServiceName)} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    <T> ServiceBuilder<T> addService(ServiceName name, Service<T> service);
-
-    /**
      * Add a stability monitor that will be added to all the ServiceBuilders installed in this target.
      *
      * @param monitor the monitor to add to the target

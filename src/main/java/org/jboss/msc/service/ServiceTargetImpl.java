@@ -60,17 +60,6 @@ class ServiceTargetImpl implements ServiceTarget {
     }
 
     @Override
-    public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
-        if (name == null) {
-            throw new IllegalArgumentException("name is null");
-        }
-        if (service == null) {
-            throw new IllegalArgumentException("service is null");
-        }
-        return createServiceBuilder(name, service, null);
-    }
-
-    @Override
     public ServiceBuilder<?> addService(final ServiceName name) {
         if (name == null) {
             throw new IllegalArgumentException("name is null");
