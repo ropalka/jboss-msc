@@ -59,12 +59,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final org.jboss.msc.service.Service<T> service, final ServiceControllerImpl<?> parent) {
-        this(serviceId, serviceTarget, parent);
-        if (service == null) throw new IllegalArgumentException("Service can not be null");
-        this.service = service;
-    }
-
     ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final ServiceControllerImpl<?> parent) {
         this.serviceId = serviceId;
         this.serviceTarget = serviceTarget;
