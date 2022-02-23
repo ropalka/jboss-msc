@@ -94,16 +94,4 @@ public interface Service {
      */
     void stop(StopContext context);
 
-    /**
-     * Factory for services providing single value.
-     *
-     * @param injector target
-     * @param value to assign
-     * @param <V> provided value type
-     * @return new service instance
-     */
-    static <V> Service newInstance(final Consumer<V> injector, final V value) {
-        return new SimpleService<>(injector, value);
-    }
-
 }
