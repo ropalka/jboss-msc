@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -52,7 +51,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
     private Service service;
-    private Set<ServiceName> aliases;
     private ServiceController.Mode initialMode;
     private Map<ServiceName, Dependency> requires;
     private Set<StabilityMonitor> monitors;
@@ -191,15 +189,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         return dependency;
     }
 
-    boolean addAliasInternal(final ServiceName alias) {
-        if (aliases == null) aliases = new HashSet<>();
-        if (!aliases.contains(alias)) {
-            aliases.add(alias);
-            return true;
-        }
-        return false;
-    }
-
     void addProvidesInternal(final ServiceName name, final WritableValueImpl dependency) {
         if (dependency != null) {
             provides.put(name, dependency);
@@ -216,10 +205,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     void addListenerInternal(final LifecycleListener listener) {
         if (lifecycleListeners == null) lifecycleListeners = new IdentityHashSet<>();
         lifecycleListeners.add(listener);
-    }
-
-    Collection<ServiceName> getServiceAliases() {
-        return aliases == null ? Collections.emptySet() : aliases;
     }
 
     Map<ServiceName, WritableValueImpl> getProvides() {

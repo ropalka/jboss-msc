@@ -67,10 +67,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      */
     private final ServiceName serviceId;
     /**
-     * The service aliases.
-     */
-    private final ServiceName[] serviceAliases;
-    /**
      * The service itself.
      */
     private final org.jboss.msc.Service service;
@@ -183,11 +179,10 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final ServiceName[] serviceAliases, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
-        this.serviceAliases = serviceAliases;
         this.service = service;
         this.requires = requires;
         this.provides = provides;
@@ -1065,10 +1060,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         return serviceId;
     }
 
-    public ServiceName[] getAliases() {
-        return serviceAliases.clone();
-    }
-
     void addListener(final ContainerShutdownListener listener) {
         assert !holdsLock(this);
         synchronized (this) {
@@ -1174,17 +1165,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         synchronized (this) {
             final String parentName = parent == null ? null : parent.getName().getCanonicalName();
             final String name = getName().getCanonicalName();
-            final ServiceName[] aliasNames = getAliases();
-            final int aliasLength = aliasNames.length;
-            final String[] aliases;
-            if (aliasLength == 0) {
-                aliases = NO_STRINGS;
-            } else {
-                aliases = new String[aliasLength];
-                for (int i = 0; i < aliasLength; i++) {
-                    aliases[i] = aliasNames[i].getCanonicalName();
-                }
-            }
             String serviceClass = service.getClass().getName();
             final Collection<Dependency> dependencies = requires;
             final int dependenciesLength = dependencies.size();
@@ -1202,7 +1182,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return new ServiceStatus(
                     parentName,
                     name,
-                    aliases,
                     serviceClass,
                     mode.name(),
                     state.getState().name(),

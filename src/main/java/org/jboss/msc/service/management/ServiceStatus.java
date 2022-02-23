@@ -35,7 +35,6 @@ public class ServiceStatus implements Serializable {
     private static final long serialVersionUID = 6538576441150451665L;
 
     private final String serviceName;
-    private final String[] aliases;
     private final String serviceClassName;
     private final String modeName;
     private final String stateName;
@@ -51,7 +50,6 @@ public class ServiceStatus implements Serializable {
      *
      * @param parentName the name of the parent
      * @param serviceName the service name
-     * @param aliases the aliases of this service
      * @param serviceClassName the name of the service class
      * @param modeName the service mode name
      * @param stateName the service state name
@@ -62,12 +60,9 @@ public class ServiceStatus implements Serializable {
      * @param dependencyUnavailable {@code true} if some dependency is unavailable
      */
     @ConstructorProperties({"parentName", "serviceName", "serviceClassName", "modeName", "stateName", "substateName", "dependencies", "dependencyFailed", "exception", "dependencyUnavailable"})
-    public ServiceStatus(final String parentName, final String serviceName, final String[] aliases, final String serviceClassName, final String modeName, final String stateName, final String substateName, final String[] dependencies, final boolean dependencyFailed, final String exception, final boolean dependencyUnavailable) {
+    public ServiceStatus(final String parentName, final String serviceName, final String serviceClassName, final String modeName, final String stateName, final String substateName, final String[] dependencies, final boolean dependencyFailed, final String exception, final boolean dependencyUnavailable) {
         if (serviceName == null) {
             throw new IllegalArgumentException("serviceName is null");
-        }
-        if (aliases == null) {
-            throw new IllegalArgumentException("aliases is null");
         }
         if (serviceClassName == null) {
             throw new IllegalArgumentException("serviceClassName is null");
@@ -85,7 +80,6 @@ public class ServiceStatus implements Serializable {
             throw new IllegalArgumentException("dependencies is null");
         }
         this.serviceName = serviceName;
-        this.aliases = aliases;
         this.serviceClassName = serviceClassName;
         this.modeName = modeName;
         this.stateName = stateName;
@@ -104,15 +98,6 @@ public class ServiceStatus implements Serializable {
      */
     public String getServiceName() {
         return serviceName;
-    }
-
-    /**
-     * Get the service aliases, if any, as strings.  If there are no aliases, an empty array is returned.
-     *
-     * @return the service aliases
-     */
-    public String[] getAliases() {
-        return aliases;
     }
 
     /**
@@ -195,17 +180,6 @@ public class ServiceStatus implements Serializable {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append("Service \"").append(serviceName).append("\" ");
-        final String[] aliases = this.aliases;
-        if (aliases.length > 0) {
-            builder.append("(aliases: ");
-            for (int i = 0; i < aliases.length; i++) {
-                builder.append(aliases[i]);
-                if (i < aliases.length - 1) {
-                    builder.append(", ");
-                }
-            }
-            builder.append(") ");
-        }
         builder.append("(class ").append(serviceClassName).append(')');
         builder.append(" mode ").append(modeName);
         builder.append(" state ").append(stateName);
