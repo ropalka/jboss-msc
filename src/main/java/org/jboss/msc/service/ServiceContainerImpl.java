@@ -694,13 +694,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
 
         // Dependencies
-        final Map<ServiceName, ServiceBuilderImpl.Dependency> dependencyMap = serviceBuilder.getDependencies();
-        final Set<Dependency> requires = new HashSet<>();
-        Dependency dependency;
-        for (ServiceBuilderImpl.Dependency dependencyDefinition : dependencyMap.values()) {
-            dependency = dependencyDefinition.getRegistration();
-            requires.add(dependency);
-        }
+        final Collection<Dependency> requires = serviceBuilder.getDependencies().values();
         // Next create the actual controller
         final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
                 requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);

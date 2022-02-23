@@ -72,7 +72,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         assertNotInstanceId(dependency);
         assertNotProvided(dependency, true);
         // implementation
-        return (Supplier<V>) addRequiresInternal(dependency).getRegistration().getReadableValue();
+        return (Supplier<V>) ((ServiceRegistrationImpl)addRequiresInternal(dependency)).getReadableValue();
     }
 
     @Override
@@ -182,7 +182,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         if (existing != null) {
             return existing;
         }
-        final Dependency dependency = new Dependency(serviceTarget.getOrCreateRegistration(name));
+        final Dependency dependency = serviceTarget.getOrCreateRegistration(name);
         requires.put(name, dependency);
         return dependency;
     }
@@ -295,18 +295,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private static void assertNotRemove(final ServiceController.Mode mode) {
         if (mode == ServiceController.Mode.REMOVE) {
             throw new IllegalArgumentException("Initial service mode cannot be REMOVE");
-        }
-    }
-
-    static final class Dependency {
-        private final ServiceRegistrationImpl registration;
-
-        Dependency(final ServiceRegistrationImpl registration) {
-            this.registration = registration;
-        }
-
-        ServiceRegistrationImpl getRegistration() {
-            return registration;
         }
     }
 
