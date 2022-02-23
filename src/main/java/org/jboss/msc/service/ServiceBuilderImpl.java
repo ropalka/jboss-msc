@@ -24,8 +24,6 @@ package org.jboss.msc.service;
 
 import static java.lang.Thread.currentThread;
 
-import org.jboss.msc.Service;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -105,7 +103,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         assertThreadSafety();
         assertServiceNotConfigured();
         // implementation
-        this.service = service != null ? service : Service.NULL;
+        this.service = service != null ? service : NullService.INSTANCE;
         return this;
     }
 
@@ -151,7 +149,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         assertThreadSafety();
         // implementation
         installed = true;
-        if (service == null) service = Service.NULL;
+        if (service == null) service = NullService.INSTANCE;
         if (initialMode == null) initialMode = ServiceController.Mode.ACTIVE;
         return serviceTarget.install(this);
     }

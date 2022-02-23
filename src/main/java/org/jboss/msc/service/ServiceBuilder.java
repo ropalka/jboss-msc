@@ -113,7 +113,7 @@ public interface ServiceBuilder<T> {
      * @throws IllegalStateException if this method have been either called twice or it was called after
      * {@link #install()} method.
      */
-    ServiceBuilder<T> setInstance(org.jboss.msc.Service service);
+    ServiceBuilder<T> setInstance(Service service);
 
     /**
      * Adds a service listener to be added to the service.

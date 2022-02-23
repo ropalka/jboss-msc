@@ -87,16 +87,6 @@ public interface ServiceController<S> {
     State getState();
 
     /**
-     * Get the service.
-     *
-     * @return the service
-     * @throws IllegalStateException if the service is not available (i.e. it is not up)
-     * @deprecated this method will be removed in a future release
-     */
-    @Deprecated
-    Service<S> getService() throws IllegalStateException;
-
-    /**
      * Get the name of this service, if any.
      *
      * @return the name, or {@code null} if none was specified.

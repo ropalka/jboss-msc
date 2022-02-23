@@ -20,35 +20,33 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc;
-
-import org.jboss.msc.service.StartContext;
-import org.jboss.msc.service.StopContext;
-
-import java.util.function.Consumer;
+package org.jboss.msc.service;
 
 /**
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class SimpleService<V> implements Service {
+final class NullService implements Service {
 
-    private final Consumer<V> injector;
-    private final V value;
+    static final NullService INSTANCE = new NullService();
 
-    SimpleService(final Consumer<V> injector, final V value) {
-        if (injector == null || value == null) {
-            throw new NullPointerException("Parameter cannot be null");
-        }
-        this.injector = injector;
-        this.value = value;
-    }
+    private NullService() {}
 
     @Override
-    public void start(final StartContext context) {
-        injector.accept(value);
-    }
+    public void start(final StartContext context) {}
 
     @Override
     public void stop(final StopContext context) {}
+
+    public String toString() {
+        return "Null service";
+    }
+
+    public int hashCode() {
+        return 31;
+    }
+
+    public boolean equals(final Object obj) {
+        return this == obj;
+    }
 
 }

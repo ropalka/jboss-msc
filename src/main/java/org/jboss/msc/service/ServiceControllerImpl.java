@@ -69,7 +69,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     /**
      * The service itself.
      */
-    private final org.jboss.msc.Service service;
+    private final Service service;
     /**
      * Lifecycle listeners.
      */
@@ -179,7 +179,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
@@ -1049,13 +1049,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    public Service<S> getService() throws IllegalStateException {
-        if (!(service instanceof Service)) {
-            throw new UnsupportedOperationException();
-        }
-        return (Service<S>) service;
-    }
-
     public ServiceName getName() {
         return serviceId;
     }
@@ -1518,7 +1511,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return true;
         }
 
-        private void startService(org.jboss.msc.Service service, StartContext context) throws StartException {
+        private void startService(Service service, StartContext context) throws StartException {
             final ClassLoader contextClassLoader = setTCCL(getCL(service.getClass()));
             try {
                 service.start(context);
@@ -1570,7 +1563,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return true;
         }
 
-        private void stopService(org.jboss.msc.Service service, StopContext context) {
+        private void stopService(Service service, StopContext context) {
             final ClassLoader contextClassLoader = setTCCL(getCL(service.getClass()));
             try {
                 service.stop(context);
