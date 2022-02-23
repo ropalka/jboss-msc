@@ -115,11 +115,6 @@ class ServiceTargetImpl implements ServiceTarget {
     }
 
     @Override
-    public Set<StabilityMonitor> getMonitors() {
-        return unmodifiableSet(monitors);
-    }
-
-    @Override
     public ServiceTarget addDependency(ServiceName dependency) {
         if (dependency == null) {
             return this;
