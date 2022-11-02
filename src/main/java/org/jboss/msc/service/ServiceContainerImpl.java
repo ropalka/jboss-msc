@@ -30,11 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +51,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jboss.modules.ref.Reaper;
 import org.jboss.modules.ref.Reference;
 import org.jboss.modules.ref.WeakReference;
-import org.jboss.threads.EnhancedQueueExecutor;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
@@ -538,32 +534,18 @@ final class ServiceContainerImpl implements ServiceContainer {
                     return doPrivileged(new ThreadAction(r, id, threadSeq));
                 }
             };
-            if (EnhancedQueueExecutor.DISABLE_HINT) {
-                delegate = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>(), threadFactory, POLICY) {
-                    protected void afterExecute(final Runnable r, final Throwable t) {
-                        super.afterExecute(r, t);
-                        if (t != null) {
-                            HANDLER.uncaughtException(Thread.currentThread(), t);
-                        }
+            delegate = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>(), threadFactory, POLICY) {
+                protected void afterExecute(final Runnable r, final Throwable t) {
+                    super.afterExecute(r, t);
+                    if (t != null) {
+                        HANDLER.uncaughtException(Thread.currentThread(), t);
                     }
+                }
 
-                    protected void terminated() {
-                        shutdownComplete(shutdownInitiated);
-                    }
-                };
-            } else {
-                delegate = new EnhancedQueueExecutor.Builder()
-                    .setCorePoolSize(corePoolSize)
-                    .setMaximumPoolSize(maximumPoolSize)
-                    .setKeepAliveTime(keepAliveTime, unit)
-                    .setTerminationTask(new Runnable() {
-                        public void run() {
-                            shutdownComplete(shutdownInitiated);
-                        }
-                    })
-                    .setThreadFactory(threadFactory)
-                    .build();
-            }
+                protected void terminated() {
+                    shutdownComplete(shutdownInitiated);
+                }
+            };
         }
 
         public void shutdown() {
