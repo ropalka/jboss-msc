@@ -20,33 +20,52 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 /**
+ * Depends on one or more dependencies.
+ *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
+ * @see Dependency
  */
-final class NullService implements Service {
+interface Dependent {
 
-    static final NullService INSTANCE = new NullService();
+    /**
+     * Notify this dependent that one of its dependencies is available.
+     */
+    void dependencyAvailable();
 
-    private NullService() {}
+    /**
+     * Notify this dependent that one of its dependencies is unavailable.
+     */
+    void dependencyUnavailable();
 
-    @Override
-    public void start(final StartContext context) {}
+    /**
+     * Notify this dependent that one of its dependencies is up.
+     */
+    void dependencyUp();
 
-    @Override
-    public void stop(final StopContext context) {}
+    /**
+     * Notify this dependent that one of its dependencies is down.
+     */
+    void dependencyDown();
 
-    public String toString() {
-        return "Null service";
-    }
+    /**
+     * Notify this dependent that one of its dependencies failed.
+     */
+    void dependencyFailed();
 
-    public int hashCode() {
-        return 31;
-    }
+    /**
+     * Notify this dependent that one of its depenencies was corrected.
+     */
+    void dependencySucceeded();
 
-    public boolean equals(final Object obj) {
-        return this == obj;
-    }
+    /**
+     * Get the controller of this dependent.
+     *
+     * @return the controller
+     */
+    ServiceControllerImpl getDependentController();
 
 }

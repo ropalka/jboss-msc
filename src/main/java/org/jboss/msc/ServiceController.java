@@ -20,37 +20,47 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
+
+import java.util.Collection;
 
 /**
- * The start lifecycle context.
+ * A controller for a single service instance.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface StartContext extends LifecycleContext {
+public interface ServiceController {
 
     /**
-     * Call within the service lifecycle method to trigger an <em>asynchronous</em> lifecycle action.
-     * This action will not be considered complete until indicated so by calling 
-     * either {@link #complete()} or {@link #fail(Throwable)} method on this interface.
-     */
-    void asynchronous();
-
-    /**
-     * Call when start lifecycle action has failed for some reason.
+     * Get the service controller's current mode.
      *
-     * @param reason the reason for the failure
-     * @throws IllegalStateException if called after {@link #complete()} was called
+     * @return the controller mode
      */
-    void fail(Throwable reason);
+    ServiceMode mode();
+
+    Collection<String> requires();
+    Collection<String> provides();
 
     /**
-     * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle action is complete.
+     * Get the current service controller state.
      *
-     * @throws IllegalStateException if called after {@link #fail(Throwable)} was called or if called twice in a row
+     * @return the current state
      */
-    void complete();
+    ServiceState state();
 
-    <V> void setValue(String name, V value);
+    /**
+     * Get the reason why the last start failed.
+     *
+     * @return the last start exception, or {@code null} if the last start succeeded or the service has not yet started
+     */
+    Throwable reason();
+
+    /**
+     * Get the complete list of dependencies that are unavailable.
+     *
+     * @return a set containing the names of all unavailable dependencies
+     */
+    Collection<String> missing();
+
 }

@@ -20,50 +20,28 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
-
-import java.util.Collection;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+package org.jboss.msc;
 
 /**
- * A controller for a single service instance.
+ * A context object for lifecycle events.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceController {
+interface LifecycleContext {
+    /**
+     * Call within the service lifecycle method to trigger an <em>asynchronous</em> lifecycle action.  This action
+     * will not be considered complete until indicated so by calling a {@link #complete()} method on this interface.
+     *
+     * @throws IllegalStateException if called twice in a row
+     */
+    void asynchronous();
 
     /**
-     * Get the service controller's current mode.
+     * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle action is complete.
      *
-     * @return the controller mode
+     * @throws IllegalStateException if called twice in a row
      */
-    ServiceMode mode();
-
-    Collection<String> requires();
-    Collection<String> provides();
-
-    /**
-     * Get the current service controller state.
-     *
-     * @return the current state
-     */
-    ServiceState state();
-
-    /**
-     * Get the reason why the last start failed.
-     *
-     * @return the last start exception, or {@code null} if the last start succeeded or the service has not yet started
-     */
-    Throwable reason();
-
-    /**
-     * Get the complete list of dependencies that are unavailable.
-     *
-     * @return a set containing the names of all unavailable dependencies
-     */
-    Collection<String> missing();
-
+    void complete();
+    <V> V getValue(String name);
 }

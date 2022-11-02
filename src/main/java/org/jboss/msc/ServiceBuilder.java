@@ -20,28 +20,12 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
-/**
- * A context object for lifecycle events.
- *
- * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
- * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
- */
-interface LifecycleContext {
-    /**
-     * Call within the service lifecycle method to trigger an <em>asynchronous</em> lifecycle action.  This action
-     * will not be considered complete until indicated so by calling a {@link #complete()} method on this interface.
-     *
-     * @throws IllegalStateException if called twice in a row
-     */
-    void asynchronous();
-
-    /**
-     * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle action is complete.
-     *
-     * @throws IllegalStateException if called twice in a row
-     */
-    void complete();
-    <V> V getValue(String name);
+public interface ServiceBuilder {
+    ServiceBuilder requires(String... names);
+    ServiceBuilder provides(String... names);
+    ServiceBuilder mode(ServiceMode mode);
+    ServiceBuilder instance(Service service);
+    ServiceController install();
 }

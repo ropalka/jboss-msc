@@ -20,12 +20,37 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 /**
- * The stop lifecycle context.
+ * The start lifecycle context.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface StopContext extends LifecycleContext {
+public interface StartContext extends LifecycleContext {
+
+    /**
+     * Call within the service lifecycle method to trigger an <em>asynchronous</em> lifecycle action.
+     * This action will not be considered complete until indicated so by calling 
+     * either {@link #complete()} or {@link #fail(Throwable)} method on this interface.
+     */
+    void asynchronous();
+
+    /**
+     * Call when start lifecycle action has failed for some reason.
+     *
+     * @param reason the reason for the failure
+     * @throws IllegalStateException if called after {@link #complete()} was called
+     */
+    void fail(Throwable reason);
+
+    /**
+     * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle action is complete.
+     *
+     * @throws IllegalStateException if called after {@link #fail(Throwable)} was called or if called twice in a row
+     */
+    void complete();
+
+    <V> void setValue(String name, V value);
 }

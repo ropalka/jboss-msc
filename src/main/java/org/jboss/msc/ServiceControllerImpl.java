@@ -20,11 +20,9 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 import static java.lang.Thread.holdsLock;
-import static org.jboss.msc.service.SecurityUtils.getCL;
-import static org.jboss.msc.service.SecurityUtils.setTCCL;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1160,11 +1158,11 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
 
         private void startService(Service service, StartContext context) {
-            final ClassLoader contextClassLoader = setTCCL(getCL(service.getClass()));
+            final ClassLoader contextClassLoader = SecurityUtils.setTCCL(SecurityUtils.getCL(service.getClass()));
             try {
                 service.start(context);
             } finally {
-                setTCCL(contextClassLoader);
+                SecurityUtils.setTCCL(contextClassLoader);
             }
         }
     }
@@ -1212,11 +1210,11 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
 
         private void stopService(Service service, StopContext context) {
-            final ClassLoader contextClassLoader = setTCCL(getCL(service.getClass()));
+            final ClassLoader contextClassLoader = SecurityUtils.setTCCL(SecurityUtils.getCL(service.getClass()));
             try {
                 service.stop(context);
             } finally {
-                setTCCL(contextClassLoader);
+                SecurityUtils.setTCCL(contextClassLoader);
             }
         }
     }

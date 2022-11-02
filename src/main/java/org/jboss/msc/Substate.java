@@ -1,4 +1,4 @@
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 /**
  * A fine-grained substate of the more general basic controller {@link ServiceState}s.  The list of possible substates may

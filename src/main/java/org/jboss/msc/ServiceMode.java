@@ -1,4 +1,4 @@
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 /**
  * The controller mode for a service.

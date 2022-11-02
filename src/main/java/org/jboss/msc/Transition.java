@@ -1,4 +1,4 @@
-package org.jboss.msc.service;
+package org.jboss.msc;
 
 /**
  * A transition from one substate to another.  The list of possible transitions may change over time, so users should

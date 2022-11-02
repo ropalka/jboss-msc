@@ -20,12 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
-
-import org.jboss.msc.service.StartContext;
-import org.jboss.msc.service.StopContext;
-
-import java.util.function.Consumer;
+package org.jboss.msc;
 
 /**
  * A service is a thing which can be started and stopped.

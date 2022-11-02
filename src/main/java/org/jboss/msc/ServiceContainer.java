@@ -20,9 +20,9 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc.service;
+package org.jboss.msc;
 
-import static org.jboss.msc.service.SecurityUtils.getSystemProperty;
+import static org.jboss.msc.SecurityUtils.getSystemProperty;
 
 import java.util.Collection;
 import java.util.Set;
