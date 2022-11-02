@@ -36,8 +36,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
-import org.jboss.msc.service.management.ServiceStatus;
-
 /**
  * The service controller implementation.
  *
@@ -1016,92 +1014,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    ServiceStatus getStatus() {
-        synchronized (this) {
-            final String name = getName().getCanonicalName();
-            String serviceClass = service.getClass().getName();
-            final Collection<Dependency> dependencies = requires;
-            final int dependenciesLength = dependencies.size();
-            final String[] dependencyNames;
-            if (dependenciesLength == 0) {
-                dependencyNames = NO_STRINGS;
-            } else {
-                dependencyNames = new String[dependenciesLength];
-                int i = 0;
-                for (Dependency dependency : dependencies) {
-                    dependencyNames[i++] = dependency.getName().getCanonicalName();
-                }
-            }
-            Throwable startException = this.startException;
-            return new ServiceStatus(
-                    name,
-                    serviceClass,
-                    mode.name(),
-                    state.getState().name(),
-                    state.name(),
-                    dependencyNames,
-                    failCount != 0,
-                    startException != null ? startException.toString() : null,
-                    unavailableDependencies > 0
-            );
-        }
-    }
-
-    String dumpServiceDetails() {
-        final StringBuilder b = new StringBuilder();
-        Set<Dependent> dependents = new IdentityHashSet<>();
-        for (ServiceRegistrationImpl registration : provides.keySet()) {
-            synchronized (registration) {
-                dependents.addAll(registration.getDependents());
-            }
-            b.append("Service Name: ").append(registration.getName().toString()).append(" - Dependents: ").append(dependents.size()).append('\n');
-            for (Dependent dependent : dependents) {
-                final ServiceControllerImpl<?> controller = dependent.getDependentController();
-                synchronized (controller) {
-                    b.append("        ").append(controller.getName().toString()).append(" - State: ").append(controller.state.getState()).append(" (Substate: ").append(controller.state).append(")\n");
-                }
-            }
-        }
-        synchronized (this) {
-            final Substate state = this.state;
-            b.append("State: ").append(state.getState()).append(" (Substate: ").append(state).append(")\n");
-            b.append("Service Mode: ").append(mode).append('\n');
-            if (startException != null) {
-                b.append("Start Exception: ").append(startException.getClass().getName()).append(" (Message: ").append(startException.getMessage()).append(")\n");
-            }
-            String serviceObjectString = "(indeterminate)";
-            Object serviceObjectClass = "(indeterminate)";
-            try {
-                Object serviceObject = service;
-                if (serviceObject != null) {
-                    serviceObjectClass = serviceObject.getClass();
-                    serviceObjectString = serviceObject.toString();
-                }
-            } catch (Throwable ignored) {}
-            b.append("Service Object: ").append(serviceObjectString).append('\n');
-            b.append("Service Object Class: ").append(serviceObjectClass).append('\n');
-            b.append("Demanded By: ").append(demandedByCount).append('\n');
-            b.append("Stopping Dependencies: ").append(stoppingDependencies).append('\n');
-            b.append("Running Dependents: ").append(runningDependents).append('\n');
-            b.append("Fail Count: ").append(failCount).append('\n');
-            b.append("Unavailable Dep Count: ").append(unavailableDependencies).append('\n');
-            b.append("Dependencies Demanded: ").append(dependenciesDemanded ? "yes" : "no").append('\n');
-            b.append("Async Tasks: ").append(asyncTasks).append('\n');
-        }
-        b.append("Dependencies: ").append(requires.size()).append('\n');
-        for (Dependency dependency : requires) {
-            final ServiceControllerImpl<?> controller = dependency.getDependencyController();
-            b.append("    ").append(dependency.getName().toString());
-            if (controller == null) {
-                b.append(" (missing)\n");
-            } else {
-                synchronized (controller) {
-                    b.append(" - State: ").append(controller.state.getState()).append(" (Substate: ").append(controller.state).append(")\n");
-                }
-            }
-        }
-        return b.toString();
-    }
 
     private Substate getSubstate() {
         synchronized (this) {
