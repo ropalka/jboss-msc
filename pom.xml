@@ -47,9 +47,9 @@
 
     <properties>
         <!-- Compilation Settings -->
-        <jdk.min.version>11</jdk.min.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <jdk.min.version>21</jdk.min.version>
+        <!--maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target-->
         <!-- Dependency Settings -->
         <version.jboss-logging>3.5.3.Final</version.jboss-logging>
         <version.jboss-logging-processor>2.2.1.Final</version.jboss-logging-processor>
@@ -151,9 +151,47 @@
                         <manifestEntries>
                             <Jar-Version>${project.version}</Jar-Version>
                             <Jar-Name>${project.artifactId}</Jar-Name>
+                            <Multi-Release>true</Multi-Release>
                         </manifestEntries>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>11</release>
+                            <buildDirectory>${project.build.directory}</buildDirectory>
+                            <compileSourceRoots>${project.compileSourceRoots}</compileSourceRoots>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>
+                            </additionalClasspathElements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-java21</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>21</release>
+                            <buildDirectory>${project.build.directory}</buildDirectory>
+                            <compileSourceRoots>${project.basedir}/src/main/java21</compileSourceRoots>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>
+                            </additionalClasspathElements>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

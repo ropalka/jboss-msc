@@ -106,7 +106,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     private final Object lock = new Object();
 
     private int unstableServices;
-    private long shutdownInitiated;
+    long shutdownInitiated;
 
     private final List<TerminateListener> terminateListeners = new ArrayList<>(1);
 
@@ -602,7 +602,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         shutdown();
     }
 
-    private void shutdownComplete(final long started) {
+    public void shutdownComplete(final long started) {
         synchronized (this) {
             terminateInfo = new TerminateListener.Info(started, System.nanoTime());
         }
@@ -815,12 +815,12 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     }
 
     private static final AtomicInteger executorSeq = new AtomicInteger(1);
-    private static final Thread.UncaughtExceptionHandler HANDLER = new Thread.UncaughtExceptionHandler() {
+    static final Thread.UncaughtExceptionHandler HANDLER = new Thread.UncaughtExceptionHandler() {
         public void uncaughtException(final Thread t, final Throwable e) {
             ServiceLogger.ROOT.uncaughtException(e, t);
         }
     };
-    private static final ThreadPoolExecutor.CallerRunsPolicy POLICY = new ThreadPoolExecutor.CallerRunsPolicy();
+    static final ThreadPoolExecutor.CallerRunsPolicy POLICY = new ThreadPoolExecutor.CallerRunsPolicy();
 
     static class ServiceThread extends Thread {
         private final ServiceContainerImpl container;
@@ -867,35 +867,10 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
                 private final AtomicInteger threadSeq = new AtomicInteger(1);
 
                 public Thread newThread(final Runnable r) {
-                    return doPrivileged(new ThreadAction(r, id, threadSeq));
+                    return doPrivileged(new ServiceContainerImpl.ThreadAction(r, id, threadSeq));
                 }
             };
-            if (EnhancedQueueExecutor.DISABLE_HINT) {
-                delegate = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>(), threadFactory, POLICY) {
-                    protected void afterExecute(final Runnable r, final Throwable t) {
-                        super.afterExecute(r, t);
-                        if (t != null) {
-                            HANDLER.uncaughtException(Thread.currentThread(), t);
-                        }
-                    }
-
-                    protected void terminated() {
-                        shutdownComplete(shutdownInitiated);
-                    }
-                };
-            } else {
-                delegate = new EnhancedQueueExecutor.Builder()
-                    .setCorePoolSize(corePoolSize)
-                    .setMaximumPoolSize(maximumPoolSize)
-                    .setKeepAliveTime(keepAliveTime, unit)
-                    .setTerminationTask(new Runnable() {
-                        public void run() {
-                            shutdownComplete(shutdownInitiated);
-                        }
-                    })
-                    .setThreadFactory(threadFactory)
-                    .build();
-            }
+            delegate = JDKSpecific.getExecutorService(corePoolSize, maximumPoolSize, keepAliveTime, unit, threadFactory, ServiceContainerImpl.this);
         }
 
         public void shutdown() {
