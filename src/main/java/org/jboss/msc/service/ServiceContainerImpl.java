@@ -55,9 +55,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,7 +71,6 @@ import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.management.ServiceContainerMXBean;
 import org.jboss.msc.service.management.ServiceStatus;
-import org.jboss.threads.EnhancedQueueExecutor;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
@@ -814,63 +810,12 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         return controller.getState() == ServiceController.State.REMOVED;
     }
 
-    private static final AtomicInteger executorSeq = new AtomicInteger(1);
-    static final Thread.UncaughtExceptionHandler HANDLER = new Thread.UncaughtExceptionHandler() {
-        public void uncaughtException(final Thread t, final Throwable e) {
-            ServiceLogger.ROOT.uncaughtException(e, t);
-        }
-    };
-    static final ThreadPoolExecutor.CallerRunsPolicy POLICY = new ThreadPoolExecutor.CallerRunsPolicy();
-
-    static class ServiceThread extends Thread {
-        private final ServiceContainerImpl container;
-
-        ServiceThread(final Runnable runnable, final ServiceContainerImpl container) {
-            super(runnable);
-            this.container = container;
-        }
-
-        ServiceContainerImpl getContainer() {
-            return container;
-        }
-    }
-
-    final class ThreadAction implements PrivilegedAction<ServiceThread> {
-        private final Runnable r;
-        private final int id;
-        private final AtomicInteger threadSeq;
-
-        ThreadAction(final Runnable r, final int id, final AtomicInteger threadSeq) {
-            this.r = r;
-            this.id = id;
-            this.threadSeq = threadSeq;
-        }
-
-        public ServiceThread run() {
-            ServiceThread thread = new ServiceThread(r, ServiceContainerImpl.this);
-            if (thread.isDaemon()) thread.setDaemon(false);
-            if (thread.getPriority() != Thread.NORM_PRIORITY) thread.setPriority(Thread.NORM_PRIORITY);
-            thread.setName(String.format("MSC service thread %d-%d", Integer.valueOf(id), Integer.valueOf(threadSeq.getAndIncrement())));
-            thread.setUncaughtExceptionHandler(HANDLER);
-            return thread;
-        }
-    }
-
-
     final class ContainerExecutor implements ExecutorService {
 
         private final ExecutorService delegate;
 
         ContainerExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit) {
-            final ThreadFactory threadFactory = new ThreadFactory() {
-                private final int id = executorSeq.getAndIncrement();
-                private final AtomicInteger threadSeq = new AtomicInteger(1);
-
-                public Thread newThread(final Runnable r) {
-                    return doPrivileged(new ServiceContainerImpl.ThreadAction(r, id, threadSeq));
-                }
-            };
-            delegate = JDKSpecific.getExecutorService(corePoolSize, maximumPoolSize, keepAliveTime, unit, threadFactory, ServiceContainerImpl.this);
+            delegate = JDKSpecific.getExecutorService(corePoolSize, maximumPoolSize, keepAliveTime, unit, ServiceContainerImpl.this);
         }
 
         public void shutdown() {
