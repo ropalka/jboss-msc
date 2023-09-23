@@ -81,7 +81,7 @@ class Lockable {
      */
     final void releaseRead() {
         assert holdsLock(this);
-        if (--readLocksCount == 0) notify();
+        if (--readLocksCount == 0) notifyAll();
     }
 
     /**
@@ -109,7 +109,7 @@ class Lockable {
      */
     final void releaseWrite() {
         assert holdsLock(this);
-        notify();
+        notifyAll();
     }
 
     /**
