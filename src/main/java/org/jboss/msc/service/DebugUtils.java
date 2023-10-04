@@ -22,10 +22,8 @@
 
 package org.jboss.msc.service;
 
-import java.io.File;
 import java.io.PrintStream;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class DebugUtils {
 
@@ -35,35 +33,27 @@ public final class DebugUtils {
 
     private static volatile PrintStream logFile;
     private static final String DEBUG_FILE = "/home/opalka/msc.debug" + System.currentTimeMillis();
-    private static final Lock lock = new ReentrantLock(true);
+    private static final AtomicLong logCounter = new AtomicLong();
 
     static {
         try {
-            logFile = new PrintStream(new File(DEBUG_FILE));
+            logFile = new PrintStream(DEBUG_FILE);
         } catch (Exception ignored) {
             System.err.println("Couldn't create debug file: " + DEBUG_FILE);
         }
     }
 
     public static void debug(final String msg) {
-        lock.lock();
-        try {
-            logFile.println("[" + Thread.currentThread().getName() + "] " + msg);
-            logFile.flush();
-        } finally {
-            lock.unlock();
-        }
+        final long msgId = logCounter.incrementAndGet();
+        logFile.println("[msg-id-" + msgId + "][" + Thread.currentThread().getName() + "] " + msg);
+        logFile.flush();
     }
 
     public static void debug(final Throwable e, final String msg) {
-        lock.lock();
-        try {
-            logFile.println("[" + Thread.currentThread().getName() + "] " + msg);
-            e.printStackTrace(logFile);
-            logFile.flush();
-        } finally {
-            lock.unlock();
-        }
+        final long msgId = logCounter.incrementAndGet();
+        logFile.println("[msg-id-" + msgId + "][" + Thread.currentThread().getName() + "] " + msg);
+        e.printStackTrace(logFile);
+        logFile.flush();
     }
 
 }
