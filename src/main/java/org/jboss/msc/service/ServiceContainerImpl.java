@@ -141,6 +141,32 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
     }
 
+    private final class HeartBeatThread extends Thread {
+        private final CountDownLatch shutdownLatch = new CountDownLatch(1);
+        private HeartBeatThread() {
+            setName(ServiceContainerImpl.this.getName() + " Heart Beat Thread");
+            setDaemon(false);
+        }
+
+        @Override
+        public void run() {
+            DebugUtils.debug("MSC heart beat thread started");
+            while (true) {
+                try {
+                    shutdownLatch.await();
+                    break;
+                } catch (final InterruptedException ie) {
+                    // ignored
+                }
+            }
+            DebugUtils.debug("MSC heart beat thread finished");
+        }
+
+        private void shutdown() {
+            shutdownLatch.countDown();
+        }
+    }
+
     private volatile TerminateListener.Info terminateInfo;
 
     private volatile boolean down;
@@ -150,6 +176,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     private final String name;
     private final ObjectName objectName;
     private final Thread shutdownThread;
+    private final HeartBeatThread heartBeatThread;
 
     private final ServiceContainerMXBean containerMXBean = new ServiceContainerMXBean() {
         public ServiceStatus getServiceStatus(final String name) {
@@ -362,6 +389,8 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
         this.objectName = objectName;
         this.shutdownThread = autoShutdown ? new ShutdownHookThread(this) : null;
+        this.heartBeatThread = true ? new HeartBeatThread() : null;
+        this.heartBeatThread.start();
     }
 
     void registerShutdownCleaner() {
@@ -554,6 +583,8 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         final ContainerShutdownListener shutdownListener = new ContainerShutdownListener(new Runnable() {
             public void run() {
                 executor.shutdown();
+                heartBeatThread.shutdown();
+                // ServiceContainerImpl.this.shutdownComplete(ServiceContainerImpl.this.shutdownInitiated); TODO: is it correct place? Or should VirtualThread providing executor lifecycle be reused?
                 DebugUtils.debug("ServiceContainerImpl.shutdown() FINISHED");
             }
         });
