@@ -23,9 +23,12 @@
 package org.jboss.msc.service;
 
 import java.io.PrintStream;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class DebugUtils {
+
+    private static final LinkedBlockingQueue<DebugMessage> messageQueue = new LinkedBlockingQueue<>();
 
     private DebugUtils() {
         // forbidden instantiation
@@ -41,19 +44,62 @@ public final class DebugUtils {
         } catch (Exception ignored) {
             System.err.println("Couldn't create debug file: " + DEBUG_FILE);
         }
+        final Runnable processQueueTask = new Runnable() {
+            @Override
+            public void run() {
+                DebugMessage msg;
+                Throwable failure;
+                while (true) {
+                    try {
+                        msg = messageQueue.take();
+                        logFile.println(msg);
+                        failure = msg.getFailure();
+                        if (failure != null) {
+                            failure.printStackTrace(logFile);
+                        }
+                        logFile.flush();
+                    } catch (InterruptedException ignored) {}
+                }
+            }
+        };
+        Thread loggingThread = new Thread(processQueueTask);
+        loggingThread.setDaemon(true);
+        loggingThread.setName("JBoss MSC Debug Utils Logging Thread");
+        loggingThread.start();
     }
 
     public static void debug(final String msg) {
-        final long msgId = logCounter.incrementAndGet();
-        logFile.println("[msg-id-" + msgId + "][" + Thread.currentThread().getName() + "] " + msg);
-        logFile.flush();
+        messageQueue.offer(new DebugMessage(logCounter.incrementAndGet(), Thread.currentThread().getName(), msg));
     }
 
     public static void debug(final Throwable e, final String msg) {
-        final long msgId = logCounter.incrementAndGet();
-        logFile.println("[msg-id-" + msgId + "][" + Thread.currentThread().getName() + "] " + msg);
-        e.printStackTrace(logFile);
-        logFile.flush();
+        messageQueue.offer(new DebugMessage(logCounter.incrementAndGet(), Thread.currentThread().getName(), msg, e));
     }
 
+    private static class DebugMessage {
+        private final long id;
+        private final String threadName;
+
+        private final String message;
+
+        private final Throwable failure;
+
+        private DebugMessage(final long id, final String threadName, final String message) {
+            this(id, threadName, message, null);
+        }
+        private DebugMessage(final long id, final String threadName, final String message, final Throwable failure) {
+            this.id = id;
+            this.threadName = threadName;
+            this.message = message;
+            this.failure = failure;
+        }
+
+        public String toString() {
+            return "[msg-id-" + id + "][" + threadName + "] " + message;
+        }
+
+        private Throwable getFailure() {
+            return failure;
+        }
+    }
 }
