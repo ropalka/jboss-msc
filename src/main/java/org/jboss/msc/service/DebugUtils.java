@@ -38,34 +38,43 @@ public final class DebugUtils {
     private static final String DEBUG_FILE = "/home/opalka/msc.debug" + System.currentTimeMillis();
     private static final AtomicLong logCounter = new AtomicLong();
 
+    static final LoggingThread LOGGING_THREAD;
+
     static {
         try {
             logFile = new PrintStream(DEBUG_FILE);
         } catch (Exception ignored) {
             System.err.println("Couldn't create debug file: " + DEBUG_FILE);
         }
-        final Runnable processQueueTask = new Runnable() {
-            @Override
-            public void run() {
-                DebugMessage msg;
-                Throwable failure;
-                while (true) {
-                    try {
-                        msg = messageQueue.take();
-                        logFile.println(msg);
-                        failure = msg.getFailure();
-                        if (failure != null) {
-                            failure.printStackTrace(logFile);
-                        }
-                        logFile.flush();
-                    } catch (InterruptedException ignored) {}
-                }
+        LOGGING_THREAD = new LoggingThread();
+        LOGGING_THREAD.setDaemon(false);
+        LOGGING_THREAD.setName("JBoss MSC Debug Utils Logging Thread");
+        LOGGING_THREAD.start();
+    }
+
+    static final class LoggingThread extends Thread {
+        private volatile boolean shutdown;
+        @Override
+        public void run() {
+            DebugMessage msg;
+            Throwable failure;
+            while (true) {
+                try {
+                    if (messageQueue.isEmpty() && shutdown) return;
+                    msg = messageQueue.take();
+                    logFile.println(msg);
+                    failure = msg.getFailure();
+                    if (failure != null) {
+                        failure.printStackTrace(logFile);
+                    }
+                    logFile.flush();
+                } catch (InterruptedException ignored) {}
             }
-        };
-        Thread loggingThread = new Thread(processQueueTask);
-        loggingThread.setDaemon(true);
-        loggingThread.setName("JBoss MSC Debug Utils Logging Thread");
-        loggingThread.start();
+        }
+
+        void shutdown() {
+            shutdown = true;
+        }
     }
 
     public static void debug(final String msg) {

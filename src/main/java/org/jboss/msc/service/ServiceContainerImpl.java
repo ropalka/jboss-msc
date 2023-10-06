@@ -584,6 +584,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             public void run() {
                 executor.shutdown();
                 heartBeatThread.shutdown();
+                DebugUtils.LOGGING_THREAD.shutdown();
                 // ServiceContainerImpl.this.shutdownComplete(ServiceContainerImpl.this.shutdownInitiated); TODO: is it correct place? Or should VirtualThread providing executor lifecycle be reused?
                 DebugUtils.debug("ServiceContainerImpl.shutdown() FINISHED");
             }
