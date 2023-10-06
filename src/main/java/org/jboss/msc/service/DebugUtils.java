@@ -24,6 +24,7 @@ package org.jboss.msc.service;
 
 import java.io.PrintStream;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class DebugUtils {
@@ -61,7 +62,8 @@ public final class DebugUtils {
             while (true) {
                 try {
                     if (messageQueue.isEmpty() && shutdown) return;
-                    msg = messageQueue.take();
+                    msg = messageQueue.poll(1L, TimeUnit.SECONDS);
+                    if (msg == null) continue;
                     logFile.println(msg);
                     failure = msg.getFailure();
                     if (failure != null) {

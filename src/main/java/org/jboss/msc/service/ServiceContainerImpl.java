@@ -582,13 +582,16 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         // shutting down all services
         final ContainerShutdownListener shutdownListener = new ContainerShutdownListener(new Runnable() {
             public void run() {
+                DebugUtils.debug("ServiceContainerImpl.shutdown() shutdownListener - STARTED");
                 executor.shutdown();
+                //try { executor.awaitTermination(1L, TimeUnit.DAYS); } catch (InterruptedException ignored) {}
                 heartBeatThread.shutdown();
                 DebugUtils.LOGGING_THREAD.shutdown();
-                // ServiceContainerImpl.this.shutdownComplete(ServiceContainerImpl.this.shutdownInitiated); TODO: is it correct place? Or should VirtualThread providing executor lifecycle be reused?
-                DebugUtils.debug("ServiceContainerImpl.shutdown() FINISHED");
+                //ServiceContainerImpl.this.shutdownComplete(ServiceContainerImpl.this.shutdownInitiated);// TODO: is it correct place? Or should VirtualThread providing executor lifecycle be reused?
+                DebugUtils.debug("ServiceContainerImpl.shutdown() shutdownListener - FINISHED");
             }
         });
+        DebugUtils.debug("ServiceContainerImpl.shutdown() shutdownListener - SCHEDULED");
         ServiceControllerImpl<?> controller;
         for (ServiceRegistrationImpl registration : registry.values()) {
             controller = registration.getDependencyController();
@@ -878,6 +881,8 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
     final class ContainerExecutor implements ExecutorService {
 
+        private final java.util.concurrent.atomic.AtomicLong pendingTasks = new java.util.concurrent.atomic.AtomicLong();
+
         private final ExecutorService delegate;
 
         ContainerExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit) {
@@ -885,6 +890,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
 
         public void shutdown() {
+            DebugUtils.debug("EXECUTOR.shutdown pending == " + pendingTasks.get());
             delegate.shutdown();
         }
 
@@ -933,7 +939,8 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
 
         public void execute(final Runnable command) {
-            delegate.execute(command);
+            DebugUtils.debug("EXECUTOR.submittedTask pending == " + pendingTasks.incrementAndGet());
+            delegate.execute(() -> {try {command.run(); } finally {DebugUtils.debug("EXECUTOR.executedTask pending == " + pendingTasks.decrementAndGet());}});
         }
     }
 }

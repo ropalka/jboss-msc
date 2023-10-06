@@ -743,15 +743,18 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     void doExecute(final List<Runnable> tasks) {
         assert !holdsLock(this);
         if (tasks.isEmpty()) return;
+        debug("doExecute() START");
         final Executor executor = container.getExecutor();
         for (Runnable task : tasks) {
             try {
+                debug("doExecute() submitting task + " + task);
                 executor.execute(task);
             } catch (RejectedExecutionException e) {
                 DebugUtils.debug(e, "SC.shutdown() == " + container.isShutdown());
                 task.run();
             }
         }
+        debug("doExecute() END");
     }
 
     public void setMode(final ServiceController.Mode newMode) {
