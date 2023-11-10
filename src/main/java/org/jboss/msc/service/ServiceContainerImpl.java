@@ -47,16 +47,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.management.MBeanServer;
@@ -584,10 +575,19 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             public void run() {
                 DebugUtils.debug("ServiceContainerImpl.shutdown() shutdownListener - STARTED");
                 executor.shutdown();
-                //try { executor.awaitTermination(1L, TimeUnit.DAYS); } catch (InterruptedException ignored) {}
-                heartBeatThread.shutdown();
-                DebugUtils.LOGGING_THREAD.shutdown();
-                //ServiceContainerImpl.this.shutdownComplete(ServiceContainerImpl.this.shutdownInitiated);// TODO: is it correct place? Or should VirtualThread providing executor lifecycle be reused?
+                final Runnable finalTask = new Runnable() {
+                    @Override
+                    public void run() {
+                        try { executor.awaitTermination(1L, TimeUnit.DAYS); } catch (InterruptedException ignored) {}
+                        ServiceContainerImpl.this.shutdownComplete(ServiceContainerImpl.this.shutdownInitiated);// TODO: is it correct place? Or should VirtualThread providing executor lifecycle be reused?
+                        heartBeatThread.shutdown();
+                        DebugUtils.LOGGING_THREAD.shutdown();
+                    }
+                };
+                final Thread t = new Thread(finalTask);
+                t.setName("MSC Final Task Thread");
+                t.setDaemon(false);
+                t.start();
                 DebugUtils.debug("ServiceContainerImpl.shutdown() shutdownListener - FINISHED");
             }
         });
@@ -881,6 +881,8 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
     final class ContainerExecutor implements ExecutorService {
 
+        private volatile boolean shutdown = false;
+
         private final java.util.concurrent.atomic.AtomicLong pendingTasks = new java.util.concurrent.atomic.AtomicLong();
 
         private final ExecutorService delegate;
@@ -891,7 +893,8 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
         public void shutdown() {
             DebugUtils.debug("EXECUTOR.shutdown pending == " + pendingTasks.get());
-            delegate.shutdown();
+            shutdown = true;
+            //delegate.shutdown();
         }
 
         public List<Runnable> shutdownNow() {
@@ -939,8 +942,18 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
 
         public void execute(final Runnable command) {
-            DebugUtils.debug("EXECUTOR.submittedTask pending == " + pendingTasks.incrementAndGet());
-            delegate.execute(() -> {try {command.run(); } finally {DebugUtils.debug("EXECUTOR.executedTask pending == " + pendingTasks.decrementAndGet());}});
+            if (shutdown) throw new RejectedExecutionException();
+            pendingTasks.incrementAndGet();
+            DebugUtils.debug("EXECUTOR.submittedTask pending == " + pendingTasks.get());
+            //delegate.execute(() -> {try {command.run(); } finally {DebugUtils.debug("EXECUTOR.executedTask pending == " + pendingTasks.decrementAndGet());}});
+            delegate.execute(() -> {try {command.run(); } finally {
+                long pending = pendingTasks.decrementAndGet();
+                DebugUtils.debug("EXECUTOR.executedTask pending == " + pendingTasks.get());
+                if (pending == 0 && shutdown) {
+                    DebugUtils.debug("EXECUTOR.executedTask delegate shutdown");
+                    delegate.shutdown();
+                }
+            }});
         }
     }
 }
