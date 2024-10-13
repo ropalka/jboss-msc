@@ -96,19 +96,10 @@ interface ServiceLogger {
     @Message(id = 9, value = "An error occurred while trying to close the profile output file: %s")
     void profileOutputCloseFailed(/* ! @Cause */ IOException cause);
 
-    @LogMessage(level = ERROR)
-    @Message(id = 10, value = "Failed to register MBean with MBeanServer")
-    void mbeanFailed(@Cause Exception e);
-
     @Message(id = 11, value = "Service not started")
     IllegalStateException serviceNotStarted();
 
     @LogMessage(level = ERROR)
     @Message(id = 12, value = "Injection failed for service %s")
     void injectFailed(@Cause Throwable cause, ServiceName serviceName);
-
-    @LogMessage(level = WARN)
-    @Message(id = 13, value = "Failed to retrieve platform MBeanServer")
-    void mbeanServerNotAvailable(@Cause Exception e);
-
 }

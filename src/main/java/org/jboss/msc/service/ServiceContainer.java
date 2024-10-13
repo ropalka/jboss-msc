@@ -24,7 +24,6 @@ package org.jboss.msc.service;
 
 import static org.jboss.msc.service.SecurityUtils.getSystemProperty;
 
-import java.io.PrintStream;
 import java.lang.ref.Cleaner;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -240,7 +239,6 @@ public interface ServiceContainer extends ServiceTarget, ServiceRegistry {
         public static ServiceContainer create(String name, int coreSize, long keepAliveTime, TimeUnit keepAliveTimeUnit, boolean autoShutdown) {
             final ServiceContainerImpl container = new ServiceContainerImpl(name, calculateCoreSize(coreSize), keepAliveTime, keepAliveTimeUnit, autoShutdown);
             container.registerShutdownCleaner();
-            container.registerMBeanCleaner();
             final ServiceContainer retVal = new LeakDetectorServiceContainer(container);
             cleaner.register(retVal, container::shutdown);
             return retVal;
