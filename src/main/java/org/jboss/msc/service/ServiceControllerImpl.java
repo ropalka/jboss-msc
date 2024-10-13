@@ -171,14 +171,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      * were added).
      */
     private volatile ChildServiceTarget childTarget;
-    /**
-     * The system nanotime of the moment in which the last lifecycle change was
-     * initiated.
-     */
-    @SuppressWarnings("VolatileLongOrDoubleField")
-    private volatile long lifecycleTime;
-
-    private static final String[] NO_STRINGS = new String[0];
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
@@ -567,7 +559,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     break;
                 }
                 case DOWN_to_START_REQUESTED: {
-                    lifecycleTime = System.nanoTime();
                     tasks.add(new DependencyAvailableTask());
                     tasks.add(new DependentStartedTask());
                     break;
@@ -582,7 +573,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     break;
                 }
                 case UP_to_STOP_REQUESTED: {
-                    lifecycleTime = System.nanoTime();
                     if (mode == Mode.LAZY && demandedByCount == 0) {
                         assert dependenciesDemanded;
                         tasks.add(new UndemandDependenciesTask());
@@ -1548,10 +1538,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
         public final void asynchronous() {
             setState(ASYNC);
-        }
-
-        public final long getElapsedTime() {
-            return System.nanoTime() - lifecycleTime;
         }
 
         public final ServiceController getController() {
