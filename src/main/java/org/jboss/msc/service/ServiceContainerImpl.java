@@ -55,7 +55,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.msc.service.ServiceController.Mode;
-import org.jboss.threads.EnhancedQueueExecutor;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
@@ -565,32 +564,18 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
                     return doPrivileged(new ThreadAction(r, id, threadSeq));
                 }
             };
-            if (EnhancedQueueExecutor.DISABLE_HINT) {
-                delegate = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>(), threadFactory, POLICY) {
-                    protected void afterExecute(final Runnable r, final Throwable t) {
-                        super.afterExecute(r, t);
-                        if (t != null) {
-                            HANDLER.uncaughtException(Thread.currentThread(), t);
-                        }
+            delegate = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>(), threadFactory, POLICY) {
+                protected void afterExecute(final Runnable r, final Throwable t) {
+                    super.afterExecute(r, t);
+                    if (t != null) {
+                        HANDLER.uncaughtException(Thread.currentThread(), t);
                     }
+                }
 
-                    protected void terminated() {
+                protected void terminated() {
                         shutdownComplete(shutdownInitiated);
                     }
-                };
-            } else {
-                delegate = new EnhancedQueueExecutor.Builder()
-                    .setCorePoolSize(corePoolSize)
-                    .setMaximumPoolSize(maximumPoolSize)
-                    .setKeepAliveTime(keepAliveTime, unit)
-                    .setTerminationTask(new Runnable() {
-                        public void run() {
-                            shutdownComplete(shutdownInitiated);
-                        }
-                    })
-                    .setThreadFactory(threadFactory)
-                    .build();
-            }
+            };
         }
 
         public void shutdown() {
