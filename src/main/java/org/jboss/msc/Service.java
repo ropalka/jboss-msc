@@ -26,8 +26,6 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 
-import java.util.function.Consumer;
-
 /**
  * A service is a thing which can be started and stopped.
  * A service may be started or stopped from any thread.
@@ -93,17 +91,5 @@ public interface Service {
      * @param context the context which can be used to trigger an asynchronous service stop
      */
     void stop(StopContext context);
-
-    /**
-     * Factory for services providing single value.
-     *
-     * @param injector target
-     * @param value to assign
-     * @param <V> provided value type
-     * @return new service instance
-     */
-    static <V> Service newInstance(final Consumer<V> injector, final V value) {
-        return new SimpleService<>(injector, value);
-    }
 
 }
