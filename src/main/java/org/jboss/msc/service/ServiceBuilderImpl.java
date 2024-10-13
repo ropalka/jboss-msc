@@ -48,7 +48,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
     private Service service;
     private ServiceController.Mode initialMode;
-    private Map<ServiceName, Dependency> requires;
+    private Map<ServiceName, ServiceRegistrationImpl> requires;
     private Set<StabilityMonitor> monitors;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
@@ -72,7 +72,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertNotInstanceId(dependency);
         assertNotProvided(dependency, true);
         // implementation
-        return (Supplier<V>) addRequiresInternal(dependency).getRegistration().getReadableValue();
+        return (Supplier<V>) addRequiresInternal(dependency).getReadableValue();
     }
 
     @Override
@@ -173,16 +173,16 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return service;
     }
 
-    private Dependency addRequiresInternal(final ServiceName name) {
+    private ServiceRegistrationImpl addRequiresInternal(final ServiceName name) {
         if (requires == null) requires = new HashMap<>();
         if (requires.size() == ServiceControllerImpl.MAX_DEPENDENCIES) {
             throw new IllegalArgumentException("Too many dependencies specified (max is " + ServiceControllerImpl.MAX_DEPENDENCIES + ")");
         }
-        final Dependency existing = requires.get(name);
+        final ServiceRegistrationImpl existing = requires.get(name);
         if (existing != null) {
             return existing;
         }
-        final Dependency dependency = new Dependency(serviceTarget.getOrCreateRegistration(name));
+        final ServiceRegistrationImpl dependency = serviceTarget.getOrCreateRegistration(name);
         requires.put(name, dependency);
         return dependency;
     }
@@ -209,7 +209,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return provides;
     }
 
-    Map<ServiceName, Dependency> getDependencies() {
+    Map<ServiceName, ServiceRegistrationImpl> getDependencies() {
         return requires == null ? Collections.emptyMap() : requires;
     }
 
@@ -297,17 +297,4 @@ final class ServiceBuilderImpl implements ServiceBuilder {
             throw new IllegalArgumentException("Initial service mode cannot be REMOVE");
         }
     }
-
-    static final class Dependency {
-        private final ServiceRegistrationImpl registration;
-
-        Dependency(final ServiceRegistrationImpl registration) {
-            this.registration = registration;
-        }
-
-        ServiceRegistrationImpl getRegistration() {
-            return registration;
-        }
-    }
-
 }

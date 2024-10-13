@@ -412,11 +412,11 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
 
         // Dependencies
-        final Map<ServiceName, ServiceBuilderImpl.Dependency> dependencyMap = serviceBuilder.getDependencies();
+        final Map<ServiceName, ServiceRegistrationImpl> dependencyMap = serviceBuilder.getDependencies();
         final Set<Dependency> requires = new HashSet<>();
         Dependency dependency;
-        for (ServiceBuilderImpl.Dependency dependencyDefinition : dependencyMap.values()) {
-            dependency = dependencyDefinition.getRegistration();
+        for (ServiceRegistrationImpl dependencyDefinition : dependencyMap.values()) {
+            dependency = dependencyDefinition;
             requires.add(dependency);
         }
 
