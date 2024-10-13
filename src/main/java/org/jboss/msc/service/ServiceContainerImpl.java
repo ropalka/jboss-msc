@@ -54,7 +54,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.threads.EnhancedQueueExecutor;
 

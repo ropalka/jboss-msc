@@ -33,5 +33,5 @@ package org.jboss.msc.service;
  * This class will be removed in a future release.
  */
 @Deprecated
-public interface Service<T> extends org.jboss.msc.Service, org.jboss.msc.value.Value<T> {
+public interface Service<T> extends org.jboss.msc.Service {
 }

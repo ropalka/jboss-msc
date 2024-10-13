@@ -22,8 +22,6 @@
 
 package org.jboss.msc.service;
 
-import org.jboss.msc.inject.Injector;
-
 import java.util.ConcurrentModificationException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
