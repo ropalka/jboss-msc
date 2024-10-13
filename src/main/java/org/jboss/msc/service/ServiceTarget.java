@@ -113,14 +113,4 @@ public interface ServiceTarget {
      */
     @Deprecated
     ServiceTarget removeMonitor(StabilityMonitor monitor);
-
-    /**
-     * Add a dependency that will be added to the all ServiceBuilders installed in this target.
-     *
-     * @param dependency the dependency to add to the target
-     * @return this target
-     * @deprecated This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceTarget addDependency(ServiceName dependency);
 }

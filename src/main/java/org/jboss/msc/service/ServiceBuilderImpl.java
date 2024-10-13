@@ -218,17 +218,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         }
     }
 
-    void addDependenciesNoCheck(final Iterable<ServiceName> dependencies) {
-        // For backward compatibility reasons when
-        // service dependencies are defined via ServiceTarget
-        for (final ServiceName dependency : dependencies) {
-            if (dependency == null) continue;
-            if (requires != null && requires.containsKey(dependency)) continue; // dependency already required
-            if (provides != null && provides.containsKey(dependency)) continue; // cannot depend on ourselves
-            addRequiresInternal(dependency);
-        }
-    }
-
     Service getService() {
         return service;
     }

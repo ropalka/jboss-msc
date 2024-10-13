@@ -24,7 +24,6 @@ package org.jboss.msc.service;
 
 import static java.util.Collections.synchronizedSet;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -39,7 +38,6 @@ class ServiceTargetImpl implements ServiceTarget {
 
     private final ServiceTargetImpl parent;
     private final Set<LifecycleListener> lifecycleListeners = synchronizedSet(new IdentityHashSet<>());
-    private final Set<ServiceName> dependencies = synchronizedSet(new HashSet<>());
     private final Set<StabilityMonitor> monitors = synchronizedSet(new IdentityHashSet<>());
 
     ServiceTargetImpl(final ServiceTargetImpl parent) {
@@ -114,17 +112,8 @@ class ServiceTargetImpl implements ServiceTarget {
         return this;
     }
 
-    @Override
-    public ServiceTarget addDependency(ServiceName dependency) {
-        if (dependency == null) {
-            return this;
-        }
-        dependencies.add(dependency);
-        return this;
-    }
-
     /**
-     * Apply listeners and dependencies to {@code serviceBuilder}.
+     * Apply monitors & listeners to {@code serviceBuilder}.
      * 
      * @param serviceBuilder serviceBuilder which listeners and dependencies will be added to.
      */
@@ -134,9 +123,6 @@ class ServiceTargetImpl implements ServiceTarget {
         }
         synchronized (lifecycleListeners) {
             serviceBuilder.addLifecycleListenersNoCheck(lifecycleListeners);
-        }
-        synchronized (dependencies) {
-            serviceBuilder.addDependenciesNoCheck(dependencies);
         }
     }
 
