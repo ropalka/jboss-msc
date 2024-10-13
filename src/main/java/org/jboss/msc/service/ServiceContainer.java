@@ -127,18 +127,6 @@ public interface ServiceContainer extends ServiceTarget, ServiceRegistry {
     boolean awaitStability(long timeout, TimeUnit unit, Set<? super ServiceController<?>> failed, Set<? super ServiceController<?>> problem) throws InterruptedException;
 
     /**
-     * Dump a complete list of services to {@code System.out}.
-     */
-    void dumpServices();
-
-    /**
-     * Dump a complete list of services to the given stream.
-     *
-     * @param stream the stream to which the service list should be written
-     */
-    void dumpServices(PrintStream stream);
-
-    /**
      * Get the name of this service container.
      *
      * @return the container name

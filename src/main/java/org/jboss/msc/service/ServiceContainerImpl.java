@@ -187,27 +187,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             }
         }
 
-        public void dumpServices() {
-            ServiceContainerImpl.this.dumpServices();
-        }
-
-        public String dumpServicesToString() {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream ps;
-            try {
-                ps = new PrintStream(baos, false, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalStateException(e);
-            }
-            ServiceContainerImpl.this.dumpServices(ps);
-            ps.flush();
-            try {
-                return new String(baos.toByteArray(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
         public String dumpServicesToGraphDescription() {
             final List<ServiceStatus> statuses = queryServiceStatuses();
             final Map<String, String> aliases = new HashMap<>();
@@ -560,32 +539,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
     public boolean isShutdownComplete() {
         return terminateInfo != null;
-    }
-
-    public void dumpServices() {
-        dumpServices(System.out);
-    }
-
-    public void dumpServices(PrintStream out) {
-        out.printf("Services for %s:\n", getName());
-        final Map<ServiceName, ServiceRegistrationImpl> registry = this.registry;
-        if (registry.isEmpty()) {
-            out.printf("(Registry is empty)\n");
-        } else {
-            int i = 0;
-            Set<ServiceControllerImpl<?>> set = new HashSet<>();
-            for (ServiceName name : new TreeSet<>(registry.keySet())) {
-                final ServiceRegistrationImpl registration = registry.get(name);
-                if (registration != null) {
-                    final ServiceControllerImpl<?> instance = registration.getDependencyController();
-                    if (instance != null && set.add(instance)) {
-                        i++;
-                        out.printf("%s\n", instance.getStatus());
-                    }
-                }
-            }
-            out.printf("%s services displayed\n", Integer.valueOf(i));
-        }
     }
 
     private void shutdownComplete(final long started) {

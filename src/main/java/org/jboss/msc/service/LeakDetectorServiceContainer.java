@@ -93,16 +93,6 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public void dumpServices() {
-        getDelegate().dumpServices();
-    }
-
-    @Override
-    public void dumpServices(final PrintStream stream) {
-        getDelegate().dumpServices(stream);
-    }
-
-    @Override
     public String getName() {
         return getDelegate().getName();
     }

@@ -62,19 +62,6 @@ public interface ServiceContainerMXBean {
     void setServiceMode(String name, String mode);
 
     /**
-     * Dump the container state to the console.
-     */
-    void dumpServices();
-
-    /**
-     * Dump the container state to a big string.  The string has no particular standard format and may
-     * change over time; this method is simply a convenience.
-     *
-     * @return the container state, as a string
-     */
-    String dumpServicesToString();
-
-    /**
      * Dump the container state to a string suitable for rendering in GraphViz or compatible tools.
      *
      * @return the container state graph
