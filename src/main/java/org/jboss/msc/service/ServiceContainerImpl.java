@@ -415,21 +415,15 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         // Dependencies
         final Map<ServiceName, ServiceBuilderImpl.Dependency> dependencyMap = serviceBuilder.getDependencies();
         final Set<Dependency> requires = new HashSet<>();
-        final List<ValueInjection<?>> valueInjections = new ArrayList<>();
         Dependency dependency;
         for (ServiceBuilderImpl.Dependency dependencyDefinition : dependencyMap.values()) {
             dependency = dependencyDefinition.getRegistration();
             requires.add(dependency);
-            for (Injector<Object> injector : dependencyDefinition.getInjectorList()) {
-                valueInjections.add(new ValueInjection<>(dependency, injector));
-            }
         }
-        final ValueInjection<?>[] valueInjectionArray = valueInjections.toArray(new ValueInjection<?>[valueInjections.size()]);
 
         // Next create the actual controller
         final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
-                requires, provides, valueInjectionArray,
-                serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
+                requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
         boolean ok = false;
         try {
             synchronized (this) {

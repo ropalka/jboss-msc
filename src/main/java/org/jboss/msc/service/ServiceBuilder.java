@@ -144,27 +144,6 @@ public interface ServiceBuilder<T> {
     ////////////////////////
 
     /**
-     * Add a service dependency.  The type of the dependency is checked before it is passed into the (type-safe) injector
-     * instance.  Calling this method multiple times for the same service name will only add it as a
-     * dependency one time; however this may be useful to specify multiple injections for one dependency.
-     *
-     * @param dependency the name of the dependency
-     * @param type the class of the value of the dependency
-     * @param target the injector into which the dependency should be stored
-     * @param <I> the type of the value of the dependency
-     * @return this builder
-     * @deprecated Use {@link #requires(ServiceName)} instead.
-     * This method will be removed in a future release.
-     * @throws ConcurrentModificationException if builder is shared between threads.
-     * Only thread that created the builder can manipulate it.
-     * @throws IllegalStateException if this method have been called after {@link #install()}  method.
-     * @throws NullPointerException if <code>dependency</code> or <code>type</code> or <code>target</code>
-     * parameter is <code>null</code>.
-     */
-    @Deprecated
-    <I> ServiceBuilder<T> addDependency(ServiceName dependency, Class<I> type, Injector<I> target);
-
-    /**
      * Adds a stability monitor to be added to the service.
      *
      * @param monitor the monitor to add to the service

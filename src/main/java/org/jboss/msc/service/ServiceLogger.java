@@ -23,10 +23,8 @@
 package org.jboss.msc.service;
 
 import static org.jboss.logging.Logger.Level.ERROR;
-import static org.jboss.logging.Logger.Level.INFO;
 import static org.jboss.logging.Logger.Level.WARN;
 
-import java.io.IOException;
 
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
@@ -65,20 +63,8 @@ interface ServiceLogger {
     void listenerFailed(@Cause Throwable cause, Object listener);
 
     @LogMessage(level = WARN)
-    @Message(id = 3, value = "Exception thrown after start was already completed in %s")
-    void exceptionAfterComplete(@Cause Throwable cause, ServiceName serviceName);
-
-    @LogMessage(level = WARN)
     @Message(id = 4, value = "Failure during stop of %s")
     void stopFailed(@Cause Throwable cause, ServiceName serviceName);
-
-    @LogMessage(level = WARN)
-    @Message(id = 5, value = "Unexpected disappearance of %s during stop")
-    void stopServiceMissing(ServiceName serviceName);
-
-    @LogMessage(level = WARN)
-    @Message(id = 6, value = "Uninjection \"%2$s\" of %1$s failed unexpectedly")
-    void uninjectFailed(@Cause Throwable cause, ServiceName serviceName, ValueInjection<?> valueInjection);
 
     @LogMessage(level = WARN)
     @Message(id = 7, value = "An internal service error has occurred while processing an operation on %s")
@@ -87,15 +73,4 @@ interface ServiceLogger {
     @LogMessage(level = ERROR)
     @Message(id = 8, value = "Worker thread %s threw an uncaught exception")
     void uncaughtException(@Cause Throwable cause, Thread thread);
-
-    @LogMessage(level = WARN)
-    @Message(id = 9, value = "An error occurred while trying to close the profile output file: %s")
-    void profileOutputCloseFailed(/* ! @Cause */ IOException cause);
-
-    @Message(id = 11, value = "Service not started")
-    IllegalStateException serviceNotStarted();
-
-    @LogMessage(level = ERROR)
-    @Message(id = 12, value = "Injection failed for service %s")
-    void injectFailed(@Cause Throwable cause, ServiceName serviceName);
 }

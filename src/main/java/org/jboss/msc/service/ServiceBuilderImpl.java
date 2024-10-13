@@ -25,15 +25,11 @@ package org.jboss.msc.service;
 import static java.lang.Thread.currentThread;
 
 import org.jboss.msc.Service;
-import org.jboss.msc.inject.Injector;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -160,21 +156,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
         if (service == null) service = Service.NULL;
         if (initialMode == null) initialMode = ServiceController.Mode.ACTIVE;
         return serviceTarget.install(this);
-    }
-
-    // deprecated methods
-
-    @Override
-    public <I> ServiceBuilder<T> addDependency(final ServiceName dependency, final Class<I> type, final Injector<I> target) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(dependency);
-        assertNotNull(type);
-        assertNotNull(target);
-        assertThreadSafety();
-        // implementation
-        addRequiresInternal(dependency).getInjectorList().add((Injector<Object>) target);
-        return this;
     }
 
     // implementation internals
@@ -323,7 +304,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     static final class Dependency {
         private final ServiceRegistrationImpl registration;
-        private List<Injector<Object>> injectorList = new ArrayList<>(0);
 
         Dependency(final ServiceRegistrationImpl registration) {
             this.registration = registration;
@@ -331,10 +311,6 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
         ServiceRegistrationImpl getRegistration() {
             return registration;
-        }
-
-        List<Injector<Object>> getInjectorList() {
-            return injectorList;
         }
     }
 
