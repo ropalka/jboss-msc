@@ -56,10 +56,6 @@ interface ServiceLogger {
     ServiceLogger SERVICE = Logger.getMessageLogger(ServiceLogger.class, "org.jboss.msc.service");
     ServiceLogger FAIL = Logger.getMessageLogger(ServiceLogger.class, "org.jboss.msc.service.fail");
 
-    @LogMessage(level = INFO)
-    @Message(value = "JBoss MSC version %s")
-    void greeting(String version);
-
     @LogMessage(level = ERROR)
     @Message(id = 1, value = "Failed to start %s")
     void startFailed(@Cause StartException cause, ServiceName serviceName);

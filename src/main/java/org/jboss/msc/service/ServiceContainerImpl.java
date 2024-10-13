@@ -54,7 +54,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jboss.msc.Version;
 import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.threads.EnhancedQueueExecutor;
@@ -67,10 +66,6 @@ import org.jboss.threads.EnhancedQueueExecutor;
 final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceContainer {
 
     private static final AtomicInteger SERIAL = new AtomicInteger(1);
-
-    static {
-        ServiceLogger.ROOT.greeting(Version.getVersionString());
-    }
 
     private final ConcurrentMap<ServiceName, ServiceRegistrationImpl> registry = new ConcurrentHashMap<>(512);
     private final long start = System.nanoTime();
