@@ -34,9 +34,4 @@ package org.jboss.msc.service;
  */
 @Deprecated
 public interface Service<T> extends org.jboss.msc.Service, org.jboss.msc.value.Value<T> {
-
-    /**
-     * A simple null service which performs no start or stop action.
-     */
-    Service<Void> NULL = NullService.INSTANCE;
 }
