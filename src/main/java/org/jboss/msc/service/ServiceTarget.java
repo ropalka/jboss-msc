@@ -25,7 +25,7 @@ package org.jboss.msc.service;
 /**
  * The target of ServiceBuilder installations.
  *
- * ServiceBuilders to be installed on a target have to be retrieved via {@link #addService(ServiceName)} method.
+ * ServiceBuilders to be installed on a target have to be retrieved via {@link #addService()} method.
  * Service installation will only take place after {@link ServiceBuilder#install()} is issued.
  * ServiceBuilders that are not installed will be ignored.
  * <p>
@@ -69,28 +69,6 @@ public interface ServiceTarget {
     ////////////////////////
     // DEPRECATED METHODS //
     ////////////////////////
-
-    /**
-     * Get a builder which can be used to add a service to this target.
-     *
-     * @param name the service name
-     * @return new service configurator
-     * @deprecated Use {@link #addService()} instead.
-     * This method will be removed in a future release.
-     */
-    ServiceBuilder<?> addService(ServiceName name);
-
-    /**
-     * Get a builder which can be used to add a service to this target.
-     *
-     * @param name the service name
-     * @param service the service
-     * @return the builder for the service
-     * @deprecated Use {@link #addService()} instead.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    <T> ServiceBuilder<T> addService(ServiceName name, Service<T> service);
 
     /**
      * Add a stability monitor that will be added to all the ServiceBuilders installed in this target.

@@ -133,16 +133,6 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public ServiceBuilder<?> addService(final ServiceName name) {
-        return getDelegate().addService(name);
-    }
-
-    @Override
-    public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) {
-        return getDelegate().addService(name, service);
-    }
-
-    @Override
     public ServiceTarget addMonitor(final StabilityMonitor monitor) {
         return getDelegate().addMonitor(monitor);
     }

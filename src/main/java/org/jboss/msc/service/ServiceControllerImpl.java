@@ -1775,14 +1775,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return super.install(serviceBuilder);
         }
 
-        protected <T> ServiceBuilder<T> createServiceBuilder(final ServiceName name, final Service<T> service, final ServiceControllerImpl<?> parent) {
-            return super.createServiceBuilder(name, service, ServiceControllerImpl.this);
-        }
-
-        protected ServiceBuilder<?> createServiceBuilder(final ServiceName name, final ServiceControllerImpl<?> parent) {
-            return super.createServiceBuilder(name, ServiceControllerImpl.this);
-        }
-
         @Override
         public ServiceTarget subTarget() {
             return new ChildServiceTarget(this);

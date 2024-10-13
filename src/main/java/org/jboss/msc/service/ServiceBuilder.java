@@ -59,8 +59,7 @@ public interface ServiceBuilder<T> {
      * @return readonly dependency reference
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
-     * @throws IllegalArgumentException if value <code>name</code> was before used as parameter either in
-     * {@link ServiceTarget#addService(ServiceName)} method when creating this builder instance or
+     * @throws IllegalArgumentException if value <code>name</code> was before used as parameter
      * in {@link #provides(ServiceName...)} method call. Value can be either required or provided but not both.
      * @throws IllegalStateException if this method have been called after {@link #install()} method.
      * @throws NullPointerException if <code>name</code> parameter is null.

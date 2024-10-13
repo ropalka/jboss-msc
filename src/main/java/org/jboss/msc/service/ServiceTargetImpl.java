@@ -51,36 +51,9 @@ class ServiceTargetImpl implements ServiceTarget {
         this.parent = null;
     }
 
-    protected <T> ServiceBuilder<T> createServiceBuilder(final ServiceName name, final Service<T> service, final ServiceControllerImpl<?> parent) throws IllegalArgumentException {
-        return new ServiceBuilderImpl<>(name, this, service, parent);
-    }
-
-    protected ServiceBuilder<?> createServiceBuilder(final ServiceName name, final ServiceControllerImpl<?> parent) throws IllegalArgumentException {
-        return new ServiceBuilderImpl<>(name, this, parent);
-    }
-
-    @Override
-    public <T> ServiceBuilder<T> addService(final ServiceName name, final Service<T> service) throws IllegalArgumentException {
-        if (name == null) {
-            throw new IllegalArgumentException("name is null");
-        }
-        if (service == null) {
-            throw new IllegalArgumentException("service is null");
-        }
-        return createServiceBuilder(name, service, null);
-    }
-
-    @Override
-    public ServiceBuilder<?> addService(final ServiceName name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name is null");
-        }
-        return createServiceBuilder(name, null);
-    }
-
     @Override
     public ServiceBuilder<?> addService() {
-        return createServiceBuilder(null, null);
+        return new ServiceBuilderImpl<>(null, this, null);
     }
 
     public ServiceTarget addListener(final LifecycleListener listener) {
