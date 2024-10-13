@@ -86,7 +86,7 @@ interface Dependency {
      *
      * @return the controller, or {@code null} for none
      */
-    ServiceControllerImpl<?> getDependencyController();
+    ServiceControllerImpl getDependencyController();
 
     /**
      * Get R/W lock associated with this dependency.

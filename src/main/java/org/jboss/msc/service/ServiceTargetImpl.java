@@ -52,8 +52,8 @@ class ServiceTargetImpl implements ServiceTarget {
     }
 
     @Override
-    public ServiceBuilder<?> addService() {
-        return new ServiceBuilderImpl<>(null, this, null);
+    public ServiceBuilder addService() {
+        return new ServiceBuilderImpl(null, this, null);
     }
 
     public ServiceTarget addListener(final LifecycleListener listener) {
@@ -90,7 +90,7 @@ class ServiceTargetImpl implements ServiceTarget {
      * 
      * @param serviceBuilder serviceBuilder which listeners and dependencies will be added to.
      */
-    void apply(ServiceBuilderImpl<?> serviceBuilder) {
+    void apply(ServiceBuilderImpl serviceBuilder) {
         synchronized (monitors) {
             serviceBuilder.addMonitorsNoCheck(monitors);
         }
@@ -108,7 +108,7 @@ class ServiceTargetImpl implements ServiceTarget {
      *
      * @throws ServiceRegistryException if a service registry issue occurred during installation
      */
-    <T> ServiceController<T> install(ServiceBuilderImpl<T> serviceBuilder) throws ServiceRegistryException {
+    ServiceController install(ServiceBuilderImpl serviceBuilder) throws ServiceRegistryException {
         apply(serviceBuilder);
         return parent.install(serviceBuilder);
     }

@@ -20,10 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.msc;
-
-import org.jboss.msc.service.StartContext;
-import org.jboss.msc.service.StopContext;
+package org.jboss.msc.service;
 
 /**
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>

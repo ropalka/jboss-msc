@@ -109,7 +109,7 @@ public interface ServiceContainer extends ServiceTarget, ServiceRegistry {
      * @throws InterruptedException if the current thread is interrupted
      *         while waiting
      */
-    void awaitStability(Set<? super ServiceController<?>> failed, Set<? super ServiceController<?>> problem) throws InterruptedException;
+    void awaitStability(Set<? super ServiceController> failed, Set<? super ServiceController> problem) throws InterruptedException;
 
     /**
      * Causes the current thread to wait until the container is stable.
@@ -123,7 +123,7 @@ public interface ServiceContainer extends ServiceTarget, ServiceRegistry {
      * @throws InterruptedException if the current thread is interrupted
      *         while waiting
      */
-    boolean awaitStability(long timeout, TimeUnit unit, Set<? super ServiceController<?>> failed, Set<? super ServiceController<?>> problem) throws InterruptedException;
+    boolean awaitStability(long timeout, TimeUnit unit, Set<? super ServiceController> failed, Set<? super ServiceController> problem) throws InterruptedException;
 
     /**
      * Get the name of this service container.

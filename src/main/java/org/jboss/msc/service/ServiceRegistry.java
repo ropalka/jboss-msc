@@ -39,7 +39,7 @@ public interface ServiceRegistry {
      * @return the service controller for the corresponding service
      * @throws ServiceNotFoundException if the service is not present in the registry
      */
-    ServiceController<?> getRequiredService(ServiceName serviceName) throws ServiceNotFoundException;
+    ServiceController getRequiredService(ServiceName serviceName) throws ServiceNotFoundException;
 
     /**
      * Get a service, returning {@code null} if it is not found.
@@ -47,7 +47,7 @@ public interface ServiceRegistry {
      * @param serviceName the service name
      * @return the service controller for the corresponding service, or {@code null} if it is not found
      */
-    ServiceController<?> getService(ServiceName serviceName);
+    ServiceController getService(ServiceName serviceName);
 
     /**
      * Get a list of service names installed in this registry.

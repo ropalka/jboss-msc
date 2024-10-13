@@ -24,8 +24,6 @@ package org.jboss.msc.service;
 
 import static java.lang.Thread.currentThread;
 
-import org.jboss.msc.Service;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -38,15 +36,13 @@ import java.util.function.Supplier;
 /**
  * Multi-value services {@link ServiceBuilder} implementation.
  *
- * @param <T> the type of service being built
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
+final class ServiceBuilderImpl implements ServiceBuilder {
 
     final ServiceName serviceId;
-    final ServiceControllerImpl<?> parent;
+    final ServiceControllerImpl parent;
     private final ServiceTargetImpl serviceTarget;
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
@@ -57,7 +53,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final ServiceControllerImpl<?> parent) {
+    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final ServiceControllerImpl parent) {
         this.serviceId = serviceId;
         this.serviceTarget = serviceTarget;
         this.parent = parent;
@@ -101,7 +97,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public ServiceBuilder<T> setInstance(final Service service) {
+    public ServiceBuilder setInstance(final Service service) {
         // preconditions
         assertNotInstalled();
         assertThreadSafety();
@@ -112,7 +108,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> setInitialMode(final ServiceController.Mode mode) {
+    public ServiceBuilder setInitialMode(final ServiceController.Mode mode) {
         // preconditions
         assertNotInstalled();
         assertNotNull(mode);
@@ -125,7 +121,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> addMonitor(final StabilityMonitor monitor) {
+    public ServiceBuilder addMonitor(final StabilityMonitor monitor) {
         // preconditions
         assertNotInstalled();
         assertNotNull(monitor);
@@ -136,7 +132,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceBuilder<T> addListener(final LifecycleListener listener) {
+    public ServiceBuilder addListener(final LifecycleListener listener) {
         // preconditions
         assertNotInstalled();
         assertNotNull(listener);
@@ -147,7 +143,7 @@ final class ServiceBuilderImpl<T> implements ServiceBuilder<T> {
     }
 
     @Override
-    public ServiceController<T> install() throws ServiceRegistryException {
+    public ServiceController install() throws ServiceRegistryException {
         // preconditions
         assertNotInstalled();
         assertThreadSafety();

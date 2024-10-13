@@ -22,7 +22,6 @@
 
 package org.jboss.msc.service;
 
-import java.io.PrintStream;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -83,12 +82,12 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public void awaitStability(final Set<? super ServiceController<?>> failed, final Set<? super ServiceController<?>> problem) throws InterruptedException {
+    public void awaitStability(final Set<? super ServiceController> failed, final Set<? super ServiceController> problem) throws InterruptedException {
         getDelegate().awaitStability(failed, problem);
     }
 
     @Override
-    public boolean awaitStability(final long timeout, TimeUnit unit, final Set<? super ServiceController<?>> failed, final Set<? super ServiceController<?>> problem) throws InterruptedException {
+    public boolean awaitStability(final long timeout, TimeUnit unit, final Set<? super ServiceController> failed, final Set<? super ServiceController> problem) throws InterruptedException {
         return getDelegate().awaitStability(timeout, unit, failed, problem);
     }
 
@@ -98,12 +97,12 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public ServiceController<?> getRequiredService(final ServiceName serviceName) throws ServiceNotFoundException {
+    public ServiceController getRequiredService(final ServiceName serviceName) throws ServiceNotFoundException {
         return getDelegate().getRequiredService(serviceName);
     }
 
     @Override
-    public ServiceController<?> getService(final ServiceName serviceName) {
+    public ServiceController getService(final ServiceName serviceName) {
         return getDelegate().getService(serviceName);
     }
 
@@ -123,7 +122,7 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public ServiceBuilder<?> addService() {
+    public ServiceBuilder addService() {
         return getDelegate().addService();
     }
 

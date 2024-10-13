@@ -57,7 +57,7 @@ public interface ServiceTarget {
      *
      * @return new service configurator
      */
-    ServiceBuilder<?> addService();
+    ServiceBuilder addService();
 
     /**
      * Create a sub-target using this as the parent target.

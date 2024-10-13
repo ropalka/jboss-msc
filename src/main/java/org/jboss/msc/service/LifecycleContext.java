@@ -59,7 +59,7 @@ public interface LifecycleContext extends Executor {
      *
      * @return the service controller
      */
-    ServiceController<?> getController();
+    ServiceController getController();
 
     /**
      * Execute a task asynchronously using the MSC task executor.

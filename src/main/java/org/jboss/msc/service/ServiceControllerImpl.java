@@ -43,13 +43,11 @@ import java.util.concurrent.TimeoutException;
 /**
  * The service controller implementation.
  *
- * @param <S> the service type
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent {
+final class ServiceControllerImpl implements ServiceController, Dependent {
 
     private static final String ILLEGAL_CONTROLLER_STATE = "Illegal controller state";
 
@@ -71,7 +69,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     /**
      * The service itself.
      */
-    final org.jboss.msc.Service service;
+    final Service service;
     /**
      * Lifecycle listeners.
      */
@@ -95,11 +93,11 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     /**
      * The parent of this service.
      */
-    private final ServiceControllerImpl<?> parent;
+    private final ServiceControllerImpl parent;
     /**
      * The children of this service (only valid during {@link State#UP}).
      */
-    private final Set<ServiceControllerImpl<?>> children;
+    private final Set<ServiceControllerImpl> children;
 
     private final Set<ServiceName> requiredValues;
     private final Set<ServiceName> providedValues;
@@ -184,7 +182,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl parent) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
@@ -772,7 +770,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     /** {@inheritDoc} */
-    public ServiceControllerImpl<?> getDependentController() {
+    public ServiceControllerImpl getDependentController() {
         return this;
     }
 
@@ -951,7 +949,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         doExecute(tasks);
     }
 
-    void addChild(final ServiceControllerImpl<?> child) {
+    void addChild(final ServiceControllerImpl child) {
         assert !holdsLock(this);
         synchronized (this) {
             if (state.getState() != State.STARTING && state.getState() != State.UP) {
@@ -962,7 +960,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         }
     }
 
-    void removeChild(final ServiceControllerImpl<?> child) {
+    void removeChild(final ServiceControllerImpl child) {
         assert !holdsLock(this);
         final List<Runnable> tasks;
         synchronized (this) {
@@ -977,12 +975,12 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         doExecute(tasks);
     }
 
-    Set<ServiceControllerImpl<?>> getChildren() {
+    Set<ServiceControllerImpl> getChildren() {
         assert holdsLock(this);
         return children;
     }
 
-    public ServiceControllerImpl<?> getParent() {
+    public ServiceControllerImpl getParent() {
         return parent;
     }
 
@@ -994,13 +992,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
         synchronized (this) {
             return state.getState();
         }
-    }
-
-    public Service<S> getService() throws IllegalStateException {
-        if (!(service instanceof Service)) {
-            throw new UnsupportedOperationException();
-        }
-        return (Service<S>) service;
     }
 
     public ServiceName getName() {
@@ -1373,7 +1364,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return true;
         }
 
-        private void startService(org.jboss.msc.Service service, StartContext context) throws StartException {
+        private void startService(Service service, StartContext context) throws StartException {
             final ClassLoader contextClassLoader = setTCCL(getCL(service.getClass()));
             try {
                 service.start(context);
@@ -1425,7 +1416,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return true;
         }
 
-        private void stopService(org.jboss.msc.Service service, StopContext context) {
+        private void stopService(Service service, StopContext context) {
             final ClassLoader contextClassLoader = setTCCL(getCL(service.getClass()));
             try {
                 service.stop(context);
@@ -1460,7 +1451,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     private final class RemoveChildrenTask extends ControllerTask {
         boolean execute() {
             synchronized (ServiceControllerImpl.this) {
-                for (ServiceControllerImpl<?> child : children) child.setMode(Mode.REMOVE);
+                for (ServiceControllerImpl child : children) child.setMode(Mode.REMOVE);
             }
             return true;
         }
@@ -1563,7 +1554,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             return System.nanoTime() - lifecycleTime;
         }
 
-        public final ServiceController<?> getController() {
+        public final ServiceController getController() {
             return ServiceControllerImpl.this;
         }
 
@@ -1644,7 +1635,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
             super(parentTarget);
         }
 
-        <T> ServiceController<T> install(final ServiceBuilderImpl<T> serviceBuilder) throws ServiceRegistryException {
+        ServiceController install(final ServiceBuilderImpl serviceBuilder) throws ServiceRegistryException {
             if (! valid) {
                 throw new IllegalStateException("Service target is no longer valid");
             }

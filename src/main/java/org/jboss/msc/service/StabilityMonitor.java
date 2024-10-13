@@ -90,9 +90,9 @@ public final class StabilityMonitor {
 
     private final Object stabilityLock = new Object();
     private final Object controllersLock = new Object();
-    private final Set<ServiceController<?>> problems = new IdentityHashSet<>();
-    private final Set<ServiceController<?>> failed = new IdentityHashSet<>();
-    private IdentityHashSet<ServiceControllerImpl<?>> controllers = new IdentityHashSet<>();
+    private final Set<ServiceController> problems = new IdentityHashSet<>();
+    private final Set<ServiceController> failed = new IdentityHashSet<>();
+    private IdentityHashSet<ServiceControllerImpl> controllers = new IdentityHashSet<>();
     private boolean addInProgress;
     private boolean cleanupInProgress;
     private boolean removeInProgress;
@@ -105,14 +105,14 @@ public final class StabilityMonitor {
      * @throws java.lang.IllegalArgumentException if {@code controller} is null
      * @throws java.lang.IllegalStateException if {@code controller}s lock is held by current thread
      */
-    public void addController(final ServiceController<?> controller) throws IllegalArgumentException, IllegalStateException {
+    public void addController(final ServiceController controller) throws IllegalArgumentException, IllegalStateException {
         if (controller == null) {
             throw new IllegalArgumentException("Controller is null");
         }
         if (holdsLock(controller)) {
             throw new IllegalStateException("Controller lock is held");
         }
-        final ServiceControllerImpl<?> serviceController = (ServiceControllerImpl<?>) controller;
+        final ServiceControllerImpl serviceController = (ServiceControllerImpl) controller;
         final boolean addMonitorToController;
         synchronized (controllersLock) {
             awaitCleanupCompletion();
@@ -132,7 +132,7 @@ public final class StabilityMonitor {
      *
      * @param controller to be registered for stability detection.
      */
-    void addControllerNoCallback(final ServiceControllerImpl<?> controller) {
+    void addControllerNoCallback(final ServiceControllerImpl controller) {
         synchronized (controllersLock) {
             awaitCleanupCompletion();
             controllers.add(controller);
@@ -146,14 +146,14 @@ public final class StabilityMonitor {
      * @throws java.lang.IllegalArgumentException if {@code controller} is null
      * @throws java.lang.IllegalStateException if {@code controller}s lock is held by current thread
      */
-    public void removeController(final ServiceController<?> controller) throws IllegalArgumentException, IllegalStateException {
+    public void removeController(final ServiceController controller) throws IllegalArgumentException, IllegalStateException {
         if (controller == null) {
             throw new IllegalArgumentException("Controller is null");
         }
         if (holdsLock(controller)) {
             throw new IllegalStateException("Controller lock is held");
         }
-        final ServiceControllerImpl<?> serviceController = (ServiceControllerImpl<?>) controller;
+        final ServiceControllerImpl serviceController = (ServiceControllerImpl) controller;
         final boolean removeMonitorFromController;
         synchronized (controllersLock) {
             if (cleanupInProgress) return;
@@ -173,7 +173,7 @@ public final class StabilityMonitor {
      *
      * @param controller to be unregistered from stability detection.
      */
-    void removeControllerNoCallback(final ServiceControllerImpl<?> controller) {
+    void removeControllerNoCallback(final ServiceControllerImpl controller) {
         synchronized (controllersLock) {
             if (!cleanupInProgress) {
                 controllers.remove(controller);
@@ -188,7 +188,7 @@ public final class StabilityMonitor {
      * The monitor can be later reused for stability detection again.
      */
     public void clear() {
-        final Set<ServiceControllerImpl<?>> controllers;
+        final Set<ServiceControllerImpl> controllers;
         synchronized (controllersLock) {
             synchronized (stabilityLock) {
                 if (cleanupInProgress) return;
@@ -205,7 +205,7 @@ public final class StabilityMonitor {
             // because of deadlock possibility. In order for removing controllers
             // to don't break stability invariants we're setting cleanupInProgress flag
             // until all the controllers are removed.
-            for (final ServiceControllerImpl<?> controller : controllers) {
+            for (final ServiceControllerImpl controller : controllers) {
                 controller.removeMonitorNoCallback(this);
             }
         } finally {
@@ -277,7 +277,7 @@ public final class StabilityMonitor {
      * @throws InterruptedException if the current thread is interrupted
      *         while waiting
      */
-    public void awaitStability(final Set<? super ServiceController<?>> failed, final Set<? super ServiceController<?>> problems) throws InterruptedException {
+    public void awaitStability(final Set<? super ServiceController> failed, final Set<? super ServiceController> problems) throws InterruptedException {
         this.awaitStability(failed, problems, null);
     }
 
@@ -293,7 +293,7 @@ public final class StabilityMonitor {
      * @throws InterruptedException if the current thread is interrupted
      *         while waiting
      */
-    public boolean awaitStability(final long timeout, final TimeUnit unit, final Set<? super ServiceController<?>> failed, final Set<? super ServiceController<?>> problems) throws InterruptedException {
+    public boolean awaitStability(final long timeout, final TimeUnit unit, final Set<? super ServiceController> failed, final Set<? super ServiceController> problems) throws InterruptedException {
         return awaitStability(timeout, unit, failed, problems, null);
     }
 
@@ -306,7 +306,7 @@ public final class StabilityMonitor {
      * @throws InterruptedException if the current thread is interrupted
      *         while waiting
      */
-    public void awaitStability(final Set<? super ServiceController<?>> failed, final Set<? super ServiceController<?>> problems, final StabilityStatistics statistics) throws InterruptedException {
+    public void awaitStability(final Set<? super ServiceController> failed, final Set<? super ServiceController> problems, final StabilityStatistics statistics) throws InterruptedException {
         final int failedCount;
         final int problemsCount;
         synchronized (stabilityLock) {
@@ -341,7 +341,7 @@ public final class StabilityMonitor {
      * @throws InterruptedException if the current thread is interrupted
      *         while waiting
      */
-    public boolean awaitStability(final long timeout, final TimeUnit unit, final Set<? super ServiceController<?>> failed, final Set<? super ServiceController<?>> problems, final StabilityStatistics statistics) throws InterruptedException {
+    public boolean awaitStability(final long timeout, final TimeUnit unit, final Set<? super ServiceController> failed, final Set<? super ServiceController> problems, final StabilityStatistics statistics) throws InterruptedException {
         long now = System.nanoTime();
         long remaining = unit.toNanos(timeout);
         final int failedCount;
@@ -370,7 +370,7 @@ public final class StabilityMonitor {
         return true;
     }
 
-    void addProblem(final ServiceController<?> controller) {
+    void addProblem(final ServiceController controller) {
         assert holdsLock(controller);
         synchronized (stabilityLock) {
             if (cleanupInProgress) return;
@@ -378,7 +378,7 @@ public final class StabilityMonitor {
         }
     }
 
-    void removeProblem(final ServiceController<?> controller) {
+    void removeProblem(final ServiceController controller) {
         assert holdsLock(controller);
         synchronized (stabilityLock) {
             if (cleanupInProgress) return;
@@ -386,7 +386,7 @@ public final class StabilityMonitor {
         }
     }
 
-    void addFailed(final ServiceController<?> controller) {
+    void addFailed(final ServiceController controller) {
         assert holdsLock(controller);
         synchronized (stabilityLock) {
             if (cleanupInProgress) return;
@@ -394,7 +394,7 @@ public final class StabilityMonitor {
         }
     }
 
-    void removeFailed(final ServiceController<?> controller) {
+    void removeFailed(final ServiceController controller) {
         assert holdsLock(controller);
         synchronized (stabilityLock) {
             if (cleanupInProgress) return;
@@ -427,13 +427,13 @@ public final class StabilityMonitor {
         // under stabilityLock because of deadlock possibility. Thus we tolerate that
         // the snapshot can be little bit out of date until controllersLock is obtained
         // plus controllers mode and state can be changed during the statistics collection phase.
-        final Set<ServiceControllerImpl<?>> controllers = new IdentityHashSet<>();
+        final Set<ServiceControllerImpl> controllers = new IdentityHashSet<>();
         synchronized (controllersLock) {
             controllers.addAll(this.controllers); 
         }
         // collect statistics
         int active = 0, lazy = 0, onDemand = 0, never = 0, passive = 0, started = 0;
-        for (final ServiceController<?> controller : controllers) {
+        for (final ServiceController controller : controllers) {
             if (controller.getState() == UP) started++;
             if (controller.getMode() == ACTIVE) active++;
             else if (controller.getMode() == PASSIVE) passive++;

@@ -42,12 +42,10 @@ import java.util.function.Supplier;
  * Implementations of this interface are thread safe because they rely on thread confinement.
  * The builder instance can be used only by thread that created it.
  *
- * @param <T> service value type if service provides single value
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceBuilder<T> {
+public interface ServiceBuilder {
 
     /**
      * Specifies value name required by service. There can be multiple values service may depend on.
@@ -94,7 +92,7 @@ public interface ServiceBuilder<T> {
      * {@link #install()} method.
      * @throws NullPointerException if <code>mode</code> parameter is <code>null</code>.
      */
-    ServiceBuilder<T> setInitialMode(ServiceController.Mode mode);
+    ServiceBuilder setInitialMode(ServiceController.Mode mode);
 
     /**
      * Sets service instance. If {@link #install()} method call is issued
@@ -112,7 +110,7 @@ public interface ServiceBuilder<T> {
      * @throws IllegalStateException if this method have been either called twice or it was called after
      * {@link #install()} method.
      */
-    ServiceBuilder<T> setInstance(org.jboss.msc.Service service);
+    ServiceBuilder setInstance(Service service);
 
     /**
      * Adds a service listener to be added to the service.
@@ -124,7 +122,7 @@ public interface ServiceBuilder<T> {
      * @throws IllegalStateException if this method have been called after {@link #install()} method.
      * @throws NullPointerException if <code>listener</code> parameter is <code>null</code>.
      */
-    ServiceBuilder<T> addListener(LifecycleListener listener);
+    ServiceBuilder addListener(LifecycleListener listener);
 
     /**
      * Installs configured service into the container.
@@ -135,7 +133,7 @@ public interface ServiceBuilder<T> {
      * @throws IllegalStateException if this method have been called twice.
      * @throws ServiceRegistryException if installation fails for any reason
      */
-    ServiceController<T> install();
+    ServiceController install();
 
     ////////////////////////
     // DEPRECATED METHODS //
@@ -154,6 +152,6 @@ public interface ServiceBuilder<T> {
      * @throws NullPointerException if <code>monitor</code> parameter is <code>null</code>.
      */
     @Deprecated
-    ServiceBuilder<T> addMonitor(StabilityMonitor monitor);
+    ServiceBuilder addMonitor(StabilityMonitor monitor);
 
 }

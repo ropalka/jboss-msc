@@ -28,19 +28,17 @@ import java.util.Set;
 /**
  * A controller for a single service instance.
  *
- * @param <S> the service type
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceController<S> {
+public interface ServiceController {
 
     /**
      * Get this service's parent service, or {@code null} if there is none.
      *
      * @return the parent service or {@code null} if this service has no parent
      */
-    ServiceController<?> getParent();
+    ServiceController getParent();
 
     /**
      * Get the service container associated with this controller.
@@ -83,16 +81,6 @@ public interface ServiceController<S> {
      * @return the current state
      */
     State getState();
-
-   /**
-     * Get the service.
-     *
-     * @return the service
-     * @throws IllegalStateException if the service is not available (i.e. it is not up)
-     * @deprecated this method will be removed in a future release
-     */
-    @Deprecated
-    Service<S> getService() throws IllegalStateException;
 
     /**
      * Get the name of this service, if any.

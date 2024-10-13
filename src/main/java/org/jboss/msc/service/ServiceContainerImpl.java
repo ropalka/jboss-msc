@@ -69,8 +69,8 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     private final ConcurrentMap<ServiceName, ServiceRegistrationImpl> registry = new ConcurrentHashMap<>(512);
     private final long start = System.nanoTime();
 
-    private final Set<ServiceController<?>> problems = new IdentityHashSet<>();
-    private final Set<ServiceController<?>> failed = new IdentityHashSet<>();
+    private final Set<ServiceController> problems = new IdentityHashSet<>();
+    private final Set<ServiceController> failed = new IdentityHashSet<>();
     private final Object lock = new Object();
 
     private int unstableServices;
@@ -134,13 +134,13 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
     }
 
-    void removeProblem(ServiceController<?> controller) {
+    void removeProblem(ServiceController controller) {
         synchronized (lock) {
             problems.remove(controller);
         }
     }
 
-    void removeFailed(ServiceController<?> controller) {
+    void removeFailed(ServiceController controller) {
         synchronized (lock) {
             failed.remove(controller);
         }
@@ -152,13 +152,13 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
     }
 
-    void addProblem(ServiceController<?> controller) {
+    void addProblem(ServiceController controller) {
         synchronized (lock) {
             problems.add(controller);
         }
     }
 
-    void addFailed(ServiceController<?> controller) {
+    void addFailed(ServiceController controller) {
         synchronized (lock) {
             failed.add(controller);
         }
@@ -223,7 +223,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     }
 
     @Override
-    public void awaitStability(Set<? super ServiceController<?>> failed, Set<? super ServiceController<?>> problem) throws InterruptedException {
+    public void awaitStability(Set<? super ServiceController> failed, Set<? super ServiceController> problem) throws InterruptedException {
         synchronized (lock) {
             while (unstableServices != 0) {
                 lock.wait();
@@ -238,7 +238,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     }
 
     @Override
-    public boolean awaitStability(final long timeout, final TimeUnit unit, Set<? super ServiceController<?>> failed, Set<? super ServiceController<?>> problem) throws InterruptedException {
+    public boolean awaitStability(final long timeout, final TimeUnit unit, Set<? super ServiceController> failed, Set<? super ServiceController> problem) throws InterruptedException {
         long now = System.nanoTime();
         long remaining = unit.toNanos(timeout);
         synchronized (lock) {
@@ -290,7 +290,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
                 executor.shutdown();
             }
         });
-        ServiceControllerImpl<?> controller;
+        ServiceControllerImpl controller;
         for (ServiceRegistrationImpl registration : registry.values()) {
             controller = registration.getDependencyController();
             if (controller != null) {
@@ -374,8 +374,8 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     }
 
     @Override
-    public ServiceController<?> getRequiredService(final ServiceName serviceName) throws ServiceNotFoundException {
-        final ServiceController<?> controller = getService(serviceName);
+    public ServiceController getRequiredService(final ServiceName serviceName) throws ServiceNotFoundException {
+        final ServiceController controller = getService(serviceName);
         if (controller == null) {
             throw new ServiceNotFoundException(serviceName + " not found");
         }
@@ -383,7 +383,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     }
 
     @Override
-    public ServiceController<?> getService(final ServiceName serviceName) {
+    public ServiceController getService(final ServiceName serviceName) {
         final ServiceRegistrationImpl registration = registry.get(serviceName);
         return registration == null ? null : registration.getDependencyController();
     }
@@ -400,7 +400,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     }
 
     @Override
-    <T> ServiceController<T> install(final ServiceBuilderImpl<T> serviceBuilder) throws DuplicateServiceException {
+    ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateServiceException {
         apply(serviceBuilder);
 
         // Initialize registrations and injectors map
@@ -421,7 +421,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
 
         // Next create the actual controller
-        final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
+        final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.serviceId, serviceBuilder.getService(),
                 requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
         boolean ok = false;
         try {
@@ -457,12 +457,12 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
      * @param instance                     the service being installed
      * @throws CircularDependencyException if a dependency cycle involving {@code instance} is detected
      */
-    private <T> void detectCircularity(ServiceControllerImpl<T> instance) throws CircularDependencyException {
+    private void detectCircularity(ServiceControllerImpl instance) throws CircularDependencyException {
         if (isAggregationService(instance)) {
             // aggregation services cannot introduce a dependency cycle
             return;
         }
-        final Set<ServiceControllerImpl<?>> visited = new IdentityHashSet<>();
+        final Set<ServiceControllerImpl> visited = new IdentityHashSet<>();
         final Deque<ServiceControllerImpl> visitStack = new ArrayDeque<>();
         visitStack.push(instance);
         for (ServiceRegistrationImpl registration : instance.getRegistrations()) {
@@ -472,9 +472,9 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
     }
 
-    private void detectCircularity(Set<? extends Dependent> dependents, ServiceControllerImpl<?> instance, Set<ServiceControllerImpl<?>> visited,  Deque<ServiceControllerImpl> visitStack) {
+    private void detectCircularity(Set<? extends Dependent> dependents, ServiceControllerImpl instance, Set<ServiceControllerImpl> visited,  Deque<ServiceControllerImpl> visitStack) {
         for (Dependent dependent: dependents) {
-            final ServiceControllerImpl<?> controller = dependent.getDependentController();
+            final ServiceControllerImpl controller = dependent.getDependentController();
             if (controller == instance) {
                 // change cycle from dependent order to dependency order
                 ServiceName[] cycle = new ServiceName[visitStack.size()];
@@ -501,11 +501,11 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
     }
 
-    private static boolean isAggregationService(final ServiceControllerImpl<?> controller) {
+    private static boolean isAggregationService(final ServiceControllerImpl controller) {
         return !(controller.service instanceof org.jboss.msc.service.Service) && controller.provides().isEmpty();
     }
 
-    private static boolean isRemovedService(final ServiceControllerImpl<?> controller) {
+    private static boolean isRemovedService(final ServiceControllerImpl controller) {
         return controller.getState() == ServiceController.State.REMOVED;
     }
 
