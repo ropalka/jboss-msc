@@ -425,15 +425,9 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             }
         }
         final ValueInjection<?>[] valueInjectionArray = valueInjections.toArray(new ValueInjection<?>[valueInjections.size()]);
-        final Collection<ServiceName> serviceAliases = serviceBuilder.getServiceAliases();
-        final ServiceName[] aliases = new ServiceName[serviceAliases.size()];
-        int i = 0;
-        for (ServiceName alias : serviceAliases) {
-            aliases[i++] = alias;
-        }
 
         // Next create the actual controller
-        final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, aliases, serviceBuilder.getService(),
+        final ServiceControllerImpl<T> instance = new ServiceControllerImpl<>(this, serviceBuilder.serviceId, serviceBuilder.getService(),
                 requires, provides, valueInjectionArray,
                 serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
         boolean ok = false;

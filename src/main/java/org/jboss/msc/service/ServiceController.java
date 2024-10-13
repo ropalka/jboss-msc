@@ -142,16 +142,6 @@ public interface ServiceController<S> extends Value<S> {
     ServiceName getName();
 
     /**
-     * Get other names this service is known as.
-     *
-     * @return the aliases
-     * @see #provides()
-     * @deprecated Use {@code ServiceController#provides()} instead. This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceName[] getAliases();
-
-    /**
      * Get the names of all values this service require.
      *
      * @return names of required values

@@ -69,10 +69,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
      */
     private final ServiceName serviceId;
     /**
-     * The service aliases.
-     */
-    private final ServiceName[] serviceAliases;
-    /**
      * The service itself.
      */
     final org.jboss.msc.Service service;
@@ -192,11 +188,10 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final ServiceName[] serviceAliases, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final ValueInjection<?>[] injections, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final org.jboss.msc.Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final ValueInjection<?>[] injections, final Set<StabilityMonitor> monitors, final Set<LifecycleListener> lifecycleListeners, final ServiceControllerImpl<?> parent) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.serviceId = serviceId;
-        this.serviceAliases = serviceAliases;
         this.service = service;
         this.injections = injections;
         this.requires = requires;
@@ -227,7 +222,7 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
     }
 
     /**
-     * Set this instance into primary and alias registrations.
+     * Set this instance into serviceName registration.
      * <p></p>
      * All notifications from registrations will be ignored until the
      * installation is {@link #commitInstallation(org.jboss.msc.service.ServiceController.Mode) committed}.
@@ -1079,10 +1074,6 @@ final class ServiceControllerImpl<S> implements ServiceController<S>, Dependent 
 
     public ServiceName getName() {
         return serviceId;
-    }
-
-    public ServiceName[] getAliases() {
-        return serviceAliases.clone();
     }
 
     public Set<ServiceName> requires() {
