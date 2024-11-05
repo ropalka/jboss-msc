@@ -22,7 +22,6 @@
 
 package org.jboss.msc.service;
 
-import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -164,21 +163,6 @@ public interface ServiceController {
          */
         REMOVED,
         ;
-
-        /**
-         * Determine if this state is one of the given states.
-         *
-         * @param states the states to check
-         * @return {@code true} if this state is in the set; {@code false} otherwise
-         */
-        public boolean in(State... states) {
-            for (State test : states) {
-                if (this == test) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 
     /**
@@ -212,21 +196,6 @@ public interface ServiceController {
          */
         ACTIVE,
         ;
-
-        /**
-         * Determine if this mode is one of the given modes.
-         *
-         * @param modes the modes to check
-         * @return {@code true} if this mode is in the set; {@code false} otherwise
-         */
-        public boolean in(Mode... modes) {
-            for (Mode test : modes) {
-                if (this == test) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 
 }
