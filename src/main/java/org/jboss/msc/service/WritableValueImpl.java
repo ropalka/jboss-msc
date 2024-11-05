@@ -45,7 +45,7 @@ final class WritableValueImpl implements Consumer<Object> {
     public void accept(final Object newValue) {
         final ServiceController controller = this.controller;
         if (controller != null) synchronized (controller) {
-            final State state = controller.getState();
+            final State state = controller.state();
             if (state == State.STARTING) {
                 value = newValue;
                 return;
@@ -63,7 +63,7 @@ final class WritableValueImpl implements Consumer<Object> {
     void uninject() {
         final ServiceController controller = this.controller;
         if (controller != null) synchronized (controller) {
-            final State state = controller.getState();
+            final State state = controller.state();
             if (state == State.STARTING || state == State.STOPPING) {
                 value = UNDEFINED;
                 return;

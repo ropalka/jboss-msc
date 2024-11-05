@@ -502,7 +502,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     }
 
     private static boolean isRemovedService(final ServiceControllerImpl controller) {
-        return controller.getState() == ServiceController.State.REMOVED;
+        return controller.state() == ServiceController.State.REMOVED;
     }
 
     private static final AtomicInteger executorSeq = new AtomicInteger(1);

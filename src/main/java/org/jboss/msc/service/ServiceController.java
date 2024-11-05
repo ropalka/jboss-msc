@@ -61,11 +61,11 @@ public interface ServiceController {
     void setMode(Mode mode);
 
     /**
-     * Get the current service controller state.
+     * Get the current service state.
      *
-     * @return the current state
+     * @return the current service state
      */
-    State getState();
+    State state();
 
     /**
      * Get the name of this service, if any.
