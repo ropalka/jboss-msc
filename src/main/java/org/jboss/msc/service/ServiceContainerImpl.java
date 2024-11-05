@@ -498,7 +498,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     }
 
     private static boolean isAggregationService(final ServiceControllerImpl controller) {
-        return !(controller.service instanceof org.jboss.msc.service.Service) && controller.provides().isEmpty();
+        return controller.provides().isEmpty();
     }
 
     private static boolean isRemovedService(final ServiceControllerImpl controller) {
