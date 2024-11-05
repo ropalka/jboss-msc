@@ -891,7 +891,15 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     }
 
     public Set<ServiceName> missing() {
-        return getUnavailableDependencies();
+        final Set<ServiceName> retVal = new IdentityHashSet<>();
+        for (Dependency dependency : requires) {
+            synchronized (dependency.getLock()) {
+                if (isUnavailable(dependency)) {
+                    retVal.add(dependency.getName());
+                }
+            }
+        }
+        return Collections.unmodifiableSet(retVal);
     }
 
     void addListener(final ContainerShutdownListener listener) {
@@ -959,19 +967,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             updateStabilityState(leavingRestState);
         }
         doExecute(tasks);
-    }
-
-    @Override
-    public Set<ServiceName> getUnavailableDependencies() {
-        final Set<ServiceName> retVal = new IdentityHashSet<>();
-        for (Dependency dependency : requires) {
-            synchronized (dependency.getLock()) {
-                if (isUnavailable(dependency)) {
-                    retVal.add(dependency.getName());
-                }
-            }
-        }
-        return Collections.unmodifiableSet(retVal);
     }
 
     private static boolean isUnavailable(final Dependency dependency) {

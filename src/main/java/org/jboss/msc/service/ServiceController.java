@@ -132,15 +132,6 @@ public interface ServiceController {
     void retry();
 
     /**
-     * Get the complete list of dependencies that are unavailable.
-     *
-     * @return a set containing the names of all unavailable dependencies
-     * @deprecated Use {@code ServiceController#missing()} instead. This method will be removed in a future release.
-     */
-    @Deprecated
-    Collection<ServiceName> getUnavailableDependencies();
-
-    /**
      * A possible state for a service controller.
      */
     enum State {
