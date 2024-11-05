@@ -119,11 +119,11 @@ public interface ServiceController {
     void removeListener(LifecycleListener listener);
 
     /**
-     * Get the reason why the last start failed.
+     * Get the reason why the start failed.
      *
-     * @return the last start exception, or {@code null} if the last start succeeded or the service has not yet started
+     * @return the start exception, or {@code null} if the last start succeeded or the service has not yet started
      */
-    StartException getStartException();
+    Throwable getStartException();
 
     /**
      * Retry a failed service.  Does nothing if the state is not {@link State#START_FAILED}.

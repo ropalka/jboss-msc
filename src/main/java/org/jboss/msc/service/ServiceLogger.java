@@ -56,7 +56,7 @@ interface ServiceLogger {
 
     @LogMessage(level = ERROR)
     @Message(id = 1, value = "Failed to start %s")
-    void startFailed(@Cause StartException cause, ServiceName serviceName);
+    void startFailed(@Cause Throwable cause, ServiceName serviceName);
 
     @LogMessage(level = ERROR)
     @Message(id = 2, value = "Invocation of listener \"%s\" failed")

@@ -42,13 +42,13 @@ package org.jboss.msc.service;
  * </ul>
  *
  * If your service start/stop does any of these things, you must use the asynchronous start/stop mechanism
- * ({@link org.jboss.msc.service.LifecycleContext#asynchronous()}) and do one of the following:
+ * ({@link StartContext#asynchronous()}/{@link StopContext#asynchronous()}) and do one of the following:
  *
  * <ul>
  * <li>Initiate your task in start()/stop(), and utilize a callback (NIO, ThreadPoolExecutor.terminated(), etc.) to call
- * {@link org.jboss.msc.service.LifecycleContext#complete()} when your start/stop completes instead of blocking</li>
+ * ({@link StartContext#complete()}/{@link StopContext#complete()}) when your start/stop completes instead of blocking</li>
  * <li>Delegate your blocking task to a thread pool ({@code Executor}) which calls
- * {@link org.jboss.msc.service.LifecycleContext#complete()} when done</li>
+ * ({@link StartContext#complete()}/{@link StopContext#complete()}) when done</li>
  * <li>Use proper dependencies instead of explicitly waiting for services in your start/stop</li>
  * </ul>
  * <p>
@@ -65,15 +65,14 @@ public interface Service {
 
     /**
      * Start the service.  Do not return until the service has been fully started, unless an asynchronous service
-     * start is performed.  All injections will be complete before this method is called.
+     * start is performed.  All dependency injections will be complete before this method is called.
      * <p>
      * If the service start involves any activities that may block, the asynchronous mechanism
      * provided by the {@code context} should be used. See the {@link Service class javadoc} for details.
      *
      * @param context the context which can be used to trigger an asynchronous service start
-     * @throws StartException if the service could not be started for some reason
      */
-    void start(StartContext context) throws StartException;
+    void start(StartContext context);
 
     /**
      * Stop the service.  Do not return until the service has been fully stopped, unless an asynchronous service

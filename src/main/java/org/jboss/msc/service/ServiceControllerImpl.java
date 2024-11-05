@@ -89,7 +89,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * The start exception.
      */
-    private StartException startException;
+    private Throwable startException;
     /**
      * The controller mode.
      */
@@ -948,7 +948,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     }
 
     @Override
-    public StartException getStartException() {
+    public Throwable getStartException() {
         synchronized (this) {
             return startException;
         }
@@ -1005,7 +1005,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         for (Entry<ServiceRegistrationImpl, WritableValueImpl> entry : provides.entrySet()) {
             injector = entry.getValue();
             if (injector != null && injector.value == null) {
-                throw new IllegalStateException("Injector for " + entry.getKey().getName() + " was not initialized");
+                throw new IllegalStateException("Value '" + entry.getKey().getName() + "' was not initialized");
             }
         }
     }
@@ -1186,16 +1186,13 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 } else {
                     checkProvidedValues();
                 }
-            } catch (StartException e) {
-                e.setServiceName(getName());
-                startFailed(e, context);
             } catch (Throwable t) {
-                startFailed(new StartException("Failed to start service", t, getName()), context);
+                startFailed(t, context);
             }
             return true;
         }
 
-        private void startService(Service service, StartContext context) throws StartException {
+        private void startService(Service service, StartContext context) {
             final ClassLoader contextClassLoader = setTCCL(getCL(service.getClass()));
             try {
                 service.start(context);
@@ -1205,7 +1202,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    private void startFailed(final StartException e, final StartContextImpl context) {
+    private void startFailed(final Throwable e, final StartContextImpl context) {
         ServiceLogger.FAIL.startFailed(e, getName());
         synchronized (context.lock) {
             context.state |= (AbstractContext.FAILED | AbstractContext.CLOSED);
@@ -1373,12 +1370,11 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     }
 
     private final class StartContextImpl extends AbstractContext implements StartContext {
-        public void fail(StartException reason) throws IllegalStateException {
+        public void fail(Throwable reason) throws IllegalStateException {
             if (reason == null) {
-                reason = new StartException("Start failed, and additionally, a null cause was supplied");
+                reason = new RuntimeException("Start failed, and additionally, a null cause was supplied");
             }
             final ServiceName serviceName = getName();
-            reason.setServiceName(serviceName);
             ServiceLogger.FAIL.startFailed(reason, serviceName);
             final int state;
             synchronized (lock) {
@@ -1397,7 +1393,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             try {
                 checkProvidedValues();
             } catch (Throwable t) {
-                startFailed(new StartException("Failed to start service", t, getName()), this);
+                startFailed(t, this);
             }
         }
     }
