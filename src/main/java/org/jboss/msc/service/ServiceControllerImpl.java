@@ -979,13 +979,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    public boolean compareAndSetMode(final Mode expectedMode, final Mode newMode) {
-        if (expectedMode == null) {
-            throw new IllegalArgumentException("expectedMode is null");
-        }
-        return internalSetMode(expectedMode, newMode);
-    }
-
     private Substate getSubstate() {
         synchronized (this) {
             return state;
