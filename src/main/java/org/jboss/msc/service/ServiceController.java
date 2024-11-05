@@ -116,7 +116,7 @@ public interface ServiceController {
      *
      * @return the start exception, or {@code null} if the last start succeeded or the service has not yet started
      */
-    Throwable getStartException();
+    Throwable reason();
 
     /**
      * Retry a failed service.  Does nothing if the state is not {@link State#START_FAILED}.
