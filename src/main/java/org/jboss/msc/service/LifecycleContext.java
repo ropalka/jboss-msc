@@ -31,5 +31,4 @@ package org.jboss.msc.service;
 public interface LifecycleContext {
     void asynchronous();
     void complete();
-    ServiceController getController();
 }
