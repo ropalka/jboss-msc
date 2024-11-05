@@ -513,20 +513,13 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     };
     private static final ThreadPoolExecutor.CallerRunsPolicy POLICY = new ThreadPoolExecutor.CallerRunsPolicy();
 
-    static class ServiceThread extends Thread {
-        private final ServiceContainerImpl container;
-
-        ServiceThread(final Runnable runnable, final ServiceContainerImpl container) {
+    private static final class ServiceThread extends Thread {
+        ServiceThread(final Runnable runnable) {
             super(runnable);
-            this.container = container;
-        }
-
-        ServiceContainerImpl getContainer() {
-            return container;
         }
     }
 
-    final class ThreadAction implements PrivilegedAction<ServiceThread> {
+    private static final class ThreadAction implements PrivilegedAction<ServiceThread> {
         private final Runnable r;
         private final int id;
         private final AtomicInteger threadSeq;
@@ -538,7 +531,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         }
 
         public ServiceThread run() {
-            ServiceThread thread = new ServiceThread(r, ServiceContainerImpl.this);
+            ServiceThread thread = new ServiceThread(r);
             if (thread.isDaemon()) thread.setDaemon(false);
             if (thread.getPriority() != Thread.NORM_PRIORITY) thread.setPriority(Thread.NORM_PRIORITY);
             thread.setName(String.format("MSC service thread %d-%d", Integer.valueOf(id), Integer.valueOf(threadSeq.getAndIncrement())));
