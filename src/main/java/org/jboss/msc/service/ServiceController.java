@@ -33,13 +33,6 @@ import java.util.Set;
 public interface ServiceController {
 
     /**
-     * Get the service container associated with this controller.
-     *
-     * @return the container
-     */
-    ServiceContainer getServiceContainer();
-
-    /**
      * Get the service controller's current mode.
      *
      * @return the controller mode

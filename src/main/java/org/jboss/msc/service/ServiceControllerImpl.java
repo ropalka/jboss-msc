@@ -868,10 +868,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         doExecute(tasks);
     }
 
-    public ServiceContainerImpl getServiceContainer() {
-        return container;
-    }
-
     public ServiceController.State getState() {
         synchronized (this) {
             return state.getState();
