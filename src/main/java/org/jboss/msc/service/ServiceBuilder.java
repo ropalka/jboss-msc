@@ -131,7 +131,7 @@ public interface ServiceBuilder {
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
      * @throws IllegalStateException if this method have been called twice.
-     * @throws ServiceRegistryException if installation fails for any reason
+     * @throws RuntimeException if installation fails for any reason
      */
     ServiceController install();
 

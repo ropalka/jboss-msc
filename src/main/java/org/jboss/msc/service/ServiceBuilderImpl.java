@@ -128,7 +128,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    public ServiceController install() throws ServiceRegistryException {
+    public ServiceController install() {
         // preconditions
         assertNotInstalled();
         assertThreadSafety();

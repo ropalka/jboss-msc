@@ -27,7 +27,7 @@ package org.jboss.msc.service;
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
-public class ServiceNotFoundException extends ServiceRegistryException {
+public class ServiceNotFoundException extends RuntimeException {
 
     private static final long serialVersionUID = -3145569397301460220L;
 

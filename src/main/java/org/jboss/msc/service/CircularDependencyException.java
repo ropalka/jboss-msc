@@ -27,7 +27,7 @@ package org.jboss.msc.service;
  * 
  * @author John Bailey
  */
-public class CircularDependencyException extends ServiceRegistryException {
+public class CircularDependencyException extends RuntimeException {
 
     private static final long serialVersionUID = -4826336558749601678L;
 
