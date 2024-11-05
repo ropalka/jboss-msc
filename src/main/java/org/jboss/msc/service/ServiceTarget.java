@@ -66,29 +66,4 @@ public interface ServiceTarget {
      */
     ServiceTarget subTarget();
 
-    ////////////////////////
-    // DEPRECATED METHODS //
-    ////////////////////////
-
-    /**
-     * Add a stability monitor that will be added to all the ServiceBuilders installed in this target.
-     *
-     * @param monitor the monitor to add to the target
-     * @return this target
-     * @deprecated Stability monitors are unreliable - do not use them.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceTarget addMonitor(StabilityMonitor monitor);
-
-    /**
-     * Remove a monitor from this target, if it exists.
-     *
-     * @param monitor the monitor to remove
-     * @return this target
-     * @deprecated Stability monitors are unreliable - do not use them.
-     * This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceTarget removeMonitor(StabilityMonitor monitor);
 }

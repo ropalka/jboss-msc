@@ -131,13 +131,4 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
         return getDelegate().subTarget();
     }
 
-    @Override
-    public ServiceTarget addMonitor(final StabilityMonitor monitor) {
-        return getDelegate().addMonitor(monitor);
-    }
-
-    @Override
-    public ServiceTarget removeMonitor(final StabilityMonitor monitor) {
-        return getDelegate().removeMonitor(monitor);
-    }
 }

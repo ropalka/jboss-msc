@@ -38,7 +38,6 @@ class ServiceTargetImpl implements ServiceTarget {
 
     private final ServiceTargetImpl parent;
     private final Set<LifecycleListener> lifecycleListeners = synchronizedSet(new IdentityHashSet<>());
-    private final Set<StabilityMonitor> monitors = synchronizedSet(new IdentityHashSet<>());
 
     ServiceTargetImpl(final ServiceTargetImpl parent) {
         if (parent == null) {
@@ -64,22 +63,6 @@ class ServiceTargetImpl implements ServiceTarget {
     }
 
     @Override
-    public ServiceTarget addMonitor(final StabilityMonitor monitor) {
-        if (monitor != null) {
-            monitors.add(monitor);
-        }
-        return this;
-    }
-
-    @Override
-    public ServiceTarget removeMonitor(final StabilityMonitor monitor) {
-        if (monitor != null) {
-            monitors.remove(monitor);
-        }
-        return this;
-    }
-
-    @Override
     public ServiceTarget removeListener(final LifecycleListener listener) {
         if (listener != null) lifecycleListeners.remove(listener);
         return this;
@@ -91,9 +74,6 @@ class ServiceTargetImpl implements ServiceTarget {
      * @param serviceBuilder serviceBuilder which listeners and dependencies will be added to.
      */
     void apply(ServiceBuilderImpl serviceBuilder) {
-        synchronized (monitors) {
-            serviceBuilder.addMonitorsNoCheck(monitors);
-        }
         synchronized (lifecycleListeners) {
             serviceBuilder.addLifecycleListenersNoCheck(lifecycleListeners);
         }

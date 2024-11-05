@@ -24,7 +24,6 @@ package org.jboss.msc.service;
 
 import static java.lang.Thread.currentThread;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -48,7 +47,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private Service service;
     private ServiceController.Mode initialMode;
     private Map<ServiceName, ServiceRegistrationImpl> requires;
-    private Set<StabilityMonitor> monitors;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
@@ -119,17 +117,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    public ServiceBuilder addMonitor(final StabilityMonitor monitor) {
-        // preconditions
-        assertNotInstalled();
-        assertNotNull(monitor);
-        assertThreadSafety();
-        // implementation
-        addMonitorInternal(monitor);
-        return this;
-    }
-
-    @Override
     public ServiceBuilder addListener(final LifecycleListener listener) {
         // preconditions
         assertNotInstalled();
@@ -161,12 +148,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    void addMonitorsNoCheck(final Collection<? extends StabilityMonitor> monitors) {
-        for (final StabilityMonitor monitor : monitors) {
-            if (monitor != null) addMonitorInternal(monitor);
-        }
-    }
-
     Service getService() {
         return service;
     }
@@ -193,11 +174,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    void addMonitorInternal(final StabilityMonitor monitor) {
-        if (monitors == null) monitors = new IdentityHashSet<>();
-        monitors.add(monitor);
-    }
-
     void addListenerInternal(final LifecycleListener listener) {
         if (lifecycleListeners == null) lifecycleListeners = new IdentityHashSet<>();
         lifecycleListeners.add(listener);
@@ -209,10 +185,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     Map<ServiceName, ServiceRegistrationImpl> getDependencies() {
         return requires == null ? Collections.emptyMap() : requires;
-    }
-
-    Set<StabilityMonitor> getMonitors() {
-        return monitors == null ? Collections.emptySet() : monitors;
     }
 
     Set<LifecycleListener> getLifecycleListeners() {
@@ -288,4 +260,5 @@ final class ServiceBuilderImpl implements ServiceBuilder {
             throw new IllegalArgumentException("Initial service mode cannot be REMOVE");
         }
     }
+
 }

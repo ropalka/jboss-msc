@@ -421,7 +421,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
         // Next create the actual controller
         final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.serviceId, serviceBuilder.getService(),
-                requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners());
+                requires, provides, serviceBuilder.getLifecycleListeners());
         boolean ok = false;
         try {
             synchronized (this) {
