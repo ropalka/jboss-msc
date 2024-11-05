@@ -421,7 +421,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
 
         // Next create the actual controller
         final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.serviceId, serviceBuilder.getService(),
-                requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners(), serviceBuilder.parent);
+                requires, provides, serviceBuilder.getMonitors(), serviceBuilder.getLifecycleListeners());
         boolean ok = false;
         try {
             synchronized (this) {
@@ -486,9 +486,6 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
             if (visited.add(controller)) {
                 if (isRemovedService(controller) || isAggregationService(controller)) continue;
                 visitStack.push(controller);
-                synchronized(controller) {
-                    detectCircularity(controller.getChildren(), instance, visited, visitStack);
-                }
                 for (ServiceRegistrationImpl registration : controller.getRegistrations()) {
                     if (registration.getDependencyController() == null) continue; // concurrent removal
                     synchronized (registration) {

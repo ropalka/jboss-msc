@@ -53,7 +53,7 @@ class ServiceTargetImpl implements ServiceTarget {
 
     @Override
     public ServiceBuilder addService() {
-        return new ServiceBuilderImpl(null, this, null);
+        return new ServiceBuilderImpl(null, this);
     }
 
     public ServiceTarget addListener(final LifecycleListener listener) {

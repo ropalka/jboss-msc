@@ -42,7 +42,6 @@ import java.util.function.Supplier;
 final class ServiceBuilderImpl implements ServiceBuilder {
 
     final ServiceName serviceId;
-    final ServiceControllerImpl parent;
     private final ServiceTargetImpl serviceTarget;
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
@@ -53,10 +52,9 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget, final ServiceControllerImpl parent) {
+    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget) {
         this.serviceId = serviceId;
         this.serviceTarget = serviceTarget;
-        this.parent = parent;
         if (serviceId != null) {
             addProvidesInternal(serviceId, null);
         }
@@ -214,13 +212,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     Set<StabilityMonitor> getMonitors() {
-        ServiceControllerImpl parent = this.parent;
-        while (parent != null) {
-            synchronized (parent) {
-                addMonitorsNoCheck(parent.getMonitors());
-                parent = parent.getParent();
-            }
-        }
         return monitors == null ? Collections.emptySet() : monitors;
     }
 
