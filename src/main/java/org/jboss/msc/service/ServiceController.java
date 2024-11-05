@@ -33,11 +33,11 @@ import java.util.Set;
 public interface ServiceController {
 
     /**
-     * Get the service controller's current mode.
+     * Get the service controller's mode.
      *
      * @return the controller mode
      */
-    Mode getMode();
+    Mode mode();
 
     /**
      * Compare the current mode against {@code expected}; if it matches, change it to {@code newMode}.  The
