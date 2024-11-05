@@ -26,6 +26,21 @@ package org.jboss.msc.service;
  * The stop lifecycle context.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
 public interface StopContext extends LifecycleContext {
+
+    /**
+     * Call within the service lifecycle stop method to trigger an <em>asynchronous</em> lifecycle stop action.
+     * This action will not be considered complete until indicated so by calling {@link #complete()} method on this interface.
+     */
+    void asynchronous();
+
+    /**
+     * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle stop action is complete.
+     *
+     * @throws IllegalStateException if called twice in a row.
+     */
+    void complete();
+
 }
