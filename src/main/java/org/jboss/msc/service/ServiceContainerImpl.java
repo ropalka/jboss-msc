@@ -23,6 +23,7 @@
 package org.jboss.msc.service;
 
 import static java.security.AccessController.doPrivileged;
+import static java.util.Collections.synchronizedSet;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -61,7 +62,7 @@ import org.jboss.msc.service.ServiceController.Mode;
  * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceContainer {
+final class ServiceContainerImpl implements ServiceContainer {
 
     private static final AtomicInteger SERIAL = new AtomicInteger(1);
 
@@ -71,6 +72,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
     private final Set<ServiceController> problems = new IdentityHashSet<>();
     private final Set<ServiceController> failed = new IdentityHashSet<>();
     private final Object lock = new Object();
+    private final Set<LifecycleListener> lifecycleListeners = synchronizedSet(new IdentityHashSet<>());
 
     private int unstableServices;
     private long shutdownInitiated;
@@ -113,6 +115,24 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         this.name = name;
         executor = new ContainerExecutor(coreSize, coreSize, timeOut, timeOutUnit);
         this.shutdownThread = autoShutdown ? new ShutdownHookThread(this) : null;
+    }
+
+    @Override
+    public ServiceBuilder addService() {
+        return new ServiceBuilderImpl(null, this);
+    }
+
+    public ServiceContainer addListener(final LifecycleListener listener) {
+        if (listener != null) {
+            lifecycleListeners.add(listener);
+        }
+        return this;
+    }
+
+    @Override
+    public ServiceContainer removeListener(final LifecycleListener listener) {
+        if (listener != null) lifecycleListeners.remove(listener);
+        return this;
     }
 
     void registerShutdownCleaner() {
@@ -398,10 +418,7 @@ final class ServiceContainerImpl extends ServiceTargetImpl implements ServiceCon
         return result;
     }
 
-    @Override
     ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateServiceException {
-        apply(serviceBuilder);
-
         // Initialize registrations and injectors map
         final Map<ServiceRegistrationImpl, WritableValueImpl> provides = new LinkedHashMap<>();
         Entry<ServiceName, WritableValueImpl> entry;

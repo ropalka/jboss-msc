@@ -31,10 +31,34 @@ import java.util.concurrent.TimeUnit;
 /**
  * A service container which manages a set of running services.
  *
+ * <p>Implementations of this interface are thread safe.</p>
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceContainer extends ServiceTarget, ServiceRegistry {
+public interface ServiceContainer extends ServiceRegistry {
+
+    /**
+     * Add a service lifecycle listener to this container, if it wasn't added yet.
+     *
+     * @param listener the lifecycle listener to add to the service
+     * @return this container
+     */
+    ServiceContainer addListener(LifecycleListener listener);
+
+    /**
+     * Remove a service lifecycle listener from this container, if it was added.
+     *
+     * @param listener the lifecycle listener to remove
+     * @return this container
+     */
+    ServiceContainer removeListener(LifecycleListener listener);
+
+    /**
+     * Get a builder which can be used to add a service to this target.
+     *
+     * @return new service configurator
+     */
+    ServiceBuilder addService();
 
     /**
      * Stop all services within this container.

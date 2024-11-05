@@ -112,23 +112,18 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public ServiceTarget addListener(final LifecycleListener listener) {
+    public ServiceContainer addListener(final LifecycleListener listener) {
         return getDelegate().addListener(listener);
     }
 
     @Override
-    public ServiceTarget removeListener(final LifecycleListener listener) {
+    public ServiceContainer removeListener(final LifecycleListener listener) {
         return getDelegate().removeListener(listener);
     }
 
     @Override
     public ServiceBuilder addService() {
         return getDelegate().addService();
-    }
-
-    @Override
-    public ServiceTarget subTarget() {
-        return getDelegate().subTarget();
     }
 
 }

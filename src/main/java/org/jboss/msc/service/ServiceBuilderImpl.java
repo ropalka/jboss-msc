@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 final class ServiceBuilderImpl implements ServiceBuilder {
 
     final ServiceName serviceId;
-    private final ServiceTargetImpl serviceTarget;
+    private final ServiceContainerImpl container;
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
     private Service service;
@@ -50,9 +50,9 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceTargetImpl serviceTarget) {
+    ServiceBuilderImpl(final ServiceName serviceId, final ServiceContainerImpl container) {
         this.serviceId = serviceId;
-        this.serviceTarget = serviceTarget;
+        this.container = container;
         if (serviceId != null) {
             addProvidesInternal(serviceId, null);
         }
@@ -136,7 +136,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         installed = true;
         if (service == null) service = Service.NULL;
         if (initialMode == null) initialMode = ServiceController.Mode.ACTIVE;
-        return serviceTarget.install(this);
+        return container.install(this);
     }
 
     // implementation internals
@@ -161,7 +161,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         if (existing != null) {
             return existing;
         }
-        final ServiceRegistrationImpl dependency = serviceTarget.getOrCreateRegistration(name);
+        final ServiceRegistrationImpl dependency = container.getOrCreateRegistration(name);
         requires.put(name, dependency);
         return dependency;
     }
