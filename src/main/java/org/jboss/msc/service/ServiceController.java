@@ -158,10 +158,6 @@ public interface ServiceController {
          */
         REMOVE,
         /**
-         * Do not start; in addition, ignore demands from dependents.
-         */
-        NEVER,
-        /**
          * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
          */
         ON_DEMAND,

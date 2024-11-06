@@ -93,7 +93,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * The controller mode.
      */
-    private ServiceController.Mode mode = ServiceController.Mode.NEVER;
+    private ServiceController.Mode mode;
     /**
      * The controller state.
      */
@@ -303,7 +303,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private boolean shouldStop() {
         assert holdsLock(this);
-        return mode == Mode.REMOVE || mode == Mode.NEVER || demandedByCount == 0 && mode == Mode.ON_DEMAND;
+        return mode == Mode.REMOVE || demandedByCount == 0 && mode == Mode.ON_DEMAND;
     }
 
     /**
@@ -407,7 +407,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 break;
             }
             case STOPPING: {
-                // TODO: eliminate this phase
                 return Transition.STOPPING_to_DOWN;
             }
             case REMOVING: {
@@ -455,7 +454,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         do {
             // first of all, check if dependencies should be un/demanded
             switch (mode) {
-                case NEVER:
                 case REMOVE:
                     if (dependenciesDemanded) {
                         tasks.add(new UndemandDependenciesTask());
