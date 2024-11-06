@@ -97,11 +97,6 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public ServiceController getRequiredService(final ServiceName serviceName) throws ServiceNotFoundException {
-        return getDelegate().getRequiredService(serviceName);
-    }
-
-    @Override
     public ServiceController getService(final ServiceName serviceName) {
         return getDelegate().getService(serviceName);
     }

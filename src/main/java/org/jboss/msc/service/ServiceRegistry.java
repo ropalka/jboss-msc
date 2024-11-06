@@ -33,15 +33,6 @@ import java.util.List;
 public interface ServiceRegistry {
 
     /**
-     * Get a service, throwing an exception if it is not found.
-     *
-     * @param serviceName the service name
-     * @return the service controller for the corresponding service
-     * @throws ServiceNotFoundException if the service is not present in the registry
-     */
-    ServiceController getRequiredService(ServiceName serviceName) throws ServiceNotFoundException;
-
-    /**
      * Get a service, returning {@code null} if it is not found.
      *
      * @param serviceName the service name
