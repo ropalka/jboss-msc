@@ -29,13 +29,31 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A service container which manages a set of running services.
+ * A service container which manages a set of running services and values they require or provide.
  *
  * <p>Implementations of this interface are thread safe.</p>
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface ServiceContainer extends ServiceRegistry {
+public interface ServiceContainer {
+
+    /**
+     * Get a controller of service providing given value.
+     * This method can return {@code null} if there is no such service.
+     * This can happen if value was only declared as required value by some installed service
+     * but there is no service installed yet providing given value.
+     *
+     * @param valueName the name of the value
+     * @return either a controller of service providing given value or {@code null}
+     */
+    ServiceController controllerOfValue(ServiceName valueName);
+
+    /**
+     * Get value names that are required or provided by already installed services.
+     *
+     * @return all value names declared by installed services
+     */
+    Set<ServiceName> valueNames();
 
     /**
      * Add a service lifecycle listener to this container, if it wasn't added yet.
