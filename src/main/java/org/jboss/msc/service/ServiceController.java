@@ -109,11 +109,6 @@ public interface ServiceController {
     Throwable reason();
 
     /**
-     * Retry a failed service.  Does nothing if the state is not {@link State#START_FAILED}.
-     */
-    void retry();
-
-    /**
      * A possible state for a service controller.
      */
     enum State {

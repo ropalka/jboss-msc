@@ -383,11 +383,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 }
             }
             case START_FAILED: {
-                if (shouldStart() && stoppingDependencies == 0) {
-                    if (startException == null) {
-                        return Transition.START_FAILED_to_STARTING;
-                    }
-                } else {
+                if (stoppingDependencies > 0) {
                     return Transition.START_FAILED_to_DOWN;
                 }
                 break;
@@ -570,12 +566,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     tasks.add(new DependencyUnavailableTask());
                     tasks.add(new DependencyRetryingTask());
                     tasks.add(new DependentStoppedTask());
-                    break;
-                }
-                case START_FAILED_to_STARTING: {
-                    container.removeFailed(this);
-                    tasks.add(new DependencyRetryingTask());
-                    tasks.add(new StartTask());
                     break;
                 }
                 default: {
@@ -946,21 +936,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         synchronized (this) {
             return startException;
         }
-    }
-
-    @Override
-    public void retry() {
-        assert !holdsLock(this);
-        final List<Runnable> tasks;
-        synchronized (this) {
-            final boolean leavingRestState = isStableRestState();
-            if (failCount > 0 || state.getState() != ServiceController.State.START_FAILED) return;
-            startException = null;
-            tasks = transition();
-            addAsyncTasks(tasks.size());
-            updateStabilityState(leavingRestState);
-        }
-        doExecute(tasks);
     }
 
     private static boolean isUnavailable(final Dependency dependency) {
