@@ -22,7 +22,6 @@
 
 package org.jboss.msc.service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -97,13 +96,13 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public ServiceController getService(final ServiceName serviceName) {
-        return getDelegate().getService(serviceName);
+    public ServiceController controllerOfValue(final ServiceName serviceName) {
+        return getDelegate().controllerOfValue(serviceName);
     }
 
     @Override
-    public List<ServiceName> getServiceNames() {
-        return getDelegate().getServiceNames();
+    public Set<ServiceName> valueNames() {
+        return getDelegate().valueNames();
     }
 
     @Override

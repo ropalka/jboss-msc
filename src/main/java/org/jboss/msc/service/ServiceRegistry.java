@@ -22,7 +22,7 @@
 
 package org.jboss.msc.service;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * A service registry.  Registries can return services by name, or get a collection of service names.
@@ -33,17 +33,21 @@ import java.util.List;
 public interface ServiceRegistry {
 
     /**
-     * Get a service, returning {@code null} if it is not found.
+     * Get a controller of service providing given value.
+     * This method can return {@code null} if there is no such service.
+     * This can happen if value was only declared as required value by some installed service
+     * but there is no service installed yet providing given value.
      *
-     * @param serviceName the service name
-     * @return the service controller for the corresponding service, or {@code null} if it is not found
+     * @param valueName the name of the value
+     * @return either a controller of service providing given value or {@code null}
      */
-    ServiceController getService(ServiceName serviceName);
+    ServiceController controllerOfValue(ServiceName valueName);
 
     /**
-     * Get a list of service names installed in this registry.
+     * Get value names that are required or provided by already installed services.
      *
-     * @return the list
+     * @return all value names declared by installed services
      */
-    List<ServiceName> getServiceNames();
+    Set<ServiceName> valueNames();
+
 }

@@ -32,6 +32,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +68,7 @@ final class ServiceContainerImpl implements ServiceContainer {
     private static final AtomicInteger SERIAL = new AtomicInteger(1);
 
     private final ConcurrentMap<ServiceName, ServiceRegistrationImpl> registry = new ConcurrentHashMap<>(512);
+    private final Set<ServiceName> valueNames = Collections.unmodifiableSet(registry.keySet());
     private final long start = System.nanoTime();
 
     private final Set<ServiceController> problems = new IdentityHashSet<>();
@@ -393,20 +395,14 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     @Override
-    public ServiceController getService(final ServiceName serviceName) {
+    public ServiceController controllerOfValue(final ServiceName serviceName) {
         final ServiceRegistrationImpl registration = registry.get(serviceName);
         return registration == null ? null : registration.getDependencyController();
     }
 
     @Override
-    public List<ServiceName> getServiceNames() {
-        final List<ServiceName> result = new ArrayList<>(registry.size());
-        for (Map.Entry<ServiceName, ServiceRegistrationImpl> registryEntry: registry.entrySet()) {
-            if (registryEntry.getValue().getDependencyController() != null) {
-                result.add(registryEntry.getKey());
-            }
-        }
-        return result;
+    public Set<ServiceName> valueNames() {
+        return valueNames;
     }
 
     ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateServiceException {
