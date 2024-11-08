@@ -119,7 +119,7 @@ final class ServiceContainerImpl implements ServiceContainer {
 
     @Override
     public ServiceBuilder addService() {
-        return new ServiceBuilderImpl(null, this);
+        return new ServiceBuilderImpl(this);
     }
 
     public ServiceContainer addListener(final LifecycleListener listener) {
@@ -422,7 +422,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         }
 
         // Next create the actual controller
-        final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.serviceId, serviceBuilder.getService(),
+        final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.getService(),
                 requires, provides, serviceBuilder.getLifecycleListeners());
         boolean ok = false;
         try {
@@ -478,10 +478,10 @@ final class ServiceContainerImpl implements ServiceContainer {
             final ServiceControllerImpl controller = dependent.getDependentController();
             if (controller == instance) {
                 // change cycle from dependent order to dependency order
-                ServiceName[] cycle = new ServiceName[visitStack.size()];
+                String[] cycle = new String[visitStack.size()];
                 int i = cycle.length - 1;
                 for (ServiceControllerImpl c : visitStack) {
-                    cycle[i--] = c.getName() != null ? c.getName() : (ServiceName)c.provides().iterator().next();
+                    cycle[i--] = c.toString();
                 }
                 throw new CircularDependencyException("Container " + name + " has a circular dependency: " + Arrays.asList(cycle), cycle);
             }

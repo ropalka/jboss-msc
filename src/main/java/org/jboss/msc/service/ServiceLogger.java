@@ -56,7 +56,7 @@ interface ServiceLogger {
 
     @LogMessage(level = ERROR)
     @Message(id = 1, value = "Failed to start %s")
-    void startFailed(@Cause Throwable cause, ServiceName serviceName);
+    void startFailed(@Cause Throwable cause, String serviceName);
 
     @LogMessage(level = ERROR)
     @Message(id = 2, value = "Invocation of listener \"%s\" failed")
@@ -64,11 +64,11 @@ interface ServiceLogger {
 
     @LogMessage(level = WARN)
     @Message(id = 4, value = "Failure during stop of %s")
-    void stopFailed(@Cause Throwable cause, ServiceName serviceName);
+    void stopFailed(@Cause Throwable cause, String serviceName);
 
     @LogMessage(level = WARN)
     @Message(id = 7, value = "An internal service error has occurred while processing an operation on %s")
-    void internalServiceError(@Cause Throwable cause, ServiceName serviceName);
+    void internalServiceError(@Cause Throwable cause, String serviceName);
 
     @LogMessage(level = ERROR)
     @Message(id = 8, value = "Worker thread %s threw an uncaught exception")

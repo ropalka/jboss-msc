@@ -40,7 +40,6 @@ import java.util.function.Supplier;
  */
 final class ServiceBuilderImpl implements ServiceBuilder {
 
-    final ServiceName serviceId;
     private final ServiceContainerImpl container;
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
@@ -50,12 +49,8 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
-    ServiceBuilderImpl(final ServiceName serviceId, final ServiceContainerImpl container) {
-        this.serviceId = serviceId;
+    ServiceBuilderImpl(final ServiceContainerImpl container) {
         this.container = container;
-        if (serviceId != null) {
-            addProvidesInternal(serviceId, null);
-        }
     }
 
     @Override
@@ -65,7 +60,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertNotInstalled();
         assertNotNull(dependency);
         assertThreadSafety();
-        assertNotInstanceId(dependency);
         assertNotProvided(dependency, true);
         // implementation
         return (Supplier<V>) addRequiresInternal(dependency).getReadableValue();
@@ -141,13 +135,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     // implementation internals
 
-    void addLifecycleListenersNoCheck(final Set<LifecycleListener> listeners) {
-        if (listeners == null || listeners.isEmpty()) return;
-        for (final LifecycleListener listener : listeners) {
-            if (listener != null) addListenerInternal(listener);
-        }
-    }
-
     Service getService() {
         return service;
     }
@@ -206,12 +193,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private void assertThreadSafety() {
         if (thread != currentThread()) {
             throw new ConcurrentModificationException("ServiceBuilder used by multiple threads");
-        }
-    }
-
-    private void assertNotInstanceId(final ServiceName dependency) {
-        if (dependency.equals(serviceId)) {
-            throw new IllegalArgumentException("Cannot both require and provide same dependency:" + dependency);
         }
     }
 

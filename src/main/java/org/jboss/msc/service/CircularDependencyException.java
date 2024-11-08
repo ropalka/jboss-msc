@@ -31,7 +31,7 @@ public class CircularDependencyException extends RuntimeException {
 
     private static final long serialVersionUID = -4826336558749601678L;
 
-    private ServiceName[] cycle;
+    private String[] cycle;
 
     /**
      * Constructs a {@code CircularDependencyException} with the specified detail message. The cause is not initialized, and
@@ -39,7 +39,7 @@ public class CircularDependencyException extends RuntimeException {
      *
      * @param msg the detail message
      */
-    public CircularDependencyException(final String msg, ServiceName[] cycle) {
+    public CircularDependencyException(final String msg, String[] cycle) {
         super(msg);
         this.cycle = cycle;
     }
@@ -50,7 +50,7 @@ public class CircularDependencyException extends RuntimeException {
      * @return an array formed by the service names involved in the cycle, in dependency order. Last name in the array
      *         has a dependency on the name in the first position, thus completing the cycle.
      */
-    public ServiceName[] getCycle() {
+    public String[] getCycle() {
         return cycle;
     }
 }

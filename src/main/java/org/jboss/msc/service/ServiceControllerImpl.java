@@ -60,10 +60,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private final ServiceContainerImpl container;
     /**
-     * The service identifier.
-     */
-    private final ServiceName serviceId;
-    /**
      * The service itself.
      */
     final Service service;
@@ -154,10 +150,9 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final ServiceName serviceId, final Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<LifecycleListener> lifecycleListeners) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<LifecycleListener> lifecycleListeners) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
-        this.serviceId = serviceId;
         this.service = service;
         this.requires = requires;
         this.requiredValues = unmodifiableSetOf(requires);
@@ -862,10 +857,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    public ServiceName getName() {
-        return serviceId;
-    }
-
     public Set<ServiceName> requires() {
         return requiredValues;
     }
@@ -980,7 +971,15 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     @Override
     public String toString() {
-        return String.format("Controller for %s@%x", getName(), Integer.valueOf(hashCode()));
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Controller of service '");
+        sb.append(service.getClass().getName());
+        sb.append("' , required values '");
+        sb.append(requiredValues);
+        sb.append("' , provided values '");
+        sb.append(providedValues);
+        sb.append("'");
+        return sb.toString();
     }
 
     private abstract class ControllerTask implements Runnable {
@@ -1004,7 +1003,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 }
                 doExecute(tasks);
             } catch (Throwable t) {
-                ServiceLogger.SERVICE.internalServiceError(t, getName());
+                ServiceLogger.SERVICE.internalServiceError(t, toString());
             } finally {
                 afterExecute();
             }
@@ -1165,7 +1164,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     }
 
     private void startFailed(final Throwable e, final StartContextImpl context) {
-        ServiceLogger.FAIL.startFailed(e, getName());
+        ServiceLogger.FAIL.startFailed(e, toString());
         synchronized (context.lock) {
             context.state |= (AbstractContext.FAILED | AbstractContext.CLOSED);
             synchronized (ServiceControllerImpl.this) {
@@ -1183,7 +1182,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 stopService(service, context);
                 ok = true;
             } catch (Throwable t) {
-                ServiceLogger.FAIL.stopFailed(t, getName());
+                ServiceLogger.FAIL.stopFailed(t, toString());
             } finally {
                 synchronized (context.lock) {
                     context.state |= AbstractContext.CLOSED;
@@ -1336,8 +1335,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             if (reason == null) {
                 reason = new RuntimeException("Start failed, and additionally, a null cause was supplied");
             }
-            final ServiceName serviceName = getName();
-            ServiceLogger.FAIL.startFailed(reason, serviceName);
+            ServiceLogger.FAIL.startFailed(reason, toString());
             final int state;
             synchronized (lock) {
                 state = setState(FAILED);

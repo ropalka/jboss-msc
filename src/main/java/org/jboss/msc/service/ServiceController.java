@@ -58,16 +58,6 @@ public interface ServiceController {
     ServiceState state();
 
     /**
-     * Get the name of this service, if any.
-     *
-     * @return the name, or {@code null} if none was specified.
-     * @see #provides()
-     * @deprecated Use {@code ServiceController#provides()} instead. This method will be removed in a future release.
-     */
-    @Deprecated
-    ServiceName getName();
-
-    /**
      * Get the names of all values this service require.
      *
      * @return names of required values
