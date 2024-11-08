@@ -122,7 +122,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * The number of dependents that are currently running. The deployment will
      * not execute the {@code stop()} method (and subsequently leave the
-     * {@link org.jboss.msc.service.ServiceController.State#STOPPING} state)
+     * {@link ServiceState#STOPPING} state)
      * until all running dependents (and listeners) are stopped.
      */
     private int runningDependents;
@@ -856,7 +856,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         doExecute(tasks);
     }
 
-    public ServiceController.State state() {
+    public ServiceState state() {
         synchronized (this) {
             return state.getState();
         }

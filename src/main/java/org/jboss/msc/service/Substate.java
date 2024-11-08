@@ -23,58 +23,58 @@
 package org.jboss.msc.service;
 
 /**
- * A fine-grained substate of the more general basic controller {@link ServiceController.State}s.
+ * A fine-grained substate of the more general basic controller {@link ServiceState}s.
  */
 enum Substate {
     /**
      * New controller being installed.
      */
-    NEW(ServiceController.State.DOWN, true),
+    NEW(ServiceState.DOWN, true),
     /**
      * Controller is down.
      */
-    DOWN(ServiceController.State.DOWN, true),
+    DOWN(ServiceState.DOWN, true),
     /**
      * Controller cannot start due to a problem with a dependency or transitive dependency.
      */
-    PROBLEM(ServiceController.State.DOWN, true),
+    PROBLEM(ServiceState.DOWN, true),
     /**
      * First phase of start processing.
      */
-    START_REQUESTED(ServiceController.State.DOWN, false),
+    START_REQUESTED(ServiceState.DOWN, false),
     /**
      * Second phase of start processing ({@link Service#start(StartContext) start()} method invoked).
      */
-    STARTING(ServiceController.State.STARTING, false),
+    STARTING(ServiceState.STARTING, false),
     /**
      * Start failed.
      */
-    START_FAILED(ServiceController.State.START_FAILED, true),
+    START_FAILED(ServiceState.START_FAILED, true),
     /**
      * Service is up.
      */
-    UP(ServiceController.State.UP, true),
+    UP(ServiceState.UP, true),
     /**
      * Service is up but has been requested to stop.
      */
-    STOP_REQUESTED(ServiceController.State.UP, false),
+    STOP_REQUESTED(ServiceState.UP, false),
     /**
      * Service is stopping.
      */
-    STOPPING(ServiceController.State.STOPPING, false),
+    STOPPING(ServiceState.STOPPING, false),
     /**
      * Service has been removed.
      */
-    REMOVING(ServiceController.State.REMOVED, false),
+    REMOVING(ServiceState.REMOVED, false),
     /**
      * Service has been terminated.
      */
-    REMOVED(ServiceController.State.REMOVED, true),
+    REMOVED(ServiceState.REMOVED, true),
     ;
-    private final ServiceController.State state;
+    private final ServiceState state;
     private final boolean restState;
 
-    Substate(final ServiceController.State state, final boolean restState) {
+    Substate(final ServiceState state, final boolean restState) {
         this.state = state;
         this.restState = restState;
     }
@@ -93,7 +93,7 @@ enum Substate {
      *
      * @return the state
      */
-    public ServiceController.State getState() {
+    public ServiceState getState() {
         return state;
     }
 }

@@ -504,7 +504,7 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     private static boolean isRemovedService(final ServiceControllerImpl controller) {
-        return controller.state() == ServiceController.State.REMOVED;
+        return controller.state() == ServiceState.REMOVED;
     }
 
     private static final AtomicInteger executorSeq = new AtomicInteger(1);

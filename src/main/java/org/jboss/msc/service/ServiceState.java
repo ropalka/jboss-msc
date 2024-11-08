@@ -23,30 +23,33 @@
 package org.jboss.msc.service;
 
 /**
- * The service mode.
+ * Service states. Every service transitions between these states during its lifecycle.
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public enum ServiceMode {
+public enum ServiceState {
     /**
-     * Remove this service and all of its dependents.
+     * Service is down.
      */
-    REMOVE,
+    DOWN,
     /**
-     * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
+     * Service is starting.
      */
-    ON_DEMAND,
+    STARTING,
     /**
-     * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
-     * Once in the {@link ServiceState#UP UP} state, it will remain that way regardless of demands from dependents.
+     * Service start failed.
      */
-    LAZY,
+    START_FAILED,
     /**
-     * Come up automatically as soon as all dependencies are satisfied.
+     * Service is up.
      */
-    PASSIVE,
+    UP,
     /**
-     * Demand to start, recursively demanding dependencies.  This is the default mode.
+     * Service is stopping.
      */
-    ACTIVE;
+    STOPPING,
+    /**
+     * Service was removed.
+     */
+    REMOVED;
 }
