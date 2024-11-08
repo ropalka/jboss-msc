@@ -45,7 +45,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private final Thread thread = currentThread();
     private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
     private Service service;
-    private ServiceController.Mode initialMode;
+    private ServiceMode initialMode;
     private Map<ServiceName, ServiceRegistrationImpl> requires;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
@@ -104,7 +104,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    public ServiceBuilder mode(final ServiceController.Mode mode) {
+    public ServiceBuilder mode(final ServiceMode mode) {
         // preconditions
         assertNotInstalled();
         assertNotNull(mode);
@@ -135,7 +135,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         // implementation
         installed = true;
         if (service == null) service = Service.NULL;
-        if (initialMode == null) initialMode = ServiceController.Mode.ACTIVE;
+        if (initialMode == null) initialMode = ServiceMode.ACTIVE;
         return container.install(this);
     }
 
@@ -191,7 +191,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return lifecycleListeners == null ? Collections.emptySet() : lifecycleListeners;
     }
 
-    ServiceController.Mode getInitialMode() {
+    ServiceMode getInitialMode() {
         return initialMode;
     }
 
@@ -255,8 +255,8 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    private static void assertNotRemove(final ServiceController.Mode mode) {
-        if (mode == ServiceController.Mode.REMOVE) {
+    private static void assertNotRemove(final ServiceMode mode) {
+        if (mode == ServiceMode.REMOVE) {
             throw new IllegalArgumentException("Initial service mode cannot be REMOVE");
         }
     }

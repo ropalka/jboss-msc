@@ -56,8 +56,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jboss.msc.service.ServiceController.Mode;
-
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:flavia.rainone@jboss.com">Flavia Rainone</a>
@@ -317,7 +315,7 @@ final class ServiceContainerImpl implements ServiceContainer {
             if (controller != null) {
                 controller.addListener(shutdownListener);
                 try {
-                    controller.setMode(Mode.REMOVE);
+                    controller.setMode(ServiceMode.REMOVE);
                 } catch (IllegalArgumentException ignored) {
                     // controller removed in the meantime
                 }

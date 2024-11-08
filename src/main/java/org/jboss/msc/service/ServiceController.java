@@ -37,18 +37,18 @@ public interface ServiceController {
      *
      * @return the controller mode
      */
-    Mode mode();
+    ServiceMode mode();
 
     /**
      * Change the service controller's current mode.  Might result in the service starting or stopping.  The mode
-     * may only be changed if it was not already set to {@link Mode#REMOVE}.  Calling this method with the controller's
+     * may only be changed if it was not already set to {@link ServiceMode#REMOVE}.  Calling this method with the controller's
      * current mode has no effect and is always allowed.
      *
      * @param mode the new controller mode
      * @throws IllegalStateException if the mode given is {@code null}, or the caller attempted to change the
-     *  service's mode from {@link Mode#REMOVE} to a different mode
+     *  service's mode from {@link ServiceMode#REMOVE} to a different mode
      */
-    void setMode(Mode mode);
+    void setMode(ServiceMode mode);
 
     /**
      * Get the current service state.
@@ -140,35 +140,6 @@ public interface ServiceController {
          * Service was removed from the container.
          */
         REMOVED,
-        ;
-    }
-
-    /**
-     * The controller mode for a service.
-     */
-    enum Mode {
-
-        /**
-         * Remove this service and all of its dependents.
-         */
-        REMOVE,
-        /**
-         * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
-         */
-        ON_DEMAND,
-        /**
-         * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
-         * Once in the {@link State#UP UP} state, it will remain that way regardless of demands from dependents.
-         */
-        LAZY,
-        /**
-         * Come up automatically as soon as all dependencies are satisfied.
-         */
-        PASSIVE,
-        /**
-         * Demand to start, recursively demanding dependencies.  This is the default mode.
-         */
-        ACTIVE,
         ;
     }
 
