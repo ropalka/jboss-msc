@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Multi-value services {@link ServiceBuilder} implementation.
@@ -45,7 +44,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private final Map<String, WritableValueImpl> provides = new HashMap<>();
     private Service service;
     private ServiceMode initialMode;
-    private Map<String, ServiceRegistrationImpl> requires;
+    private Map<String, Dependency> requires;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
@@ -54,15 +53,15 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <V> Supplier<V> requires(final String dependency) {
+    public ServiceBuilder requires(final String dependency) {
         // preconditions
         assertNotInstalled();
         assertNotNull(dependency);
         assertThreadSafety();
         assertNotProvided(dependency, true);
         // implementation
-        return (Supplier<V>) addRequiresInternal(dependency).getReadableValue();
+        addRequiresInternal(dependency);
+        return this;
     }
 
     @Override
@@ -86,7 +85,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ServiceBuilder instance(final Service service) {
         // preconditions
         assertNotInstalled();
@@ -139,18 +137,15 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return service;
     }
 
-    private ServiceRegistrationImpl addRequiresInternal(final String name) {
+    private void addRequiresInternal(final String name) {
         if (requires == null) requires = new HashMap<>();
         if (requires.size() == ServiceControllerImpl.MAX_DEPENDENCIES) {
             throw new IllegalArgumentException("Too many dependencies specified (max is " + ServiceControllerImpl.MAX_DEPENDENCIES + ")");
         }
-        final ServiceRegistrationImpl existing = requires.get(name);
-        if (existing != null) {
-            return existing;
+        final Dependency existing = requires.get(name);
+        if (existing == null) {
+            requires.put(name, container.getOrCreateRegistration(name));
         }
-        final ServiceRegistrationImpl dependency = container.getOrCreateRegistration(name);
-        requires.put(name, dependency);
-        return dependency;
     }
 
     void addProvidesInternal(final String name, final WritableValueImpl dependency) {
@@ -170,7 +165,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return provides;
     }
 
-    Map<String, ServiceRegistrationImpl> getDependencies() {
+    Map<String, Dependency> getDependencies() {
         return requires == null ? Collections.emptyMap() : requires;
     }
 

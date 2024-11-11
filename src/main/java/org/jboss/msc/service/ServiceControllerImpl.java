@@ -74,7 +74,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * Required dependencies by this service.
      */
-    private final Set<Dependency> requires;
+    private final Map<String, Dependency> requires;
     /**
      * Provided dependencies by this service.
      */
@@ -150,20 +150,20 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     static final int MAX_DEPENDENCIES = (1 << 14) - 1;
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Set<Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<LifecycleListener> lifecycleListeners) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, Dependency> requires, final Map<ServiceRegistrationImpl, WritableValueImpl> provides, final Set<LifecycleListener> lifecycleListeners) {
         assert requires.size() <= MAX_DEPENDENCIES;
         this.container = container;
         this.service = service;
         this.requires = requires;
-        this.requiredValues = unmodifiableSetOf(requires);
+        this.requiredValues = unmodifiableSetOf(requires.values());
         this.provides = provides;
         this.providedValues = unmodifiableSetOf(provides.keySet());
         this.lifecycleListeners = new IdentityHashSet<>(lifecycleListeners);
         this.stoppingDependencies = requires.size();
     }
 
-    private static Set<String> unmodifiableSetOf(final Set<? extends Dependency> set) {
-        if (set.isEmpty()) return Collections.EMPTY_SET;
+    private static Set<String> unmodifiableSetOf(final Collection<? extends Dependency> set) {
+        if (set.isEmpty()) return Collections.emptySet();
         final Set<String> temp = new HashSet<>(set.size());
         for (Dependency dependency : set) {
             temp.add(dependency.getName());
@@ -207,7 +207,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     void startConfiguration() {
         Lockable lock;
-        for (Dependency dependency : requires) {
+        for (Dependency dependency : requires.values()) {
             lock = dependency.getLock();
             synchronized (lock) {
                 lock.acquireWrite();
@@ -867,7 +867,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     public Set<String> missing() {
         final Set<String> retVal = new IdentityHashSet<>();
-        for (Dependency dependency : requires) {
+        for (Dependency dependency : requires.values()) {
             synchronized (dependency.getLock()) {
                 if (isUnavailable(dependency)) {
                     retVal.add(dependency.getName());
@@ -1017,7 +1017,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     private abstract class DependenciesControllerTask extends ControllerTask {
         final boolean execute() {
             Lockable lock;
-            for (Dependency dependency : requires) {
+            for (Dependency dependency : requires.values()) {
                 lock = dependency.getLock();
                 synchronized (lock) {
                     lock.acquireWrite();
@@ -1264,7 +1264,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     }
                 }
             }
-            for (Dependency dependency : requires) {
+            for (Dependency dependency : requires.values()) {
                 lock = dependency.getLock();
                 synchronized (lock) {
                     lock.acquireWrite();
@@ -1327,6 +1327,16 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
         public final void asynchronous() {
             setState(ASYNC);
+        }
+
+        @Override
+        public <V> V getValue(final String name) {
+            synchronized (lock) {
+                if ((state & CLOSED) != 0) return null;
+                // context was not closed - values retrieval is permitted
+                final Dependency dependency = requires.get(name);
+                return dependency != null ? (V) dependency.getValue() : null;
+            }
         }
     }
 

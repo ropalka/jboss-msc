@@ -51,8 +51,7 @@ public interface ServiceBuilder {
      * Specifies value name required by service. There can be multiple values service may depend on.
      *
      * @param name required dependency name
-     * @param <V> required dependency value type
-     * @return readonly dependency reference
+     * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
      * @throws IllegalArgumentException if value <code>name</code> was before used as parameter
@@ -60,7 +59,7 @@ public interface ServiceBuilder {
      * @throws IllegalStateException if this method have been called after {@link #install()} method.
      * @throws NullPointerException if <code>name</code> parameter is null.
      */
-    <V> Supplier<V> requires(String name);
+    ServiceBuilder requires(String name);
 
     /**
      * Specifies value provided by service. There can be multiple names for the same value.
@@ -104,7 +103,7 @@ public interface ServiceBuilder {
      * methods will fail because their return values should be provided to service instance.
      *
      * @param service the service instance
-     * @return this configurator
+     * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
      * @throws IllegalStateException if this method have been either called twice or it was called after

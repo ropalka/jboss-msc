@@ -29,4 +29,5 @@ package org.jboss.msc.service;
 interface LifecycleContext {
     void asynchronous();
     void complete();
+    <V> V getValue(String name);
 }
