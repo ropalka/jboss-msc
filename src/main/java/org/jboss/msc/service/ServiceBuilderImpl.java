@@ -39,9 +39,9 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private final ServiceContainerImpl container;
     private final Thread thread = currentThread();
     private Map<String, ServiceRegistrationImpl> provides;
-    private Map<String, Dependency> requires;
+    private Map<String, ServiceRegistrationImpl> requires;
     private Service service;
-    private ServiceMode initialMode;
+    private ServiceMode mode;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
@@ -103,7 +103,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertModeNotConfigured();
         assertThreadSafety();
         // implementation
-        this.initialMode = mode;
+        this.mode = mode;
         return this;
     }
 
@@ -126,7 +126,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         // implementation
         installed = true;
         if (service == null) service = Service.NULL;
-        if (initialMode == null) initialMode = ServiceMode.ACTIVE;
+        if (mode == null) mode = ServiceMode.ACTIVE;
         return container.install(this);
     }
 
@@ -144,7 +144,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    void addProvidesInternal(final String name) {
+    private void addProvidesInternal(final String name) {
         if (provides == null) provides = new HashMap<>();
         final ServiceRegistrationImpl existing = provides.get(name);
         if (existing == null) {
@@ -152,7 +152,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    void addListenerInternal(final LifecycleListener listener) {
+    private void addListenerInternal(final LifecycleListener listener) {
         if (lifecycleListeners == null) lifecycleListeners = new IdentityHashSet<>();
         lifecycleListeners.add(listener);
     }
@@ -161,7 +161,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return provides;
     }
 
-    Map<String, Dependency> getRequires() {
+    Map<String, ServiceRegistrationImpl> getRequires() {
         return requires == null ? Collections.emptyMap() : requires;
     }
 
@@ -169,8 +169,8 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return lifecycleListeners == null ? Collections.emptySet() : lifecycleListeners;
     }
 
-    ServiceMode getInitialMode() {
-        return initialMode;
+    ServiceMode getMode() {
+        return mode;
     }
 
     // implementation assertions
@@ -216,7 +216,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     private void assertModeNotConfigured() {
-        if (initialMode != null) {
+        if (mode != null) {
             throw new IllegalStateException("setInitialMode() method called twice");
         }
     }

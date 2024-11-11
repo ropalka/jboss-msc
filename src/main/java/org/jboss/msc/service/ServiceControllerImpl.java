@@ -74,7 +74,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * Required dependencies by this service.
      */
-    private final Map<String, Dependency> requires;
+    private final Map<String, ServiceRegistrationImpl> requires;
     /**
      * Provided dependencies by this service.
      */
@@ -148,7 +148,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private final List<Runnable> listenerTransitionTasks = new ArrayList<>();
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, Dependency> requires, final Map<String, ServiceRegistrationImpl> provides, final Set<LifecycleListener> lifecycleListeners) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, ServiceRegistrationImpl> requires, final Map<String, ServiceRegistrationImpl> provides, final Set<LifecycleListener> lifecycleListeners) {
         this.container = container;
         this.service = service;
         this.requires = requires;
