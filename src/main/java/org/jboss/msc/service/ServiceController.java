@@ -40,17 +40,6 @@ public interface ServiceController {
     ServiceMode mode();
 
     /**
-     * Change the service controller's current mode.  Might result in the service starting or stopping.  The mode
-     * may only be changed if it was not already set to {@link ServiceMode#REMOVE}.  Calling this method with the controller's
-     * current mode has no effect and is always allowed.
-     *
-     * @param mode the new controller mode
-     * @throws IllegalStateException if the mode given is {@code null}, or the caller attempted to change the
-     *  service's mode from {@link ServiceMode#REMOVE} to a different mode
-     */
-    void setMode(ServiceMode mode);
-
-    /**
      * Get the current service state.
      *
      * @return the current service state
