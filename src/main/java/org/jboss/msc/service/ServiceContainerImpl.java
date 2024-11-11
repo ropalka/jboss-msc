@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -412,12 +411,9 @@ final class ServiceContainerImpl implements ServiceContainer {
             provides.put(getOrCreateRegistration(entry.getKey()), entry.getValue());
         }
 
-        // Dependencies
-        final Map<String, Dependency> requires = serviceBuilder.getDependencies();
-
         // Next create the actual controller
         final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.getService(),
-                requires, provides, serviceBuilder.getLifecycleListeners());
+                serviceBuilder.getRequires(), provides, serviceBuilder.getLifecycleListeners());
         boolean ok = false;
         try {
             synchronized (this) {

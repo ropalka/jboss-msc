@@ -53,33 +53,37 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    public ServiceBuilder requires(final String dependency) {
+    public ServiceBuilder requires(final String... values) {
         // preconditions
         assertNotInstalled();
-        assertNotNull(dependency);
+        assertNotNull(values);
         assertThreadSafety();
-        assertNotProvided(dependency, true);
+        for (final String value : values) {
+            assertNotNull(value);
+            assertNotProvided(value, true);
+        }
         // implementation
-        addRequiresInternal(dependency);
+        for (final String value : values) {
+            addRequiresInternal(value);
+        }
         return this;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> Consumer<V> provides(final String... dependencies) {
+    public <V> Consumer<V> provides(final String... values) {
         // preconditions
         assertNotInstalled();
-        assertNotNull(dependencies);
+        assertNotNull(values);
         assertThreadSafety();
-        for (final String dependency : dependencies) {
-            assertNotNull(dependency);
-            assertNotRequired(dependency, false);
-            assertNotProvided(dependency, false);
+        for (final String value : values) {
+            assertNotNull(value);
+            assertNotRequired(value, false);
         }
         // implementation
         final WritableValueImpl retVal = new WritableValueImpl();
-        for (final String dependency : dependencies) {
-            addProvidesInternal(dependency, retVal);
+        for (final String value : values) {
+            addProvidesInternal(value, retVal);
         }
         return (Consumer<V>)retVal;
     }
@@ -165,7 +169,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return provides;
     }
 
-    Map<String, Dependency> getDependencies() {
+    Map<String, Dependency> getRequires() {
         return requires == null ? Collections.emptyMap() : requires;
     }
 

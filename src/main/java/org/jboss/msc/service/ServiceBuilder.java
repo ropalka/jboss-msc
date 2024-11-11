@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  * Builder to configure service before installing it into the container.
  * <p>
  * Service may require multiple dependencies (named values) to be satisfied before starting.
- * Every dependency requirement must be specified via {@link #requires(String)} method.
+ * Every dependency requirement must be specified via {@link #requires(String...)} method.
  * <p>
  * Single service can provide multiple values which can be requested by dependent services.
  * Every named value service provides must be specified via {@link #provides(String...)} method.
@@ -48,9 +48,10 @@ import java.util.function.Supplier;
 public interface ServiceBuilder {
 
     /**
-     * Specifies value name required by service. There can be multiple values service may depend on.
+     * Specifies value names required by service.
+     * At least one <code>value</code> parameter must be provided to this method.
      *
-     * @param name required dependency name
+     * @param values required value names
      * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
@@ -59,25 +60,24 @@ public interface ServiceBuilder {
      * @throws IllegalStateException if this method have been called after {@link #install()} method.
      * @throws NullPointerException if <code>name</code> parameter is null.
      */
-    ServiceBuilder requires(String name);
+    ServiceBuilder requires(String... values);
 
     /**
-     * Specifies value provided by service. There can be multiple names for the same value.
-     * At least one <code>name</code> parameter must be provided to this method. If there are more <code>names</code>
-     * in the vararg array then the first one is called provided value name and other are called provided value aliases.
+     * Specifies value names provided by service.
+     * At least one <code>value</code> parameter must be provided to this method.
      *
-     * @param names provided value name (and its aliases)
+     * @param values provided value names
      * @param <V> provided value type
      * @return writable dependency reference
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
      * @throws IllegalArgumentException if value <code>name</code> was before used as parameter in
-     * in {@link #requires(String)} method call. Value can be either required or provided but not both.
+     * in {@link #requires(String...)} method call. Value can be either required or provided but not both.
      * @throws IllegalStateException if this method have been called after {@link #install()} method.
      * @throws NullPointerException if <code>names</code> parameter is <code>null</code> or any value of the vararg
      * array is <code>null</code>.
      */
-    <V> Consumer<V> provides(String... names);
+    <V> Consumer<V> provides(String... values);
 
     /**
      * Sets initial service mode.
@@ -99,7 +99,7 @@ public interface ServiceBuilder {
      * installed into the container.
      * <p>
      * Once this method have been called then all subsequent
-     * calls of {@link #requires(String)}, and {@link #provides(String...)}
+     * calls of {@link #requires(String...)}, and {@link #provides(String...)}
      * methods will fail because their return values should be provided to service instance.
      *
      * @param service the service instance

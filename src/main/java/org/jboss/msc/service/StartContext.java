@@ -54,7 +54,7 @@ public interface StartContext extends LifecycleContext {
 
     /**
      * Gets dependency value. Returns dependency value if and only if dependency value was configured via
-     * {@link ServiceBuilder#requires(String)} method and this context wasn't invalidated, null otherwise.
+     * {@link ServiceBuilder#requires(String...)} method and this context wasn't invalidated, null otherwise.
      *
      * @param name required value or null
      * @return value associated with given name
