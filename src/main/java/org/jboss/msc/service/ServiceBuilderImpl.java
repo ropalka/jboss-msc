@@ -99,7 +99,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         // preconditions
         assertNotInstalled();
         assertNotNull(mode);
-        assertNotRemove(mode);
         assertModeNotConfigured();
         assertThreadSafety();
         // implementation
@@ -224,12 +223,6 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private static void assertNotNull(final Object parameter) {
         if (parameter == null) {
             throw new NullPointerException("Method parameter cannot be null");
-        }
-    }
-
-    private static void assertNotRemove(final ServiceMode mode) {
-        if (mode == ServiceMode.REMOVE) {
-            throw new IllegalArgumentException("Initial service mode cannot be REMOVE");
         }
     }
 

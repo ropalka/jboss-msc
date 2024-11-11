@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -87,7 +86,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private Throwable startException;
     /**
-     * The controller mode.
+     * The controller mode. When mode is set to 'null' it is being removed.
      */
     private ServiceMode mode;
     /**
@@ -189,6 +188,10 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
+    ServiceContainerImpl getContainer() {
+        return container;
+    }
+
     /**
      * Start this service configuration connecting it to its dependencies.
      * <p></p>
@@ -213,11 +216,11 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * Commit the service install, kicking off the mode set and listener execution.
      *
-     * @param initialMode the initial service mode
+     * @param mode the service mode
      */
-    void commitInstallation(ServiceMode initialMode) {
+    void commitInstallation(final ServiceMode mode) {
         assert (state == Substate.NEW);
-        assert initialMode != null;
+        assert mode != null;
         assert !holdsLock(this);
 
         final List<Runnable> tasks;
@@ -226,7 +229,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 throw new IllegalStateException("Container is down");
             }
             final boolean leavingRestState = isStableRestState();
-            internalSetMode(initialMode);
+            this.mode = mode;
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
@@ -241,7 +244,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         final Runnable removeTask;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
-            mode = ServiceMode.REMOVE;
+            mode = null;
             state = Substate.REMOVING;
             removeTask = new RemoveTask();
             incrementAsyncTasks();
@@ -288,7 +291,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private boolean shouldStop() {
         assert holdsLock(this);
-        return mode == ServiceMode.REMOVE || demandedByCount == 0 && mode == ServiceMode.ON_DEMAND;
+        return mode == null || demandedByCount == 0 && mode == ServiceMode.ON_DEMAND;
     }
 
     /**
@@ -336,7 +339,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 break;
             }
             case DOWN: {
-                if (mode == ServiceMode.REMOVE) {
+                if (mode == null) {
                     return Transition.DOWN_to_REMOVING;
                 } else if (shouldStart()) {
                     if (unavailableDependencies > 0 || failCount > 0) {
@@ -435,13 +438,13 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         Transition transition;
         do {
             // first of all, check if dependencies should be un/demanded
-            switch (mode) {
-                case REMOVE:
-                    if (dependenciesDemanded) {
-                        tasks.add(new UndemandDependenciesTask());
-                        dependenciesDemanded = false;
-                    }
-                    break;
+            if (mode == null) {
+                // mode == REMOVED
+                if (dependenciesDemanded) {
+                    tasks.add(new UndemandDependenciesTask());
+                    dependenciesDemanded = false;
+                }
+            } else switch (mode) {
                 case LAZY: {
                     if (state == Substate.UP) {
                         if (!dependenciesDemanded) {
@@ -590,45 +593,22 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     }
 
     void setMode(final ServiceMode newMode) {
-        internalSetMode(null, newMode);
-    }
-
-    private boolean internalSetMode(final ServiceMode expectedMode, final ServiceMode newMode) {
         assert !holdsLock(this);
-        if (newMode == null) {
-            throw new IllegalArgumentException("newMode is null");
-        }
-        if (newMode != ServiceMode.REMOVE && container.isShutdown()) {
+        if (newMode != null && container.isShutdown()) {
             throw new IllegalArgumentException("Container is shutting down");
         }
         final List<Runnable> tasks;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
-            final ServiceMode oldMode = mode;
-            if (expectedMode != null && expectedMode != oldMode) {
-                return false;
+            if (mode == newMode) {
+                return;
             }
-            if (oldMode == newMode) {
-                return true;
-            }
-            internalSetMode(newMode);
+            mode = newMode;
             tasks = transition();
             addAsyncTasks(tasks.size());
             updateStabilityState(leavingRestState);
         }
         doExecute(tasks);
-        return true;
-    }
-
-    private void internalSetMode(final ServiceMode newMode) {
-        assert holdsLock(this);
-        final ServiceMode oldMode = mode;
-        if (oldMode == ServiceMode.REMOVE) {
-            if (state.compareTo(Substate.REMOVING) >= 0) {
-                throw new IllegalStateException("Service already removed");
-            }
-        }
-        mode = newMode;
     }
 
     @Override
@@ -1234,7 +1214,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     private final class RemoveTask extends ControllerTask {
         boolean execute() {
-            assert mode() == ServiceMode.REMOVE;
+            assert mode() == null;
             assert getSubstate() == Substate.REMOVING;
             Lockable lock;
             boolean removeRegistration;

@@ -84,7 +84,6 @@ public interface ServiceBuilder {
      * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
-     * @throws IllegalArgumentException if <code>mode</code> is {@link ServiceMode#REMOVE}.
      * @throws IllegalStateException if this method have been either called twice or it was called after
      * {@link #install()} method.
      * @throws NullPointerException if <code>mode</code> parameter is <code>null</code>.

@@ -120,4 +120,9 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
         return getDelegate().addService();
     }
 
+    @Override
+    public void removeService(ServiceController controller) {
+        getDelegate().removeService(controller);
+    }
+
 }

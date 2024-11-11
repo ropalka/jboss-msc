@@ -314,13 +314,20 @@ final class ServiceContainerImpl implements ServiceContainer {
             if (controller != null) {
                 controller.addListener(shutdownListener);
                 try {
-                    controller.setMode(ServiceMode.REMOVE);
+                    controller.setMode(null);
                 } catch (IllegalArgumentException ignored) {
                     // controller removed in the meantime
                 }
             }
         }
         shutdownListener.done();
+    }
+
+    @Override
+    public void removeService(final ServiceController controller) {
+        if (!(controller instanceof ServiceControllerImpl)) return;
+        final ServiceControllerImpl controllerImpl = (ServiceControllerImpl) controller;
+        if (controllerImpl.getContainer() == this) controllerImpl.setMode(null);
     }
 
     public boolean isShutdownComplete() {

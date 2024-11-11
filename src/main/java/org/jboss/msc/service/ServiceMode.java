@@ -29,10 +29,6 @@ package org.jboss.msc.service;
  */
 public enum ServiceMode {
     /**
-     * Remove this service and all of its dependents.
-     */
-    REMOVE,
-    /**
      * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
      */
     ON_DEMAND,

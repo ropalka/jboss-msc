@@ -79,6 +79,13 @@ public interface ServiceContainer {
     ServiceBuilder addService();
 
     /**
+     * Removes service from the container.
+     *
+     * @param controller
+     */
+    void removeService(ServiceController controller);
+
+    /**
      * Stop all services within this container.
      */
     void shutdown();
