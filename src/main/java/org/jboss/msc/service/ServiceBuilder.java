@@ -49,7 +49,6 @@ public interface ServiceBuilder {
 
     /**
      * Specifies value names required by service.
-     * At least one <code>value</code> parameter must be provided to this method.
      *
      * @param values required value names
      * @return this builder
@@ -58,26 +57,25 @@ public interface ServiceBuilder {
      * @throws IllegalArgumentException if value <code>name</code> was before used as parameter
      * in {@link #provides(String...)} method call. Value can be either required or provided but not both.
      * @throws IllegalStateException if this method have been called after {@link #install()} method.
-     * @throws NullPointerException if <code>name</code> parameter is null.
+     * @throws NullPointerException if <code>names</code> parameter is <code>null</code> or any value of the vararg
+     * array is <code>null</code>.
      */
     ServiceBuilder requires(String... values);
 
     /**
      * Specifies value names provided by service.
-     * At least one <code>value</code> parameter must be provided to this method.
      *
      * @param values provided value names
-     * @param <V> provided value type
-     * @return writable dependency reference
+     * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
-     * @throws IllegalArgumentException if value <code>name</code> was before used as parameter in
+     * @throws IllegalArgumentException if value <code>name</code> was before used as parameter
      * in {@link #requires(String...)} method call. Value can be either required or provided but not both.
      * @throws IllegalStateException if this method have been called after {@link #install()} method.
      * @throws NullPointerException if <code>names</code> parameter is <code>null</code> or any value of the vararg
      * array is <code>null</code>.
      */
-    <V> Consumer<V> provides(String... values);
+    ServiceBuilder provides(String... values);
 
     /**
      * Sets initial service mode.

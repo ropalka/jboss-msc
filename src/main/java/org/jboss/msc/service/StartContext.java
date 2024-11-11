@@ -53,7 +53,7 @@ public interface StartContext extends LifecycleContext {
     void fail(Throwable reason);
 
     /**
-     * Gets dependency value. Returns dependency value if and only if dependency value was configured via
+     * Gets required value. Returns dependency value if and only if required value was configured via
      * {@link ServiceBuilder#requires(String...)} method and this context wasn't invalidated, null otherwise.
      *
      * @param name required value or null
@@ -61,5 +61,16 @@ public interface StartContext extends LifecycleContext {
      * @param <V> value type
      */
     <V> V getValue(String name);
+
+    /**
+     * Sets provided value. Injects provided value if and only if provided value was configured via
+     * {@link ServiceBuilder#provides(String...)} method and this context wasn't invalidated.
+     * Provided values are automatically invalidated when either service start will fail or service will stop.
+     *
+     * @param name provided value name
+     * @param value provided value associated with given name
+     * @param <V> value type
+     */
+    <V> void setValue(String name, V value);
 
 }

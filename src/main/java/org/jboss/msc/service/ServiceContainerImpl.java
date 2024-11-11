@@ -403,17 +403,8 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateServiceException {
-        // Initialize registrations and injectors map
-        final Map<ServiceRegistrationImpl, WritableValueImpl> provides = new LinkedHashMap<>();
-        Entry<String, WritableValueImpl> entry;
-        for (Iterator<Entry<String, WritableValueImpl>> j = serviceBuilder.getProvides().entrySet().iterator(); j.hasNext(); ) {
-            entry = j.next();
-            provides.put(getOrCreateRegistration(entry.getKey()), entry.getValue());
-        }
-
-        // Next create the actual controller
         final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.getService(),
-                serviceBuilder.getRequires(), provides, serviceBuilder.getLifecycleListeners());
+                serviceBuilder.getRequires(), serviceBuilder.getProvides(), serviceBuilder.getLifecycleListeners());
         boolean ok = false;
         try {
             synchronized (this) {

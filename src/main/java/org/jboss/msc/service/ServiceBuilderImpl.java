@@ -29,11 +29,8 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
- * Multi-value services {@link ServiceBuilder} implementation.
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
@@ -41,10 +38,10 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     private final ServiceContainerImpl container;
     private final Thread thread = currentThread();
-    private final Map<String, WritableValueImpl> provides = new HashMap<>();
+    private Map<String, ServiceRegistrationImpl> provides;
+    private Map<String, Dependency> requires;
     private Service service;
     private ServiceMode initialMode;
-    private Map<String, Dependency> requires;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
@@ -70,8 +67,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <V> Consumer<V> provides(final String... values) {
+    public ServiceBuilder provides(final String... values) {
         // preconditions
         assertNotInstalled();
         assertNotNull(values);
@@ -81,11 +77,10 @@ final class ServiceBuilderImpl implements ServiceBuilder {
             assertNotRequired(value, false);
         }
         // implementation
-        final WritableValueImpl retVal = new WritableValueImpl();
         for (final String value : values) {
-            addProvidesInternal(value, retVal);
+            addProvidesInternal(value);
         }
-        return (Consumer<V>)retVal;
+        return this;
     }
 
     @Override
@@ -143,20 +138,17 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     private void addRequiresInternal(final String name) {
         if (requires == null) requires = new HashMap<>();
-        if (requires.size() == ServiceControllerImpl.MAX_DEPENDENCIES) {
-            throw new IllegalArgumentException("Too many dependencies specified (max is " + ServiceControllerImpl.MAX_DEPENDENCIES + ")");
-        }
         final Dependency existing = requires.get(name);
         if (existing == null) {
             requires.put(name, container.getOrCreateRegistration(name));
         }
     }
 
-    void addProvidesInternal(final String name, final WritableValueImpl dependency) {
-        if (dependency != null) {
-            provides.put(name, dependency);
-        } else if (!provides.containsKey(name)) {
-            provides.put(name, null);
+    void addProvidesInternal(final String name) {
+        if (provides == null) provides = new HashMap<>();
+        final ServiceRegistrationImpl existing = provides.get(name);
+        if (existing == null) {
+            provides.put(name, container.getOrCreateRegistration(name));
         }
     }
 
@@ -165,7 +157,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         lifecycleListeners.add(listener);
     }
 
-    Map<String, WritableValueImpl> getProvides() {
+    Map<String, ServiceRegistrationImpl> getProvides() {
         return provides;
     }
 
