@@ -42,10 +42,10 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     private final ServiceContainerImpl container;
     private final Thread thread = currentThread();
-    private final Map<ServiceName, WritableValueImpl> provides = new HashMap<>();
+    private final Map<String, WritableValueImpl> provides = new HashMap<>();
     private Service service;
     private ServiceMode initialMode;
-    private Map<ServiceName, ServiceRegistrationImpl> requires;
+    private Map<String, ServiceRegistrationImpl> requires;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
@@ -55,7 +55,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> Supplier<V> requires(final ServiceName dependency) {
+    public <V> Supplier<V> requires(final String dependency) {
         // preconditions
         assertNotInstalled();
         assertNotNull(dependency);
@@ -67,19 +67,19 @@ final class ServiceBuilderImpl implements ServiceBuilder {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V> Consumer<V> provides(final ServiceName... dependencies) {
+    public <V> Consumer<V> provides(final String... dependencies) {
         // preconditions
         assertNotInstalled();
         assertNotNull(dependencies);
         assertThreadSafety();
-        for (final ServiceName dependency : dependencies) {
+        for (final String dependency : dependencies) {
             assertNotNull(dependency);
             assertNotRequired(dependency, false);
             assertNotProvided(dependency, false);
         }
         // implementation
         final WritableValueImpl retVal = new WritableValueImpl();
-        for (final ServiceName dependency : dependencies) {
+        for (final String dependency : dependencies) {
             addProvidesInternal(dependency, retVal);
         }
         return (Consumer<V>)retVal;
@@ -139,7 +139,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return service;
     }
 
-    private ServiceRegistrationImpl addRequiresInternal(final ServiceName name) {
+    private ServiceRegistrationImpl addRequiresInternal(final String name) {
         if (requires == null) requires = new HashMap<>();
         if (requires.size() == ServiceControllerImpl.MAX_DEPENDENCIES) {
             throw new IllegalArgumentException("Too many dependencies specified (max is " + ServiceControllerImpl.MAX_DEPENDENCIES + ")");
@@ -153,7 +153,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return dependency;
     }
 
-    void addProvidesInternal(final ServiceName name, final WritableValueImpl dependency) {
+    void addProvidesInternal(final String name, final WritableValueImpl dependency) {
         if (dependency != null) {
             provides.put(name, dependency);
         } else if (!provides.containsKey(name)) {
@@ -166,11 +166,11 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         lifecycleListeners.add(listener);
     }
 
-    Map<ServiceName, WritableValueImpl> getProvides() {
+    Map<String, WritableValueImpl> getProvides() {
         return provides;
     }
 
-    Map<ServiceName, ServiceRegistrationImpl> getDependencies() {
+    Map<String, ServiceRegistrationImpl> getDependencies() {
         return requires == null ? Collections.emptyMap() : requires;
     }
 
@@ -196,7 +196,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    private void assertNotRequired(final ServiceName dependency, final boolean processingRequires) {
+    private void assertNotRequired(final String dependency, final boolean processingRequires) {
         if (requires != null && requires.keySet().contains(dependency)) {
             if (processingRequires) {
                 throw new IllegalArgumentException("Cannot require dependency more than once:" + dependency);
@@ -206,7 +206,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    private void assertNotProvided(final ServiceName dependency, final boolean processingRequires) {
+    private void assertNotProvided(final String dependency, final boolean processingRequires) {
         if (processingRequires) {
             if (provides.containsKey(dependency)) {
                 throw new IllegalArgumentException("Cannot both require and provide same dependency:" + dependency);

@@ -80,8 +80,8 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private final Map<ServiceRegistrationImpl, WritableValueImpl> provides;
 
-    private final Set<ServiceName> requiredValues;
-    private final Set<ServiceName> providedValues;
+    private final Set<String> requiredValues;
+    private final Set<String> providedValues;
     /**
      * The start exception.
      */
@@ -162,9 +162,9 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         this.stoppingDependencies = requires.size();
     }
 
-    private static Set<ServiceName> unmodifiableSetOf(final Set<? extends Dependency> set) {
+    private static Set<String> unmodifiableSetOf(final Set<? extends Dependency> set) {
         if (set.isEmpty()) return Collections.EMPTY_SET;
-        final Set<ServiceName> temp = new HashSet<>(set.size());
+        final Set<String> temp = new HashSet<>(set.size());
         for (Dependency dependency : set) {
             temp.add(dependency.getName());
         }
@@ -857,16 +857,16 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    public Set<ServiceName> requires() {
+    public Set<String> requires() {
         return requiredValues;
     }
 
-    public Set<ServiceName> provides() {
+    public Set<String> provides() {
         return providedValues;
     }
 
-    public Set<ServiceName> missing() {
-        final Set<ServiceName> retVal = new IdentityHashSet<>();
+    public Set<String> missing() {
+        final Set<String> retVal = new IdentityHashSet<>();
         for (Dependency dependency : requires) {
             synchronized (dependency.getLock()) {
                 if (isUnavailable(dependency)) {

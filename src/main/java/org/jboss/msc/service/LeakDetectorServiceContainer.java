@@ -96,12 +96,12 @@ final class LeakDetectorServiceContainer implements ServiceContainer {
     }
 
     @Override
-    public ServiceController controllerOfValue(final ServiceName serviceName) {
+    public ServiceController controllerOfValue(final String serviceName) {
         return getDelegate().controllerOfValue(serviceName);
     }
 
     @Override
-    public Set<ServiceName> valueNames() {
+    public Set<String> valueNames() {
         return getDelegate().valueNames();
     }
 

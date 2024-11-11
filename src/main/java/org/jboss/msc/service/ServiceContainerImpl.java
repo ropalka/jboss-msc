@@ -65,8 +65,8 @@ final class ServiceContainerImpl implements ServiceContainer {
 
     private static final AtomicInteger SERIAL = new AtomicInteger(1);
 
-    private final ConcurrentMap<ServiceName, ServiceRegistrationImpl> registry = new ConcurrentHashMap<>(512);
-    private final Set<ServiceName> valueNames = Collections.unmodifiableSet(registry.keySet());
+    private final ConcurrentMap<String, ServiceRegistrationImpl> registry = new ConcurrentHashMap<>(512);
+    private final Set<String> valueNames = Collections.unmodifiableSet(registry.keySet());
     private final long start = System.nanoTime();
 
     private final Set<ServiceController> problems = new IdentityHashSet<>();
@@ -363,8 +363,8 @@ final class ServiceContainerImpl implements ServiceContainer {
      * @param name the service name
      * @return the registration
      */
-    ServiceRegistrationImpl getOrCreateRegistration(final ServiceName name) {
-        final ConcurrentMap<ServiceName, ServiceRegistrationImpl> registry = this.registry;
+    ServiceRegistrationImpl getOrCreateRegistration(final String name) {
+        final ConcurrentMap<String, ServiceRegistrationImpl> registry = this.registry;
         ServiceRegistrationImpl registration;
         boolean success;
         do {
@@ -388,32 +388,32 @@ final class ServiceContainerImpl implements ServiceContainer {
         return registration;
     }
 
-    void removeRegistration(final ServiceName name) {
+    void removeRegistration(final String name) {
         registry.remove(name);
     }
 
     @Override
-    public ServiceController controllerOfValue(final ServiceName serviceName) {
+    public ServiceController controllerOfValue(final String serviceName) {
         final ServiceRegistrationImpl registration = registry.get(serviceName);
         return registration == null ? null : registration.getDependencyController();
     }
 
     @Override
-    public Set<ServiceName> valueNames() {
+    public Set<String> valueNames() {
         return valueNames;
     }
 
     ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateServiceException {
         // Initialize registrations and injectors map
         final Map<ServiceRegistrationImpl, WritableValueImpl> provides = new LinkedHashMap<>();
-        Entry<ServiceName, WritableValueImpl> entry;
-        for (Iterator<Entry<ServiceName, WritableValueImpl>> j = serviceBuilder.getProvides().entrySet().iterator(); j.hasNext(); ) {
+        Entry<String, WritableValueImpl> entry;
+        for (Iterator<Entry<String, WritableValueImpl>> j = serviceBuilder.getProvides().entrySet().iterator(); j.hasNext(); ) {
             entry = j.next();
             provides.put(getOrCreateRegistration(entry.getKey()), entry.getValue());
         }
 
         // Dependencies
-        final Map<ServiceName, ServiceRegistrationImpl> dependencyMap = serviceBuilder.getDependencies();
+        final Map<String, ServiceRegistrationImpl> dependencyMap = serviceBuilder.getDependencies();
         final Set<Dependency> requires = new HashSet<>();
         Dependency dependency;
         for (ServiceRegistrationImpl dependencyDefinition : dependencyMap.values()) {

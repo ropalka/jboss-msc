@@ -62,21 +62,21 @@ public interface ServiceController {
      *
      * @return names of required values
      */
-    Set<ServiceName> requires();
+    Set<String> requires();
 
     /**
      * Get the names of all values this service provide.
      *
      * @return names of provided values
      */
-    Set<ServiceName> provides();
+    Set<String> provides();
 
     /**
      * Get the names of all missing values this service require.
      *
      * @return names of missing values
      */
-    Set<ServiceName> missing();
+    Set<String> missing();
     /**
      * Add a service lifecycle listener.
      *

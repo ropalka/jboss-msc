@@ -46,14 +46,14 @@ public interface ServiceContainer {
      * @param valueName the name of the value
      * @return either a controller of service providing given value or {@code null}
      */
-    ServiceController controllerOfValue(ServiceName valueName);
+    ServiceController controllerOfValue(String valueName);
 
     /**
      * Get value names that are required or provided by already installed services.
      *
      * @return all value names declared by installed services
      */
-    Set<ServiceName> valueNames();
+    Set<String> valueNames();
 
     /**
      * Add a service lifecycle listener to this container, if it wasn't added yet.
