@@ -22,35 +22,29 @@
 
 package org.jboss.msc.service;
 
+import java.util.Collection;
+
 /**
- * Exception used to indicate there was a circular dependency discovered during resolution.
- * 
- * @author John Bailey
+ * Indicates service installation process failed because there was a dependencies
+ * cycle detected on attempt to install a new service to the container.
+ *
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public class CircularDependencyException extends RuntimeException {
-
+public final class CycleDetectedException extends RuntimeException {
     private static final long serialVersionUID = -4826336558749601678L;
+    private final Collection<String> cycle;
 
-    private String[] cycle;
-
-    /**
-     * Constructs a {@code CircularDependencyException} with the specified detail message. The cause is not initialized, and
-     * may subsequently be initialized by a call to {@link #initCause(Throwable) initCause}.
-     *
-     * @param msg the detail message
-     */
-    public CircularDependencyException(final String msg, String[] cycle) {
+    CycleDetectedException(final String msg, final Collection<String> cycle) {
         super(msg);
         this.cycle = cycle;
     }
 
     /**
-     * Returns a cycle found during service installation.
+     * Returns a dependencies cycle description identified on service installation attempt.
      * 
-     * @return an array formed by the service names involved in the cycle, in dependency order. Last name in the array
-     *         has a dependency on the name in the first position, thus completing the cycle.
+     * @return a collection of services description involved in the cycle, in dependency order.
      */
-    public String[] getCycle() {
+    public Collection<String> getCycle() {
         return cycle;
     }
 }

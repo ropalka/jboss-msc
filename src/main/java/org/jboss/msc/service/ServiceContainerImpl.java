@@ -440,9 +440,9 @@ final class ServiceContainerImpl implements ServiceContainer {
      * Detects if installation of {@code instance} results in dependency cycles.
      *
      * @param instance                     the service being installed
-     * @throws CircularDependencyException if a dependency cycle involving {@code instance} is detected
+     * @throws CycleDetectedException if a dependency cycle involving {@code instance} is detected
      */
-    private void detectCircularity(ServiceControllerImpl instance) throws CircularDependencyException {
+    private void detectCircularity(ServiceControllerImpl instance) throws CycleDetectedException {
         if (isAggregationService(instance)) {
             // aggregation services cannot introduce a dependency cycle
             return;
@@ -462,12 +462,12 @@ final class ServiceContainerImpl implements ServiceContainer {
             final ServiceControllerImpl controller = dependent.getDependentController();
             if (controller == instance) {
                 // change cycle from dependent order to dependency order
-                String[] cycle = new String[visitStack.size()];
-                int i = cycle.length - 1;
+                List<String> cycle = new ArrayList<>(visitStack.size());
+                int i = visitStack.size() - 1;
                 for (ServiceControllerImpl c : visitStack) {
-                    cycle[i--] = c.toString();
+                    cycle.add(i--, c.toString());
                 }
-                throw new CircularDependencyException("Container " + name + " has a circular dependency: " + Arrays.asList(cycle), cycle);
+                throw new CycleDetectedException("Container '" + name + "' detected dependencies cycle", Collections.unmodifiableList(cycle));
             }
             if (visited.add(controller)) {
                 if (isRemovedService(controller) || isAggregationService(controller)) continue;
