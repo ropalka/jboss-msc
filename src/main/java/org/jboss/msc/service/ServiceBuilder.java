@@ -127,7 +127,10 @@ public interface ServiceBuilder {
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
      * @throws IllegalStateException if this method have been called twice.
-     * @throws CycleDetectedException if installation process failed because there was a dependencies cycle detected
+     * @throws CycleDetectedException if installation process failed because there was
+     * a dependencies cycle detected on attempt to install this service to the container.
+     * @throws DuplicateValueException if installation process failed because there was
+     * an existing service that is already providing configured provided value detected
      * on attempt to install this service to the container.
      */
     ServiceController install();
