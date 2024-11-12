@@ -44,7 +44,7 @@ public interface ServiceController {
      *
      * @return the current service state
      */
-    ServiceState state();
+    State state();
 
     /**
      * Get the names of all values this service require.

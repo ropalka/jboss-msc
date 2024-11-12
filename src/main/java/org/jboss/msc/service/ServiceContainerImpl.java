@@ -34,11 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -492,7 +488,7 @@ final class ServiceContainerImpl implements ServiceContainer {
     }
 
     private static boolean isRemovedService(final ServiceControllerImpl controller) {
-        return controller.state() == ServiceState.REMOVED;
+        return controller.state() == State.REMOVED;
     }
 
     private static final AtomicInteger executorSeq = new AtomicInteger(1);

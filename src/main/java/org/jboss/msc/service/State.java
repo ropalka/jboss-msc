@@ -23,11 +23,11 @@
 package org.jboss.msc.service;
 
 /**
- * Service states. Every service transitions between these states during its lifecycle.
+ * The service state.
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public enum ServiceState {
+public enum State {
     /**
      * Service is down.
      */

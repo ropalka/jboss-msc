@@ -23,58 +23,58 @@
 package org.jboss.msc.service;
 
 /**
- * A fine-grained substate of the more general basic controller {@link ServiceState}s.
+ * A fine-grained substate of the more general basic controller {@link State}s.
  */
 enum Substate {
     /**
      * New controller being installed.
      */
-    NEW(ServiceState.DOWN, true),
+    NEW(State.DOWN, true),
     /**
      * Controller is down.
      */
-    DOWN(ServiceState.DOWN, true),
+    DOWN(State.DOWN, true),
     /**
      * Controller cannot start due to a problem with a dependency or transitive dependency.
      */
-    PROBLEM(ServiceState.DOWN, true),
+    PROBLEM(State.DOWN, true),
     /**
      * First phase of start processing.
      */
-    START_REQUESTED(ServiceState.DOWN, false),
+    START_REQUESTED(State.DOWN, false),
     /**
      * Second phase of start processing ({@link Service#start(StartContext) start()} method invoked).
      */
-    STARTING(ServiceState.STARTING, false),
+    STARTING(State.STARTING, false),
     /**
      * Start failed.
      */
-    START_FAILED(ServiceState.FAILED, true),
+    START_FAILED(State.FAILED, true),
     /**
      * Service is up.
      */
-    UP(ServiceState.UP, true),
+    UP(State.UP, true),
     /**
      * Service is up but has been requested to stop.
      */
-    STOP_REQUESTED(ServiceState.UP, false),
+    STOP_REQUESTED(State.UP, false),
     /**
      * Service is stopping.
      */
-    STOPPING(ServiceState.STOPPING, false),
+    STOPPING(State.STOPPING, false),
     /**
      * Service has been removed.
      */
-    REMOVING(ServiceState.REMOVED, false),
+    REMOVING(State.REMOVED, false),
     /**
      * Service has been terminated.
      */
-    REMOVED(ServiceState.REMOVED, true),
+    REMOVED(State.REMOVED, true),
     ;
-    private final ServiceState state;
+    private final State state;
     private final boolean restState;
 
-    Substate(final ServiceState state, final boolean restState) {
+    Substate(final State state, final boolean restState) {
         this.state = state;
         this.restState = restState;
     }
@@ -93,7 +93,7 @@ enum Substate {
      *
      * @return the state
      */
-    public ServiceState getState() {
+    public State getState() {
         return state;
     }
 }

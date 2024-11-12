@@ -117,7 +117,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * The number of dependents that are currently running. The deployment will
      * not execute the {@code stop()} method (and subsequently leave the
-     * {@link ServiceState#STOPPING} state)
+     * {@link State#STOPPING} state)
      * until all running dependents (and listeners) are stopped.
      */
     private int runningDependents;
@@ -824,7 +824,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         doExecute(tasks);
     }
 
-    public ServiceState state() {
+    public State state() {
         synchronized (this) {
             return state.getState();
         }
