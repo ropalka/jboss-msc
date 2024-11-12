@@ -36,6 +36,6 @@ public interface LifecycleListener {
      * @param controller the controller
      * @param event the lifecycle event
      */
-    void handleEvent(ServiceController controller, LifecycleEvent event);
+    void handleEvent(ServiceController controller, Event event);
 
 }

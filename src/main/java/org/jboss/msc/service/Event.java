@@ -23,15 +23,25 @@
 package org.jboss.msc.service;
 
 /**
- * Service lifecycle events.
+ * The service lifecycle event.
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public enum LifecycleEvent {
-
+public enum Event {
+    /**
+     * Service is removed.
+     */
     REMOVED,
+    /**
+     * Service is down.
+     */
     DOWN,
+    /**
+     * Service start failed.
+     */
     FAILED,
-    UP
-
+    /**
+     * Service is up.
+     */
+    UP;
 }
