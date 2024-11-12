@@ -124,12 +124,12 @@ final class ServiceRegistrationImpl extends Lockable implements Dependency {
         return removed;
     }
 
-    void set(final ServiceControllerImpl newInstance) throws DuplicateServiceException {
+    void set(final ServiceControllerImpl newInstance) throws DuplicateValueException {
         assert newInstance != null;
         assert isWriteLocked();
         pendingInstallation--;
         if (instance != null) {
-            throw new DuplicateServiceException(String.format("Service %s is already registered", name));
+            throw new DuplicateValueException(String.format("Service providing value '%s' is already installed", name));
         }
         instance = newInstance;
         if (demandedByCount > 0) instance.addDemands(demandedByCount);

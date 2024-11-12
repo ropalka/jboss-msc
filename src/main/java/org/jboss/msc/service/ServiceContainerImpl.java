@@ -30,7 +30,6 @@ import java.lang.ref.WeakReference;
 import java.security.PrivilegedAction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -405,7 +404,7 @@ final class ServiceContainerImpl implements ServiceContainer {
         return valueNames;
     }
 
-    ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateServiceException {
+    ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateValueException {
         final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.getService(),
                 serviceBuilder.getRequires(), serviceBuilder.getProvides(), serviceBuilder.getLifecycleListeners());
         boolean ok = false;
