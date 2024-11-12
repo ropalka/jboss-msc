@@ -50,35 +50,35 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    public ServiceBuilder requires(final String... values) {
+    public ServiceBuilder requires(final String... valueNames) {
         // preconditions
         assertNotInstalled();
-        assertNotNull(values);
+        assertNotNull(valueNames);
         assertThreadSafety();
-        for (final String value : values) {
-            assertNotNull(value);
-            assertNotProvided(value, true);
+        for (final String valueName : valueNames) {
+            assertNotNull(valueName);
+            assertNotProvided(valueName);
         }
         // implementation
-        for (final String value : values) {
-            addRequiresInternal(value);
+        for (final String valueName : valueNames) {
+            addRequiresInternal(valueName);
         }
         return this;
     }
 
     @Override
-    public ServiceBuilder provides(final String... values) {
+    public ServiceBuilder provides(final String... valueNames) {
         // preconditions
         assertNotInstalled();
-        assertNotNull(values);
+        assertNotNull(valueNames);
         assertThreadSafety();
-        for (final String value : values) {
-            assertNotNull(value);
-            assertNotRequired(value, false);
+        for (final String valueName : valueNames) {
+            assertNotNull(valueName);
+            assertNotRequired(valueName);
         }
         // implementation
-        for (final String value : values) {
-            addProvidesInternal(value);
+        for (final String valueName : valueNames) {
+            addProvidesInternal(valueName);
         }
         return this;
     }
@@ -89,7 +89,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertNotInstalled();
         assertNotNull(service);
         assertThreadSafety();
-        assertServiceNotConfigured();
+        assertServiceInstanceNotConfigured();
         // implementation
         this.service = service;
         return this;
@@ -123,9 +123,10 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         // preconditions
         assertNotInstalled();
         assertThreadSafety();
+        assertServiceUsability();
+        assertServiceInstanceConfigured();
         // implementation
         installed = true;
-        if (service == null) service = NullService.INSTANCE;
         if (mode == null) mode = Mode.ACTIVE;
         return container.install(this);
     }
@@ -158,7 +159,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     Map<String, ServiceRegistrationImpl> getProvides() {
-        return provides;
+        return provides == null ? Collections.emptyMap() : provides;
     }
 
     Map<String, ServiceRegistrationImpl> getRequires() {
@@ -187,37 +188,38 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    private void assertNotRequired(final String dependency, final boolean processingRequires) {
-        if (requires != null && requires.keySet().contains(dependency)) {
-            if (processingRequires) {
-                throw new IllegalArgumentException("Cannot require dependency more than once:" + dependency);
-            } else {
-                throw new IllegalArgumentException("Cannot both require and provide same dependency:" + dependency);
-            }
+    private void assertNotRequired(final String valueName) {
+        if (requires != null && requires.containsKey(valueName)) {
+            throw new IllegalArgumentException("Cannot both require and provide value name: " + valueName);
         }
     }
 
-    private void assertNotProvided(final String dependency, final boolean processingRequires) {
-        if (processingRequires) {
-            if (provides.containsKey(dependency)) {
-                throw new IllegalArgumentException("Cannot both require and provide same dependency:" + dependency);
-            }
-        } else {
-            if (provides.get(dependency) != null) {
-                throw new IllegalArgumentException("Cannot provide dependency more than once: " + dependency);
-            }
+    private void assertNotProvided(final String valueName) {
+        if (provides != null && provides.containsKey(valueName)) {
+            throw new IllegalArgumentException("Cannot both require and provide value name: " + valueName);
         }
     }
 
-    private void assertServiceNotConfigured() {
+    private void assertServiceInstanceNotConfigured() {
         if (service != null) {
-            throw new IllegalStateException("Detected requires(), provides() or setInstance() call after setInstance() method call");
+            throw new IllegalStateException("instance() method called twice");
         }
     }
 
+    private void assertServiceInstanceConfigured() {
+        if (service == null) {
+            throw new IllegalStateException("instance() method have not been called");
+        }
+    }
+
+    private void assertServiceUsability() {
+        if (requires == null && provides == null) {
+            throw new IllegalStateException("either requires() or provides() method must be called");
+        }
+    }
     private void assertModeNotConfigured() {
         if (mode != null) {
-            throw new IllegalStateException("setInitialMode() method called twice");
+            throw new IllegalStateException("mode() method called twice");
         }
     }
 

@@ -23,24 +23,32 @@
 package org.jboss.msc.service;
 
 import java.util.ConcurrentModificationException;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
- * Builder to configure service before installing it into the container.
+ * The service builder. It is used to configure the service before installing it into the container.
  * <p>
- * Service may require multiple dependencies (named values) to be satisfied before starting.
- * Every dependency requirement must be specified via {@link #requires(String...)} method.
+ * Service may require multiple values provided by other services in order to be able to start.
+ * Every named value service will require must be declared via {@link #requires(String...)} method.
+ * Once required values are configured and service is installed into the container
+ * then declared values will be accessible via:
+ * <ul>
+ *     <li>{@link StartContext#getValue(String)} method during execution of {@link Service#start(StartContext)} method</li>
+ *     <li>{@link StopContext#getValue(String)} method during execution of {@link Service#stop(StopContext)} method</li>
+ * </ul>
  * <p>
- * Single service can provide multiple values which can be requested by dependent services.
- * Every named value service provides must be specified via {@link #provides(String...)} method.
+ * Service can provide multiple values which may be consumed by other services.
+ * Every named value service will provide must be declared via {@link #provides(String...)} method.
+ * Once provided values are configured and service is installed into the container
+ * then declared values must be provided to the container via:
+ * <ul>
+ *     <li>{@link StartContext#setValue(String, Object)} method during execution of {@link Service#start(StartContext)} method</li>
+ * </ul>
+ * It is not necessary to clean up the provided values. The container will do it automatically when either service
+ * start will fail or service will stop. However, it is required that installed service will provide all
+ * declared provided values to the container otherwise service start process will fail.
  * <p>
- * Once all required and provided dependencies are defined, references to all {@link Consumer}s
- * and {@link Supplier}s should be passed to service instance so they can be accessed by service
- * at runtime.
- * <p>
- * Implementations of this interface are thread safe because they rely on thread confinement.
- * The builder instance can be used only by thread that created it.
+ * The implementation of this interface is thread safe because it relies on thread confinement
+ * i.e. the builder instance can be used only by thread that created it.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
@@ -50,7 +58,7 @@ public interface ServiceBuilder {
     /**
      * Specifies value names required by service.
      *
-     * @param values required value names
+     * @param valueNames required value names
      * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
@@ -60,12 +68,12 @@ public interface ServiceBuilder {
      * @throws NullPointerException if <code>names</code> parameter is <code>null</code> or any value of the vararg
      * array is <code>null</code>.
      */
-    ServiceBuilder requires(String... values);
+    ServiceBuilder requires(String... valueNames);
 
     /**
      * Specifies value names provided by service.
      *
-     * @param values provided value names
+     * @param valueNames provided value names
      * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
@@ -75,12 +83,12 @@ public interface ServiceBuilder {
      * @throws NullPointerException if <code>names</code> parameter is <code>null</code> or any value of the vararg
      * array is <code>null</code>.
      */
-    ServiceBuilder provides(String... values);
+    ServiceBuilder provides(String... valueNames);
 
     /**
-     * Sets initial service mode.
+     * Sets service mode.
      *
-     * @param mode initial service mode
+     * @param mode the service mode
      * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
@@ -109,9 +117,9 @@ public interface ServiceBuilder {
     ServiceBuilder instance(Service service);
 
     /**
-     * Adds a service listener to be added to the service.
+     * Adds a service lifecycle listener.
      *
-     * @param listener the listener to add to the service
+     * @param listener the listener to listen for service lifecycle events
      * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
@@ -126,7 +134,8 @@ public interface ServiceBuilder {
      * @return installed service controller
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
-     * @throws IllegalStateException if this method have been called twice.
+     * @throws IllegalStateException if this method have been called twice or if instance was not provided
+     * or if service is useless i.e. it neither requires any value nor provide any value.
      * @throws CycleDetectedException if installation process failed because there was
      * a dependencies cycle detected on attempt to install this service to the container.
      * @throws DuplicateValueException if installation process failed because there was
