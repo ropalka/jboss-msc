@@ -25,7 +25,12 @@ package org.jboss.msc.service;
 import java.util.Set;
 
 /**
- * A controller for a single service instance.
+ * The service controller. Provides basic information about controlled service like
+ * which values it provide to other services,
+ * which values it consume from other services,
+ * which values are missing preventing it to start,
+ * the start failure reason if start failed
+ * and finally its mode and current state.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
