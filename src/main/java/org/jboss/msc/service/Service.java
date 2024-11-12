@@ -59,11 +59,6 @@ package org.jboss.msc.service;
 public interface Service {
 
     /**
-     * A simple null service whose start and stop methods do nothing.
-     */
-    Service NULL = NullService.INSTANCE;
-
-    /**
      * Start the service.  Do not return until the service has been fully started, unless an asynchronous service
      * start is performed.  All dependency injections will be complete before this method is called.
      * <p>

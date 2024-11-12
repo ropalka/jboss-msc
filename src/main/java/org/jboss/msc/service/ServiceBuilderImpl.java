@@ -87,10 +87,11 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     public ServiceBuilder instance(final Service service) {
         // preconditions
         assertNotInstalled();
+        assertNotNull(service);
         assertThreadSafety();
         assertServiceNotConfigured();
         // implementation
-        this.service = service != null ? service : Service.NULL;
+        this.service = service;
         return this;
     }
 
@@ -124,7 +125,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         assertThreadSafety();
         // implementation
         installed = true;
-        if (service == null) service = Service.NULL;
+        if (service == null) service = NullService.INSTANCE;
         if (mode == null) mode = Mode.ACTIVE;
         return container.install(this);
     }
