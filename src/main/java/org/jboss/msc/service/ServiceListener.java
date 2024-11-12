@@ -23,12 +23,12 @@
 package org.jboss.msc.service;
 
 /**
- * A listener for service lifecycle events. The associated controller
+ * The service listener. The associated controller
  * will not leave its current state until all listeners finish running.
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface LifecycleListener {
+public interface ServiceListener {
 
     /**
      * The service has entered new state

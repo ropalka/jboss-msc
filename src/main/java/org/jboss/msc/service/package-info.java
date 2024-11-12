@@ -29,7 +29,7 @@
  * this strict internal state machine (separated into two views for better illustration).
  * <p>
  * First view shows substates and tasks executed on every transition from one substate to another.
- * Listener tasks are executed as last on every transition.
+ * ServiceListener tasks are executed as last on every transition.
  * <img src="doc-files/Substates-Transition-Tasks.png" alt="State machine transition tasks">
  * <p>
  * Second view shows substates and conditions between them causing transition from one substate to another.

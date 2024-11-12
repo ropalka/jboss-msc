@@ -66,7 +66,7 @@ final class ServiceContainerImpl implements ServiceContainer {
     private final Set<ServiceController> problems = new IdentityHashSet<>();
     private final Set<ServiceController> failed = new IdentityHashSet<>();
     private final Object lock = new Object();
-    private final Set<LifecycleListener> lifecycleListeners = synchronizedSet(new IdentityHashSet<>());
+    private final Set<ServiceListener> listeners = synchronizedSet(new IdentityHashSet<>());
 
     private int unstableServices;
     private long shutdownInitiated;
@@ -116,16 +116,16 @@ final class ServiceContainerImpl implements ServiceContainer {
         return new ServiceBuilderImpl(this);
     }
 
-    public ServiceContainer addListener(final LifecycleListener listener) {
+    public ServiceContainer addListener(final ServiceListener listener) {
         if (listener != null) {
-            lifecycleListeners.add(listener);
+            listeners.add(listener);
         }
         return this;
     }
 
     @Override
-    public ServiceContainer removeListener(final LifecycleListener listener) {
-        if (listener != null) lifecycleListeners.remove(listener);
+    public ServiceContainer removeListener(final ServiceListener listener) {
+        if (listener != null) listeners.remove(listener);
         return this;
     }
 
@@ -406,7 +406,7 @@ final class ServiceContainerImpl implements ServiceContainer {
 
     ServiceController install(final ServiceBuilderImpl serviceBuilder) throws DuplicateValueException {
         final ServiceControllerImpl instance = new ServiceControllerImpl(this, serviceBuilder.getService(),
-                serviceBuilder.getRequires(), serviceBuilder.getProvides(), serviceBuilder.getLifecycleListeners());
+                serviceBuilder.getRequires(), serviceBuilder.getProvides(), serviceBuilder.getListeners());
         boolean ok = false;
         try {
             synchronized (this) {

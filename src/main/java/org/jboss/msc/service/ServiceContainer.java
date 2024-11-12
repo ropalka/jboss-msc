@@ -61,7 +61,7 @@ public interface ServiceContainer {
      * @param listener the lifecycle listener to add to the service
      * @return this container
      */
-    ServiceContainer addListener(LifecycleListener listener);
+    ServiceContainer addListener(ServiceListener listener);
 
     /**
      * Remove a service lifecycle listener from this container, if it was added.
@@ -69,7 +69,7 @@ public interface ServiceContainer {
      * @param listener the lifecycle listener to remove
      * @return this container
      */
-    ServiceContainer removeListener(LifecycleListener listener);
+    ServiceContainer removeListener(ServiceListener listener);
 
     /**
      * Get a builder which can be used to add a service to this target.

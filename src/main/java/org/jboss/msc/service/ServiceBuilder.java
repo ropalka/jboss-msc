@@ -118,7 +118,7 @@ public interface ServiceBuilder {
      * @throws IllegalStateException if this method have been called after {@link #install()} method.
      * @throws NullPointerException if <code>listener</code> parameter is <code>null</code>.
      */
-    ServiceBuilder addListener(LifecycleListener listener);
+    ServiceBuilder addListener(ServiceListener listener);
 
     /**
      * Installs configured service into the container.

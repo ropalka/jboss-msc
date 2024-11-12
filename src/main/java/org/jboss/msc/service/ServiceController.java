@@ -76,14 +76,14 @@ public interface ServiceController {
      *
      * @param listener the lifecycle listener
      */
-    void addListener(LifecycleListener listener);
+    void addListener(ServiceListener listener);
 
     /**
      * Remove a lifecycle listener.
      *
      * @param listener the lifecycle listener to remove
      */
-    void removeListener(LifecycleListener listener);
+    void removeListener(ServiceListener listener);
 
     /**
      * Get the reason why the start failed.

@@ -42,7 +42,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private Map<String, ServiceRegistrationImpl> requires;
     private Service service;
     private Mode mode;
-    private Set<LifecycleListener> lifecycleListeners;
+    private Set<ServiceListener> listeners;
     private boolean installed;
 
     ServiceBuilderImpl(final ServiceContainerImpl container) {
@@ -107,7 +107,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    public ServiceBuilder addListener(final LifecycleListener listener) {
+    public ServiceBuilder addListener(final ServiceListener listener) {
         // preconditions
         assertNotInstalled();
         assertNotNull(listener);
@@ -151,9 +151,9 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         }
     }
 
-    private void addListenerInternal(final LifecycleListener listener) {
-        if (lifecycleListeners == null) lifecycleListeners = new IdentityHashSet<>();
-        lifecycleListeners.add(listener);
+    private void addListenerInternal(final ServiceListener listener) {
+        if (listeners == null) listeners = new IdentityHashSet<>();
+        listeners.add(listener);
     }
 
     Map<String, ServiceRegistrationImpl> getProvides() {
@@ -164,8 +164,8 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return requires == null ? Collections.emptyMap() : requires;
     }
 
-    Set<LifecycleListener> getLifecycleListeners() {
-        return lifecycleListeners == null ? Collections.emptySet() : lifecycleListeners;
+    Set<ServiceListener> getListeners() {
+        return listeners == null ? Collections.emptySet() : listeners;
     }
 
     Mode getMode() {

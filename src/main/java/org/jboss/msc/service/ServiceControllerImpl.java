@@ -65,7 +65,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * Lifecycle listeners.
      */
-    private final Set<LifecycleListener> lifecycleListeners;
+    private final Set<ServiceListener> listeners;
     /**
      * Container shutdown listener.
      */
@@ -147,14 +147,14 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private final List<Runnable> listenerTransitionTasks = new ArrayList<>();
 
-    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, ServiceRegistrationImpl> requires, final Map<String, ServiceRegistrationImpl> provides, final Set<LifecycleListener> lifecycleListeners) {
+    ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, ServiceRegistrationImpl> requires, final Map<String, ServiceRegistrationImpl> provides, final Set<ServiceListener> listeners) {
         this.container = container;
         this.service = service;
         this.requires = requires;
         this.requiredValues = unmodifiableSetOf(requires.values());
         this.provides = provides;
         this.providedValues = unmodifiableSetOf(provides.values());
-        this.lifecycleListeners = new IdentityHashSet<>(lifecycleListeners);
+        this.listeners = new IdentityHashSet<>(listeners);
         this.stoppingDependencies = requires.size();
     }
 
@@ -407,7 +407,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     private boolean postTransitionTasks(final List<Runnable> tasks) {
         assert holdsLock(this);
-        // Listener transition tasks are executed last for ongoing transition and outside of intrinsic lock
+        // ServiceListener transition tasks are executed last for ongoing transition and outside of intrinsic lock
         if (listenerTransitionTasks.size() > 0) {
             tasks.addAll(listenerTransitionTasks);
             listenerTransitionTasks.clear();
@@ -530,7 +530,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 }
                 case REMOVING_to_REMOVED: {
                     getListenerTasks(Event.REMOVED, listenerTransitionTasks);
-                    lifecycleListeners.clear();
+                    listeners.clear();
                     break;
                 }
                 case START_REQUESTED_to_DOWN: {
@@ -574,8 +574,8 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     }
 
     private void getListenerTasks(final Event event, final List<Runnable> tasks) {
-        for (LifecycleListener listener : lifecycleListeners) {
-            tasks.add(new LifecycleListenerTask(listener, event));
+        for (ServiceListener listener : listeners) {
+            tasks.add(new ListenerTask(listener, event));
         }
     }
 
@@ -864,23 +864,23 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    public void addListener(final LifecycleListener listener) {
+    public void addListener(final ServiceListener listener) {
         if (listener == null) return;
         final List<Runnable> tasks;
         synchronized (this) {
             final boolean leavingRestState = isStableRestState();
-            if (lifecycleListeners.contains(listener)) return;
-            lifecycleListeners.add(listener);
+            if (listeners.contains(listener)) return;
+            listeners.add(listener);
             if (state == Substate.NEW) {
                 return;
             } else if (state == Substate.UP) {
-                listenerTransitionTasks.add(new LifecycleListenerTask(listener, Event.UP));
+                listenerTransitionTasks.add(new ListenerTask(listener, Event.UP));
             } else if (state == Substate.DOWN) {
-                listenerTransitionTasks.add(new LifecycleListenerTask(listener, Event.DOWN));
+                listenerTransitionTasks.add(new ListenerTask(listener, Event.DOWN));
             } else if (state == Substate.START_FAILED) {
-                listenerTransitionTasks.add(new LifecycleListenerTask(listener, Event.FAILED));
+                listenerTransitionTasks.add(new ListenerTask(listener, Event.FAILED));
             } else if (state == Substate.REMOVED) {
-                listenerTransitionTasks.add(new LifecycleListenerTask(listener, Event.REMOVED));
+                listenerTransitionTasks.add(new ListenerTask(listener, Event.REMOVED));
             }
             tasks = transition();
             addAsyncTasks(tasks.size());
@@ -889,9 +889,9 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         doExecute(tasks);
     }
 
-    public void removeListener(final LifecycleListener listener) {
+    public void removeListener(final ServiceListener listener) {
         synchronized (this) {
-            lifecycleListeners.remove(listener);
+            listeners.remove(listener);
         }
     }
 
@@ -1190,11 +1190,11 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    private final class LifecycleListenerTask extends ControllerTask {
-        private final LifecycleListener listener;
+    private final class ListenerTask extends ControllerTask {
+        private final ServiceListener listener;
         private final Event event;
 
-        LifecycleListenerTask(final LifecycleListener listener, final Event event) {
+        ListenerTask(final ServiceListener listener, final Event event) {
             this.listener = listener;
             this.event = event;
         }
