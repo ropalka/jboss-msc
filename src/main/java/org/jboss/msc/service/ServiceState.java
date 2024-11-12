@@ -39,7 +39,7 @@ public enum ServiceState {
     /**
      * Service start failed.
      */
-    START_FAILED,
+    FAILED,
     /**
      * Service is up.
      */

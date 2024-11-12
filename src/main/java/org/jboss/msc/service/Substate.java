@@ -49,7 +49,7 @@ enum Substate {
     /**
      * Start failed.
      */
-    START_FAILED(ServiceState.START_FAILED, true),
+    START_FAILED(ServiceState.FAILED, true),
     /**
      * Service is up.
      */
