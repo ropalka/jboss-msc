@@ -23,7 +23,7 @@
 package org.jboss.msc.service;
 
 /**
- * The stop lifecycle context.
+ * The service stop lifecycle context.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
@@ -38,7 +38,18 @@ public interface StopContext extends LifecycleContext {
 
     /**
      * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle stop action is complete.
-     *
+     * The user must do maximum effort to completely release all resources acquired in {@link Service#start(StartContext)} method.
+     * Calling explicitly {@link StopContext#complete()} method is mandatory in case of <em>asynchronous</em> lifecycle stop action.
+     * Calling {@link StopContext#complete()} method is optional in case of successful <em>synchronous</em> lifecycle stop action i.e.
+     * when {@link Service#stop(StopContext)} method execution finished successfully and {@link StopContext#asynchronous()} have not been called.
+     * In such case the container will detect it as successful <em>synchronous</em> stop operation
+     * and will call {@link StopContext#complete()} method implicitly on behalf of the user.
+     * <P>
+     * Note that {@link Service#stop(StopContext)} method can never fail. Although it is allowed to throw {@link RuntimeException} from
+     * {@link Service#stop(StopContext)} method when such use case is detected the container will log
+     * that exception and will mark <em>synchronous</em> lifecycle stop method as successful i.e. it will call {@link StopContext#complete()} method
+     * implicitly on behalf of the user regardless if it was successful or runtime exception have been thrown.
+     * </P>
      * @throws IllegalStateException if called twice in a row.
      */
     void complete();
