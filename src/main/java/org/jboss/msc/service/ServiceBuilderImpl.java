@@ -41,7 +41,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     private Map<String, ServiceRegistrationImpl> provides;
     private Map<String, ServiceRegistrationImpl> requires;
     private Service service;
-    private ServiceMode mode;
+    private Mode mode;
     private Set<LifecycleListener> lifecycleListeners;
     private boolean installed;
 
@@ -95,7 +95,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
     }
 
     @Override
-    public ServiceBuilder mode(final ServiceMode mode) {
+    public ServiceBuilder mode(final Mode mode) {
         // preconditions
         assertNotInstalled();
         assertNotNull(mode);
@@ -125,7 +125,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         // implementation
         installed = true;
         if (service == null) service = Service.NULL;
-        if (mode == null) mode = ServiceMode.ACTIVE;
+        if (mode == null) mode = Mode.ACTIVE;
         return container.install(this);
     }
 
@@ -168,7 +168,7 @@ final class ServiceBuilderImpl implements ServiceBuilder {
         return lifecycleListeners == null ? Collections.emptySet() : lifecycleListeners;
     }
 
-    ServiceMode getMode() {
+    Mode getMode() {
         return mode;
     }
 

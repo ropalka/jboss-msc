@@ -38,6 +38,6 @@
  * <p>
  * <img src="doc-files/Substates-Transition-Conditions.png" alt="State machine transition conditions">
  * <p>
- * Where <em>mode</em> variable may hold one of possible controller {@link org.jboss.msc.service.ServiceMode mode values}.
+ * Where <em>mode</em> variable may hold one of possible controller {@link org.jboss.msc.service.Mode mode values}.
  */
 package org.jboss.msc.service;

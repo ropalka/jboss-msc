@@ -88,7 +88,7 @@ public interface ServiceBuilder {
      * {@link #install()} method.
      * @throws NullPointerException if <code>mode</code> parameter is <code>null</code>.
      */
-    ServiceBuilder mode(ServiceMode mode);
+    ServiceBuilder mode(Mode mode);
 
     /**
      * Sets service instance. If {@link #install()} method call is issued

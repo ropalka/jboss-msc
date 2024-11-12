@@ -27,7 +27,7 @@ package org.jboss.msc.service;
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public enum ServiceMode {
+public enum Mode {
     /**
      * Only come up if all dependencies are satisfied <b>and</b> at least one dependent demands to start.
      */

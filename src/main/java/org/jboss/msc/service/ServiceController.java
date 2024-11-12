@@ -37,7 +37,7 @@ public interface ServiceController {
      *
      * @return the controller mode
      */
-    ServiceMode mode();
+    Mode mode();
 
     /**
      * Get the current service state.

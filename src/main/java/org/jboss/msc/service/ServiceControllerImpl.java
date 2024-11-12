@@ -88,7 +88,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * The controller mode. When mode is set to 'null' it is being removed.
      */
-    private ServiceMode mode;
+    private Mode mode;
     /**
      * The controller state.
      */
@@ -171,7 +171,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      * Set this instance into serviceName registration.
      * <p></p>
      * All notifications from registrations will be ignored until the
-     * installation is {@link #commitInstallation(ServiceMode) committed}.
+     * installation is {@link #commitInstallation(Mode) committed}.
      */
     void startInstallation() {
         Lockable lock;
@@ -196,7 +196,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      * Start this service configuration connecting it to its dependencies.
      * <p></p>
      * All notifications from dependencies will be ignored until the
-     * installation is {@link #commitInstallation(ServiceMode) committed}.
+     * installation is {@link #commitInstallation(Mode) committed}.
      */
     void startConfiguration() {
         Lockable lock;
@@ -218,7 +218,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      *
      * @param mode the service mode
      */
-    void commitInstallation(final ServiceMode mode) {
+    void commitInstallation(final Mode mode) {
         assert (state == Substate.NEW);
         assert mode != null;
         assert !holdsLock(this);
@@ -281,7 +281,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private boolean shouldStart() {
         assert holdsLock(this);
-        return mode == ServiceMode.ACTIVE || mode == ServiceMode.PASSIVE && stoppingDependencies == 0 || demandedByCount > 0 && (mode == ServiceMode.ON_DEMAND || mode == ServiceMode.LAZY);
+        return mode == Mode.ACTIVE || mode == Mode.PASSIVE && stoppingDependencies == 0 || demandedByCount > 0 && (mode == Mode.ON_DEMAND || mode == Mode.LAZY);
     }
 
     /**
@@ -291,7 +291,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
      */
     private boolean shouldStop() {
         assert holdsLock(this);
-        return mode == null || demandedByCount == 0 && mode == ServiceMode.ON_DEMAND;
+        return mode == null || demandedByCount == 0 && mode == Mode.ON_DEMAND;
     }
 
     /**
@@ -506,7 +506,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     break;
                 }
                 case UP_to_STOP_REQUESTED: {
-                    if (mode == ServiceMode.LAZY && demandedByCount == 0) {
+                    if (mode == Mode.LAZY && demandedByCount == 0) {
                         assert dependenciesDemanded;
                         tasks.add(new UndemandDependenciesTask());
                         dependenciesDemanded = false;
@@ -592,7 +592,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    void setMode(final ServiceMode newMode) {
+    void setMode(final Mode newMode) {
         assert !holdsLock(this);
         if (newMode != null && container.isShutdown()) {
             throw new IllegalArgumentException("Container is shutting down");
@@ -795,8 +795,8 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             final int cnt = this.demandedByCount;
             this.demandedByCount += demandedByCount;
             if (ignoreNotification()) return;
-            boolean notStartedLazy = mode == ServiceMode.LAZY && state != Substate.UP;
-            propagate = cnt == 0 && (mode == ServiceMode.ON_DEMAND || notStartedLazy || mode == ServiceMode.PASSIVE);
+            boolean notStartedLazy = mode == Mode.LAZY && state != Substate.UP;
+            propagate = cnt == 0 && (mode == Mode.ON_DEMAND || notStartedLazy || mode == Mode.PASSIVE);
             if (!propagate) return;
             tasks = transition();
             addAsyncTasks(tasks.size());
@@ -814,8 +814,8 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             assert demandedByCount > 0;
             final int cnt = --demandedByCount;
             if (ignoreNotification()) return;
-            boolean notStartedLazy = mode == ServiceMode.LAZY && state != Substate.UP;
-            propagate = cnt == 0 && (mode == ServiceMode.ON_DEMAND || notStartedLazy || mode == ServiceMode.PASSIVE);
+            boolean notStartedLazy = mode == Mode.LAZY && state != Substate.UP;
+            propagate = cnt == 0 && (mode == Mode.ON_DEMAND || notStartedLazy || mode == Mode.PASSIVE);
             if (!propagate) return;
             tasks = transition();
             addAsyncTasks(tasks.size());
@@ -910,7 +910,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    public ServiceMode mode() {
+    public Mode mode() {
         synchronized (this) {
             return mode;
         }
