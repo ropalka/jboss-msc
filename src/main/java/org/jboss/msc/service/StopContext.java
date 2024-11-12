@@ -28,7 +28,7 @@ package org.jboss.msc.service;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public interface StopContext extends LifecycleContext {
+public interface StopContext {
 
     /**
      * Call within the service lifecycle stop method to trigger an <em>asynchronous</em> lifecycle stop action.

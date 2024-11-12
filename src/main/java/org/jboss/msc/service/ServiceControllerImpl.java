@@ -1250,7 +1250,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         }
     }
 
-    private abstract class AbstractContext implements LifecycleContext {
+    private abstract class AbstractContext {
         static final int ASYNC = 1;
         static final int CLOSED = 1 << 1;
         static final int COMPLETED = 1 << 2;
@@ -1297,7 +1297,6 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             setState(ASYNC);
         }
 
-        @Override
         public <V> V getValue(final String name) {
             synchronized (lock) {
                 if ((state & CLOSED) != 0) return null;
