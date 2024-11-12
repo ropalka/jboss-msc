@@ -23,7 +23,7 @@
 package org.jboss.msc.service;
 
 /**
- * The start lifecycle context.
+ * The service start lifecycle context.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
@@ -31,7 +31,7 @@ package org.jboss.msc.service;
 public interface StartContext extends LifecycleContext {
 
     /**
-     * Call within the service lifecycle start method to trigger an <em>asynchronous</em> lifecycle start action.
+     * Call within the service lifecycle {@link Service#start(StartContext)}} method to trigger an <em>asynchronous</em> lifecycle start action.
      * This action will not be considered complete until indicated so by calling 
      * either {@link #complete()} or {@link #fail(Throwable)} method on this interface.
      */
@@ -39,6 +39,14 @@ public interface StartContext extends LifecycleContext {
 
     /**
      * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle start action is complete.
+     * Calling explicitly either {@link StartContext#complete()} or {@link StartContext#fail(Throwable)} method
+     * is mandatory in case of <em>asynchronous</em> lifecycle start action.
+     * Calling {@link StartContext#complete()} method
+     * is optional in case of successful <em>synchronous</em> lifecycle start action i.e.
+     * when {@link Service#start(StartContext)} method execution finished successfully
+     * and neither {@link StartContext#asynchronous()} nor {@link StartContext#fail(Throwable)} have been called.
+     * In such case the container will detect it as successful <em>synchronous</em> start operation
+     * and will call {@link StartContext#complete()} method implicitly on behalf of the user.
      *
      * @throws IllegalStateException if called after {@link #fail(Throwable)} was called or if called twice in a row
      */
@@ -46,6 +54,14 @@ public interface StartContext extends LifecycleContext {
 
     /**
      * Call when either <em>synchronous</em> or <em>asynchronous</em> lifecycle start action has failed for some reason.
+     * Calling explicitly either {@link StartContext#complete()} or {@link StartContext#fail(Throwable)} method
+     * is mandatory in case of <em>asynchronous</em> lifecycle start action.
+     * Calling {@link StartContext#fail(Throwable)} method
+     * is optional in case of failed <em>synchronous</em> lifecycle start action that threw {@link RuntimeException} i.e.
+     * when {@link Service#start(StartContext)} method execution failed, {@link RuntimeException} was thrown from its body
+     * and neither {@link StartContext#asynchronous()} nor {@link StartContext#fail(Throwable)} have been called.
+     * In such case the container will detect it as failed <em>synchronous</em> start operation
+     * and will call {@link StartContext#fail(Throwable)} method implicitly on behalf of the user.
      *
      * @param reason the reason for the failure
      * @throws IllegalStateException if called after {@link #complete()} was called or if called twice in a row
