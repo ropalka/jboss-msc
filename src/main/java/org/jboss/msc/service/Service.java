@@ -67,7 +67,7 @@ public interface Service {
      *
      * @param context the context which can be used to trigger an asynchronous service start
      */
-    void start(StartContext context);
+    default void start(StartContext context) {};
 
     /**
      * Stop the service.  Do not return until the service has been fully stopped, unless an asynchronous service
@@ -79,6 +79,6 @@ public interface Service {
      *
      * @param context the context which can be used to trigger an asynchronous service stop
      */
-    void stop(StopContext context);
+    default void stop(StopContext context) {};
 
 }
