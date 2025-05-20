@@ -58,7 +58,7 @@ public interface ServiceBuilder {
     /**
      * Specifies value names required by service.
      *
-     * @param valueNames required value names
+     * @param values required value names
      * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
@@ -68,12 +68,12 @@ public interface ServiceBuilder {
      * @throws NullPointerException if <code>names</code> parameter is <code>null</code> or any value of the vararg
      * array is <code>null</code>.
      */
-    ServiceBuilder requires(String... valueNames);
+    ServiceBuilder requires(String... values);
 
     /**
      * Specifies value names provided by service.
      *
-     * @param valueNames provided value names
+     * @param values provided value names
      * @return this builder
      * @throws ConcurrentModificationException if builder is shared between threads.
      * Only thread that created the builder can manipulate it.
@@ -83,7 +83,7 @@ public interface ServiceBuilder {
      * @throws NullPointerException if <code>names</code> parameter is <code>null</code> or any value of the vararg
      * array is <code>null</code>.
      */
-    ServiceBuilder provides(String... valueNames);
+    ServiceBuilder provides(String... values);
 
     /**
      * Sets service mode.
