@@ -145,7 +145,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     /**
      * Tasks executed last on transition outside the lock.
      */
-    private final List<Runnable> listenerTransitionTasks = new ArrayList<>();
+    private final List<Runnable> listenerTasks = new ArrayList<>();
 
     ServiceControllerImpl(final ServiceContainerImpl container, final Service service, final Map<String, ServiceRegistrationImpl> requires, final Map<String, ServiceRegistrationImpl> provides, final Set<ServiceListener> listeners) {
         this.container = container;
@@ -408,9 +408,9 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
     private boolean postTransitionTasks(final List<Runnable> tasks) {
         assert holdsLock(this);
         // ServiceListener transition tasks are executed last for ongoing transition and outside of intrinsic lock
-        if (listenerTransitionTasks.size() > 0) {
-            tasks.addAll(listenerTransitionTasks);
-            listenerTransitionTasks.clear();
+        if (listenerTasks.size() > 0) {
+            tasks.addAll(listenerTasks);
+            listenerTasks.clear();
             return true;
         }
         return false;
@@ -480,7 +480,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             }
             switch (transition) {
                 case NEW_to_DOWN: {
-                    getListenerTasks(Event.DOWN, listenerTransitionTasks);
+                    getListenerTasks(listenerTasks);
                     break;
                 }
                 case DOWN_to_PROBLEM: {
@@ -501,7 +501,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     break;
                 }
                 case STARTING_to_UP: {
-                    getListenerTasks(Event.UP, listenerTransitionTasks);
+                    getListenerTasks(listenerTasks);
                     tasks.add(new DependencyStartedTask());
                     break;
                 }
@@ -519,7 +519,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     break;
                 }
                 case STOPPING_to_DOWN: {
-                    getListenerTasks(Event.DOWN, listenerTransitionTasks);
+                    getListenerTasks(listenerTasks);
                     tasks.add(new DependencyUnavailableTask());
                     tasks.add(new DependentStoppedTask());
                     break;
@@ -529,7 +529,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     break;
                 }
                 case REMOVING_to_REMOVED: {
-                    getListenerTasks(Event.REMOVED, listenerTransitionTasks);
+                    getListenerTasks(listenerTasks);
                     listeners.clear();
                     break;
                 }
@@ -543,13 +543,13 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                     break;
                 }
                 case STARTING_to_START_FAILED: {
-                    getListenerTasks(Event.FAILED, listenerTransitionTasks);
+                    getListenerTasks(listenerTasks);
                     container.addFailed(this);
                     tasks.add(new DependencyFailedTask());
                     break;
                 }
                 case START_FAILED_to_DOWN: {
-                    getListenerTasks(Event.DOWN, listenerTransitionTasks);
+                    getListenerTasks(listenerTasks);
                     container.removeFailed(this);
                     startException = null;
                     tasks.add(new DependencyUnavailableTask());
@@ -562,7 +562,7 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
                 }
             }
             state = transition.getAfter();
-        } while (tasks.isEmpty() && listenerTransitionTasks.isEmpty());
+        } while (tasks.isEmpty() && listenerTasks.isEmpty());
         // Notify waiters that a transition occurred
         notifyAll();
         if (tasks.size() > 0) {
@@ -573,9 +573,9 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
         return tasks;
     }
 
-    private void getListenerTasks(final Event event, final List<Runnable> tasks) {
+    private void getListenerTasks(final List<Runnable> tasks) {
         for (ServiceListener listener : listeners) {
-            tasks.add(new ListenerTask(listener, event));
+            tasks.add(new ListenerTask(listener));
         }
     }
 
@@ -874,13 +874,13 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
             if (state == Substate.NEW) {
                 return;
             } else if (state == Substate.UP) {
-                listenerTransitionTasks.add(new ListenerTask(listener, Event.UP));
+                listenerTasks.add(new ListenerTask(listener));
             } else if (state == Substate.DOWN) {
-                listenerTransitionTasks.add(new ListenerTask(listener, Event.DOWN));
+                listenerTasks.add(new ListenerTask(listener));
             } else if (state == Substate.START_FAILED) {
-                listenerTransitionTasks.add(new ListenerTask(listener, Event.FAILED));
+                listenerTasks.add(new ListenerTask(listener));
             } else if (state == Substate.REMOVED) {
-                listenerTransitionTasks.add(new ListenerTask(listener, Event.REMOVED));
+                listenerTasks.add(new ListenerTask(listener));
             }
             tasks = transition();
             addAsyncTasks(tasks.size());
@@ -1192,17 +1192,15 @@ final class ServiceControllerImpl implements ServiceController, Dependent {
 
     private final class ListenerTask extends ControllerTask {
         private final ServiceListener listener;
-        private final Event event;
 
-        ListenerTask(final ServiceListener listener, final Event event) {
+        ListenerTask(final ServiceListener listener) {
             this.listener = listener;
-            this.event = event;
         }
 
         boolean execute() {
             final ClassLoader oldCL = setTCCL(getCL(listener.getClass()));
             try {
-                listener.handleEvent(ServiceControllerImpl.this, event);
+                listener.stateChanged(ServiceControllerImpl.this);
             } catch (Throwable t) {
                 ServiceLogger.SERVICE.listenerFailed(t, listener);
             } finally {

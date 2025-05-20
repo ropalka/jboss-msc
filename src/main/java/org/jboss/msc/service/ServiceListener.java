@@ -34,8 +34,7 @@ public interface ServiceListener {
      * The service has entered new state
      *
      * @param controller the controller
-     * @param event the lifecycle event
      */
-    void handleEvent(ServiceController controller, Event event);
+    void stateChanged(ServiceController controller);
 
 }
